@@ -85,13 +85,13 @@
         }
     },
     "variables": {
-        "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
-        "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
-        "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
-        "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
-        "databaseName": "[concat(replace(variables('resourceNamePrefix'), 'api', ''), '-db')]",
-        "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]",
-        "configNames": "__SolutionBaseName__" //PLACEHOLDER
+      "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
+      "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
+      "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
+      "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
+      "databaseName": "[concat(replace(variables('resourceNamePrefix'), 'api', ''), '-db')]",
+      "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]",
+      "configNames": "SFA.DAS.FundingProjection.Api_1.0"
     },
     "resources": [
         {

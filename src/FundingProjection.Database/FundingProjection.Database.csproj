@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>SFA.DAS.FundingProjection.Database</AssemblyName>
+    <RootNamespace>SFA.DAS.FundingProjection.Database</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Tables\" />
+  </ItemGroup>
+</Project>

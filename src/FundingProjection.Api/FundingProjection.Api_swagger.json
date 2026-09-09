@@ -1,0 +1,69 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "SFA.DAS.FundingProjection.Api | swagger",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/ping": {
+      "get": {
+        "tags": [
+          "Ping"
+        ],
+        "parameters": [
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Service Status"
+        ],
+        "responses": {
+          "200": {
+            "description": null,
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "enum": [
+                    "Healthy"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": null,
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "enum": [
+                    "Unhealthy"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Ping"
+    }
+  ]
+}

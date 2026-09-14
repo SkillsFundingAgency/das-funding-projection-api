@@ -23,7 +23,7 @@ internal class Startup
     {
         _environmentName = configuration["EnvironmentName"]!;
 
-        if (_environmentName == "INTEGRATION")
+        if (_environmentName == "INTEGRATION" || Environment.GetEnvironmentVariable("_MSBUILDTLENABLED") is not null)
         {
             Configuration = configuration;
             return;

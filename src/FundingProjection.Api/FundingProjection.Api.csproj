@@ -42,7 +42,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\FundingProjection.Application\FundingProjection.Application.csproj" />
-    <ProjectReference Include="..\FundingProjection.Database\FundingProjection.Database.csproj" />
     <ProjectReference Include="..\FundingProjection.Data\FundingProjection.Data.csproj" />
     <ProjectReference Include="..\FundingProjection.Domain\FundingProjection.Domain.csproj" />
   </ItemGroup>

@@ -9,16 +9,16 @@ using SFA.DAS.FundingProjection.Api.Models.Mappers;
 namespace SFA.DAS.FundingProjection.Api.Controllers;
 
 [ApiController]
-public class EmployerFundingProjectionController(
+public class FundingProjectionController(
     [FromServices] IEmployerFundingProjectionRepository repository,
-    ILogger<EmployerFundingProjectionController> logger) : ControllerBase
+    ILogger<FundingProjectionController> logger) : ControllerBase
 {
     [HttpGet]
     [Route($"{RouteNames.EmployerFundingProjection}/{{accountId:long}}/{RouteElements.FundingProjection}")]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(GetEmployerFundingProjectionResponse), StatusCodes.Status200OK)]
-    public async Task<IResult> Get(
+    public async Task<IResult> GetEmployerFundingProjection(
         [FromRoute] [Required] long accountId,
         CancellationToken token)
     {

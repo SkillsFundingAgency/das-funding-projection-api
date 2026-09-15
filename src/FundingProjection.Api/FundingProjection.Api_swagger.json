@@ -8,7 +8,7 @@
     "/api/employer/{accountId}/funding-projection": {
       "get": {
         "tags": [
-          "EmployerFundingProjection"
+          "FundingProjection"
         ],
         "parameters": [
           {
@@ -166,7 +166,7 @@
   },
   "tags": [
     {
-      "name": "EmployerFundingProjection"
+      "name": "FundingProjection"
     },
     {
       "name": "Ping"

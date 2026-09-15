@@ -19,14 +19,14 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         long accountId,
         EmployerFundingProjectionEntity mockResponse,
         [Frozen] Mock<IEmployerFundingProjectionRepository> provider,
-        [Greedy] EmployerFundingProjectionController controller,
+        [Greedy] FundingProjectionController controller,
         CancellationToken token)
     {
         // Arrange
         provider.Setup(p => p.GetByEmployerAccountIdAsync(accountId, token)).ReturnsAsync(mockResponse);
 
         // Act
-        var result = await controller.Get(accountId, token);
+        var result = await controller.GetEmployerFundingProjection(accountId, token);
 
         // Assert
         result.Should().BeOfType<Ok<GetEmployerFundingProjectionResponse>>();
@@ -38,14 +38,14 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
     public async Task Get_ReturnsNotFound_WhenEmployerFundingProjectionEntityDoesNotExist(long accountId,
         EmployerFundingProjectionEntity mockResponse,
         [Frozen] Mock<IEmployerFundingProjectionRepository> provider,
-        [Greedy] EmployerFundingProjectionController controller,
+        [Greedy] FundingProjectionController controller,
         CancellationToken token)
     {
         // Arrange
         provider.Setup(p => p.GetByEmployerAccountIdAsync(accountId, token)).ReturnsAsync((EmployerFundingProjectionEntity)null!);
 
         // Act
-        var result = await controller.Get(accountId, token);
+        var result = await controller.GetEmployerFundingProjection(accountId, token);
 
         // Assert
         result.Should().BeOfType<NotFound>();
@@ -55,14 +55,14 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
     public async Task Get_ReturnsInternalServerException_WhenException_Thrown(long accountId,
         EmployerFundingProjectionEntity mockResponse,
         [Frozen] Mock<IEmployerFundingProjectionRepository> provider,
-        [Greedy] EmployerFundingProjectionController controller,
+        [Greedy] FundingProjectionController controller,
         CancellationToken token)
     {
         // Arrange
         provider.Setup(p => p.GetByEmployerAccountIdAsync(accountId, token)).ThrowsAsync(new Exception());
 
         // Act
-        var result = await controller.Get(accountId, token);
+        var result = await controller.GetEmployerFundingProjection(accountId, token);
 
         // Assert
         result.Should().BeOfType<ProblemHttpResult>();

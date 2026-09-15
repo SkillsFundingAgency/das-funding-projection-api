@@ -1,7 +1,8 @@
 <Solution>
-  <Folder Name="/Tests/" />
+  <Folder Name="/Tests/">
+    <Project Path="FundingProjection.Api.UnitTests/FundingProjection.Api.UnitTests.csproj" Id="fb5533a1-53d3-4a1a-b287-5c4ca9402297" />
+  </Folder>
   <Project Path="FundingProjection.Api/FundingProjection.Api.csproj" />
-  <Project Path="FundingProjection.Application/FundingProjection.Application.csproj" />
   <Project Path="FundingProjection.Data/FundingProjection.Data.csproj" Id="b1ccd941-47b7-4d94-9375-99c294b9e8a4" />
   <Project Path="FundingProjection.Database/FundingProjection.Database.csproj" />
   <Project Path="FundingProjection.Domain/FundingProjection.Domain.csproj" Id="d127026c-66ed-4265-a2c1-5089a626e0a1" />

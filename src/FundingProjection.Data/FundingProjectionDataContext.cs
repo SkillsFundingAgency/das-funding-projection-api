@@ -2,12 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Options;
+using SFA.DAS.FundingProjection.Data.Configuration;
 using SFA.DAS.FundingProjection.Domain.Configuration;
+using SFA.DAS.FundingProjection.Domain.Entities;
 
 namespace SFA.DAS.FundingProjection.Data;
 
 public interface IFundingProjectionDataContext
 {
+    DbSet<CommittedLearnerCostEntity> CommittedLearnerCosts { get; }
+    DbSet<CommittedTransferOutEntity> CommittedTransferOuts { get; }
+    DbSet<EmployerFundingProjectionEntity> EmployerFundingProjections { get; }
     DatabaseFacade Database { get; }
     Task Ping(CancellationToken cancellationToken);
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
@@ -37,8 +42,16 @@ public class FundingProjectionDataContext : DbContext, IFundingProjectionDataCon
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(FundingProjectionDataContext).Assembly);
+        modelBuilder.ApplyConfiguration(new CommittedLearnerCostEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new CommittedTransferOutEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new EmployerFundingProjectionEntityConfiguration());
         base.OnModelCreating(modelBuilder);
     }
+
+    public DbSet<CommittedLearnerCostEntity> CommittedLearnerCosts { get; set; }
+    public DbSet<CommittedTransferOutEntity> CommittedTransferOuts { get; set; }
+    public DbSet<EmployerFundingProjectionEntity> EmployerFundingProjections { get; set; }
 
     public async Task Ping(CancellationToken cancellationToken)
     {

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SFA.DAS.FundingProjection.Data;
 using SFA.DAS.FundingProjection.Domain.Configuration;
 using System.Diagnostics.CodeAnalysis;
+using SFA.DAS.FundingProjection.Data.Repositories;
 
 namespace SFA.DAS.FundingProjection.Api.AppStart;
 
@@ -40,6 +41,8 @@ public static class AddServiceRegistrationExtension
             provider.GetRequiredService<FundingProjectionDataContext>());
         services.AddScoped(provider =>
             new Lazy<FundingProjectionDataContext>(provider.GetRequiredService<FundingProjectionDataContext>));
+
+        services.AddScoped<IEmployerFundingProjectionRepository, EmployerFundingProjectionRepository>();
     }
 
     public static void ConfigureHealthChecks(this IServiceCollection services)

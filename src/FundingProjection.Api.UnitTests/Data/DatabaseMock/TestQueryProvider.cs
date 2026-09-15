@@ -6,7 +6,7 @@ namespace SFA.DAS.Recruit.Api.UnitTests.Data.DatabaseMock;
 
 public abstract class TestQueryProvider<T> : IOrderedQueryable<T>, IQueryProvider
 {
-    private IEnumerable<T> _enumerable;
+    private IEnumerable<T>? _enumerable;
 
     protected TestQueryProvider(Expression expression)
     {

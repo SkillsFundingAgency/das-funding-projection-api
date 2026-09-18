@@ -20,8 +20,7 @@ public class JobsController(ILogger<JobsController> logger) : ControllerBase
     [Route($"{RouteNames.Jobs}/{{jobName}}")]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(GetCommittedLearnerResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(GetCommittedLearnerResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ImportJobStateResponse), StatusCodes.Status200OK)]
     public async Task<IResult> GetOrCreateJobState(
         [FromRoute] JobName jobName,
         [FromServices] IImportJobStateRepository repository,
@@ -54,8 +53,7 @@ public class JobsController(ILogger<JobsController> logger) : ControllerBase
     [Route($"{RouteNames.Jobs}/{{id:guid}}")]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(GetCommittedLearnerResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(GetCommittedLearnerResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ImportJobStateResponse), StatusCodes.Status200OK)]
     public async Task<IResult> UpdateJobState([FromRoute] Guid id,
         [FromBody] PutImportJobStateRequest request,
         [FromServices] IImportJobStateRepository repository,

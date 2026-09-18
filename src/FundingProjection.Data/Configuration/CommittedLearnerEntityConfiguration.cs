@@ -6,11 +6,11 @@ using System.Diagnostics.CodeAnalysis;
 namespace SFA.DAS.FundingProjection.Data.Configuration;
 
 [ExcludeFromCodeCoverage]
-internal class CommittedLearnerCostEntityConfiguration : IEntityTypeConfiguration<CommittedLearnerCostEntity>
+internal class CommittedLearnerEntityConfiguration : IEntityTypeConfiguration<CommittedLearnerEntity>
 {
-    public void Configure(EntityTypeBuilder<CommittedLearnerCostEntity> builder)
+    public void Configure(EntityTypeBuilder<CommittedLearnerEntity> builder)
     {
-        builder.ToTable("CommittedLearnerCost", "dbo");
+        builder.ToTable("CommittedLearners", "dbo");
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
@@ -29,24 +29,34 @@ internal class CommittedLearnerCostEntityConfiguration : IEntityTypeConfiguratio
             .HasColumnType("bigint")
             .IsRequired();
 
-        builder.Property(x => x.TransferSenderId)
-            .HasColumnName("TransferSenderId")
+        builder.Property(x => x.CommitmentId)
+            .HasColumnName("CommitmentId")
             .HasColumnType("bigint")
             .IsRequired(false);
 
-        builder.Property(x => x.RemainingCost)
-            .HasColumnName("RemainingCost")
+        builder.Property(x => x.Cost)
+            .HasColumnName("Cost")
             .HasColumnType("decimal(18,2)")
             .IsRequired();
 
-        builder.Property(x => x.PlannedEndDate)
-            .HasColumnName("PlannedEndDate")
+        builder.Property(x => x.StartDate)
+            .HasColumnName("StartDate")
             .HasColumnType("date")
             .IsRequired();
 
-        builder.Property(x => x.Status)
-            .HasColumnName("Status")
+        builder.Property(x => x.EndDate)
+            .HasColumnName("EndDate")
+            .HasColumnType("date")
+            .IsRequired();
+
+        builder.Property(x => x.PaymentStatus)
+            .HasColumnName("PaymentStatus")
             .HasColumnType("nvarchar(50)")
+            .IsRequired();
+
+        builder.Property(x => x.CreatedDate)
+            .HasColumnName("CreatedDate")
+            .HasColumnType("datetime2")
             .IsRequired();
 
         builder.Property(x => x.LastUpdatedDate)
@@ -54,14 +64,24 @@ internal class CommittedLearnerCostEntityConfiguration : IEntityTypeConfiguratio
             .HasColumnType("datetime2")
             .IsRequired();
 
+        builder.Property(x => x.ImportedDate)
+            .HasColumnName("ImportedDate")
+            .HasColumnType("datetime2")
+            .IsRequired();
+
+        builder.Property(x => x.ImportStatus)
+            .HasColumnName("ImportStatus")
+            .HasColumnType("nvarchar(50)")
+            .IsRequired();
+
         // Unique constraint
         builder.HasIndex(x => new {x.EmployerAccountId, x.ApprenticeshipId})
             .IsUnique()
-            .HasDatabaseName("UQ_CommittedLearnerCost_Account_Apprenticeship");
+            .HasDatabaseName("UQ_CommittedLearner_Account_Apprenticeship");
 
         // Non-clustered index with INCLUDE columns
         builder.HasIndex(x => x.EmployerAccountId)
-            .HasDatabaseName("IX_CommittedLearnerCost_EmployerAccountId")
-            .IncludeProperties(x => new {x.RemainingCost, x.TransferSenderId, x.Status});
+            .HasDatabaseName("IX_CommittedLearner_EmployerAccountId")
+            .IncludeProperties(x => new {x.Cost, x.PaymentStatus});
     }
 }

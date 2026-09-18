@@ -10,7 +10,8 @@ namespace SFA.DAS.FundingProjection.Data;
 
 public interface IFundingProjectionDataContext
 {
-    DbSet<CommittedLearnerCostEntity> CommittedLearnerCosts { get; }
+    DbSet<ImportJobStateEntity> ImportJobStates { get; }
+    DbSet<CommittedLearnerEntity> CommittedLearners { get; }
     DbSet<CommittedTransferOutEntity> CommittedTransferOuts { get; }
     DbSet<EmployerFundingProjectionEntity> EmployerFundingProjections { get; }
     DatabaseFacade Database { get; }
@@ -43,13 +44,15 @@ public class FundingProjectionDataContext : DbContext, IFundingProjectionDataCon
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(FundingProjectionDataContext).Assembly);
-        modelBuilder.ApplyConfiguration(new CommittedLearnerCostEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new CommittedLearnerEntityConfiguration());
         modelBuilder.ApplyConfiguration(new CommittedTransferOutEntityConfiguration());
         modelBuilder.ApplyConfiguration(new EmployerFundingProjectionEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ImportJobStateConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 
-    public DbSet<CommittedLearnerCostEntity> CommittedLearnerCosts { get; set; }
+    public DbSet<ImportJobStateEntity> ImportJobStates { get; set; }
+    public DbSet<CommittedLearnerEntity> CommittedLearners { get; set; }
     public DbSet<CommittedTransferOutEntity> CommittedTransferOuts { get; set; }
     public DbSet<EmployerFundingProjectionEntity> EmployerFundingProjections { get; set; }
 

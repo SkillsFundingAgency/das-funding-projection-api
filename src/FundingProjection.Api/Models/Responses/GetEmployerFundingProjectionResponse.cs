@@ -1,4 +1,4 @@
-﻿namespace SFA.DAS.FundingProjection.Api.Models;
+﻿namespace SFA.DAS.FundingProjection.Api.Models.Responses;
 
 public record GetEmployerFundingProjectionResponse
 {

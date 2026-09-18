@@ -7,20 +7,28 @@ namespace SFA.DAS.FundingProjection.Domain.Entities;
 public class EmployerFundingProjectionEntity
 {
     [Key]
-    [Column(TypeName = "bigint")]
+    public Guid Id { get; set; }
+
+    [Required]
     public long EmployerAccountId { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(18,2)")]
-    public decimal CommittedLearnerCostTotal { get; set; } = 0;
+    public decimal CommittedLearnerCostTotal { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(18,2)")]
-    public decimal CommittedTransferOutTotal { get; set; } = 0;
+    public decimal CommittedTransferOutTotal { get; set; }
+
+    [Required]
+    public int CalendarPeriodMonth { get; set; }
+
+    [Required]
+    public int CalendarPeriodYear { get; set; }
 
     [Required]
     public DateTime LastRecalculatedDate { get; set; }
 
     [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedDate { get; set; }
 }

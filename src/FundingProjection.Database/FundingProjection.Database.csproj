@@ -5,6 +5,12 @@
     <SqlServerVersion>SqlAzure</SqlServerVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Tables\ImportJobState.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Tables\ImportJobState.sql" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Database.publish.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

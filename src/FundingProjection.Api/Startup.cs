@@ -94,7 +94,7 @@ internal class Startup
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
-        services.AddApplicationDependencies(Configuration);
+        services.AddApplicationDependencies();
         services.AddDatabaseRegistration(connectionStrings!, Configuration["EnvironmentName"]);
         services.AddOpenTelemetryRegistration(Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]!);
         services.ConfigureHealthChecks();

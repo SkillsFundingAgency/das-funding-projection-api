@@ -10,27 +10,65 @@ internal class EmployerFundingProjectionEntityConfiguration : IEntityTypeConfigu
 {
     public void Configure(EntityTypeBuilder<EmployerFundingProjectionEntity> builder)
     {
-        builder.ToTable("EmployerFundingProjection");
-        builder.HasKey(x => x.EmployerAccountId);
+        // Table configuration
+        builder.ToTable("EmployerFundingProjection", schema: "dbo");
 
-        builder.Property(x => x.EmployerAccountId)
-            .HasColumnName("EmployerAccountId")
-            .HasColumnType("bigint")
+        // Primary Key
+        builder.HasKey(e => e.Id)
+            .HasName("PK_EmployerFundingProjection");
+
+        // Column configurations
+        builder.Property(e => e.Id)
+            .HasDefaultValueSql("NEWSEQUENTIALID()")
             .IsRequired();
-            
+
+        builder.Property(e => e.EmployerAccountId)
+            .IsRequired();
+
         builder.Property(e => e.CommittedLearnerCostTotal)
-            .HasColumnName("CommittedLearnerCostTotal")
             .HasColumnType("decimal(18,2)")
-            .HasDefaultValue(0);
+            .HasDefaultValue(0)
+            .IsRequired();
 
         builder.Property(e => e.CommittedTransferOutTotal)
-            .HasColumnName("CommittedTransferOutTotal")
             .HasColumnType("decimal(18,2)")
-            .HasDefaultValue(0);
+            .HasDefaultValue(0)
+            .IsRequired();
+
+        builder.Property(e => e.CalendarPeriodMonth)
+            .IsRequired();
+
+        builder.Property(e => e.CalendarPeriodYear)
+            .IsRequired();
+
+        builder.Property(e => e.LastRecalculatedDate)
+            .IsRequired();
 
         builder.Property(e => e.CreatedDate)
-            .HasColumnName("CreatedDate")
-            .HasColumnType("datetime")
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("GETUTCDATE()")
+            .IsRequired();
+
+        // Unique Constraint
+        builder.HasIndex(e => new { e.EmployerAccountId, e.CalendarPeriodYear, e.CalendarPeriodMonth })
+            .IsUnique()
+            .HasName("UQ_EmployerFundingProjection_EmployerMonth");
+
+        // Check Constraints (EF Core 5.0+)
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_Month_Range",
+            "[CalendarPeriodMonth] >= 1 AND [CalendarPeriodMonth] <= 12"));
+
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_Year_Valid",
+            "[CalendarPeriodYear] >= 2000"));
+
+        // Additional indexes for query performance
+        builder.HasIndex(e => e.EmployerAccountId)
+            .HasDatabaseName("IX_EmployerFundingProjection_EmployerAccount")
+            .IncludeProperties(e => new { e.CommittedLearnerCostTotal, e.CommittedTransferOutTotal });
+
+        builder.HasIndex(e => new { e.CalendarPeriodYear, e.CalendarPeriodMonth })
+            .HasDatabaseName("IX_EmployerFundingProjection_Period")
+            .IncludeProperties(e => e.CommittedLearnerCostTotal);
     }
 }

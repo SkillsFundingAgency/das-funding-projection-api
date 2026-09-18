@@ -3,10 +3,11 @@
 namespace SFA.DAS.FundingProjection.Domain.Enums;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum LearnerCostStatus
+public enum PaymentStatus : short
 {
+    //PendingApproval = 0, //TODO : Remove later
     Active = 1,
-    Completed = 2,
+    Paused = 2,
     Withdrawn = 3,
-    Paused = 4
+    Completed = 4
 }

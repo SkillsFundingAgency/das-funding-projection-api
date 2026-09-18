@@ -3,8 +3,8 @@ using SFA.DAS.FundingProjection.Data.Repositories;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using SFA.DAS.FundingProjection.Api.Core;
-using SFA.DAS.FundingProjection.Api.Models;
 using SFA.DAS.FundingProjection.Api.Models.Mappers;
+using SFA.DAS.FundingProjection.Api.Models.Responses;
 
 namespace SFA.DAS.FundingProjection.Api.Controllers;
 

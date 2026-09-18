@@ -1,26 +1,23 @@
-﻿using FluentValidation;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.FundingProjection.Data;
+using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Configuration;
 using System.Diagnostics.CodeAnalysis;
-using SFA.DAS.FundingProjection.Data.Repositories;
 
 namespace SFA.DAS.FundingProjection.Api.AppStart;
 
 [ExcludeFromCodeCoverage]
 public static class AddServiceRegistrationExtension
 {
-    public static void AddApplicationDependencies(this IServiceCollection services, IConfiguration configuration)
+    public static void AddApplicationDependencies(this IServiceCollection services)
     {
         // validators
-        services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
         services.AddSingleton(TimeProvider.System);
-
+        services.AddFluentValidators();
         services.AddDistributedMemoryCache();
     }
 
-    public static void AddDatabaseRegistration(
-        this IServiceCollection services,
+    public static void AddDatabaseRegistration(this IServiceCollection services,
         ConnectionStrings config,
         string? environmentName)
     {
@@ -43,6 +40,8 @@ public static class AddServiceRegistrationExtension
             new Lazy<FundingProjectionDataContext>(provider.GetRequiredService<FundingProjectionDataContext>));
 
         services.AddScoped<IEmployerFundingProjectionRepository, EmployerFundingProjectionRepository>();
+        services.AddScoped<ICommittedLearnerRepository, CommittedLearnerRepository>();
+        services.AddScoped<IImportJobStateRepository, ImportJobStateRepository>();
     }
 
     public static void ConfigureHealthChecks(this IServiceCollection services)

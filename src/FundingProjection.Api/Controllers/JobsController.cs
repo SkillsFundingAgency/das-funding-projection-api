@@ -32,11 +32,6 @@ public class JobsController(ILogger<JobsController> logger) : ControllerBase
             var jobState = await repository.GetOrCreateJobStateAsync(jobName, cancellationToken);
             return Results.Ok(jobState.MapToResponse());
         }
-        catch (ArgumentException ex)
-        {
-            logger.LogWarning("Invalid argument provided: {Message}", ex.Message);
-            return Results.BadRequest(new { error = ex.Message });
-        }
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred while processing the request");
@@ -74,16 +69,6 @@ public class JobsController(ILogger<JobsController> logger) : ControllerBase
 
             var updatedJobState = await repository.UpdateJobStateAsync(entity, cancellationToken);
             return Results.Ok(updatedJobState.MapToResponse());
-        }
-        catch (ArgumentException ex)
-        {
-            logger.LogWarning("Invalid argument provided: {Message}", ex.Message);
-            return Results.BadRequest(new { error = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            logger.LogWarning("Job state not found for ID {Id}: {Message}", id, ex.Message);
-            return Results.NotFound(new { error = ex.Message });
         }
         catch (Exception ex)
         {

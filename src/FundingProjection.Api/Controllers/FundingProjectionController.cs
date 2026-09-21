@@ -5,6 +5,7 @@ using System.Net;
 using SFA.DAS.FundingProjection.Api.Core;
 using SFA.DAS.FundingProjection.Api.Models.Mappers;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
+using SFA.DAS.FundingProjection.Data.Services;
 
 namespace SFA.DAS.FundingProjection.Api.Controllers;
 
@@ -35,6 +36,31 @@ public class FundingProjectionController(
         catch (Exception e)
         {
             logger.LogError(e, "Unable to Get funding projection : An error occurred");
+            return Results.Problem(statusCode: (int)HttpStatusCode.InternalServerError);
+        }
+    }
+
+    [HttpPost]
+    [Route($"{RouteNames.EmployerFundingProjection}/{RouteElements.FundingProjection}/update")]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    public async Task<IResult> UpdateEmployerFundingProjection(
+        [FromQuery] DateTime cutOffDateTime,
+        [FromServices] IFundingProjectionServices fundingProjectionServices,
+        CancellationToken token)
+    {
+        try
+        {
+            logger.LogInformation("Funding Projection API: Received request to update projection");
+
+            var result = await fundingProjectionServices.UpdateProjection(cutOffDateTime, token);
+
+            return Results.Ok(result);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Unable to Update funding projection : An error occurred");
             return Results.Problem(statusCode: (int)HttpStatusCode.InternalServerError);
         }
     }

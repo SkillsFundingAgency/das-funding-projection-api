@@ -25,17 +25,29 @@ public class EmployerFundingProjectionRepository(IFundingProjectionDataContext c
 
     public async Task<UpsertResult<EmployerFundingProjectionEntity>> UpsertOneAsync(EmployerFundingProjectionEntity entity, CancellationToken cancellationToken)
     {
-        var existingEntity = entity.EmployerAccountId == 0 ? null : await GetOneAsync(entity.EmployerAccountId, cancellationToken);
+        var existingEntity = await context.EmployerFundingProjections
+            .SingleOrDefaultAsync(x =>
+                    x.EmployerAccountId == entity.EmployerAccountId &&
+                    x.CalendarPeriodYear == entity.CalendarPeriodYear &&
+                    x.CalendarPeriodMonth == entity.CalendarPeriodMonth,
+                cancellationToken);
+
         if (existingEntity is null)
         {
-            await context.EmployerFundingProjections.AddAsync(entity, cancellationToken);
+            await context.EmployerFundingProjections.AddAsync(
+                entity,
+                cancellationToken);
+
             await context.SaveChangesAsync(cancellationToken);
             return UpsertResult.Create(entity, true);
         }
 
-        context.SetValues(existingEntity, entity);
+        existingEntity.CommittedLearnerCostTotal = entity.CommittedLearnerCostTotal;
+        existingEntity.CommittedTransferOutTotal = entity.CommittedTransferOutTotal;
+        existingEntity.LastRecalculatedDate = entity.LastRecalculatedDate;
+
         await context.SaveChangesAsync(cancellationToken);
-        return UpsertResult.Create(entity, false);
+        return UpsertResult.Create(existingEntity, false);
     }
 
     public Task<bool> DeleteOneAsync(long key, CancellationToken cancellationToken)

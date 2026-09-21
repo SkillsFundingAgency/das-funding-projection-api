@@ -8,6 +8,7 @@ namespace SFA.DAS.FundingProjection.Data.Repositories;
 public interface ICommittedLearnerRepository : IReadRepository<CommittedLearnerEntity, Guid>,
     IWriteRepository<CommittedLearnerEntity, Guid>
 {
+    IQueryable<CommittedLearnerEntity> GetAll();
     Task<List<CommittedLearnerEntity>> GetAllImportStatus(ImportStatus importStatus, CancellationToken cancellationToken);
 }
 
@@ -54,6 +55,11 @@ public class CommittedLearnerRepository(IFundingProjectionDataContext dataContex
         return await dataContext.CommittedLearners
             .FirstOrDefaultAsync(x => x.ApprenticeshipId == apprenticeId,
                 cancellationToken);
+    }
+
+    public IQueryable<CommittedLearnerEntity> GetAll()
+    {
+        return dataContext.CommittedLearners;
     }
 
     public async Task<List<CommittedLearnerEntity>> GetAllImportStatus(ImportStatus importStatus, CancellationToken cancellationToken)

@@ -16,9 +16,9 @@ internal class WhenMappingEmployerFundingProjection
 
         // Assert
         response.EmployerAccountId.Should().Be(entity.EmployerAccountId);
-        response.CommittedLearnerCostTotal.Should().Be(entity.CommittedLearnerCostTotal);
-        response.CommittedTransferOutTotal.Should().Be(entity.CommittedTransferOutTotal);
-        response.LastRecalculatedDate.Should().Be(entity.LastRecalculatedDate);
-        response.CreatedDate.Should().Be(entity.CreatedDate);
+        response.Month.Should().Be(entity.CalendarPeriodMonth);
+        response.Year.Should().Be(entity.CalendarPeriodYear);
+        response.CommittedLearnerCost.Should().Be(entity.CommittedLearnerCostTotal);
+        response.CommittedTransferOut.Should().Be(entity.CommittedTransferOutTotal);
     }
 }

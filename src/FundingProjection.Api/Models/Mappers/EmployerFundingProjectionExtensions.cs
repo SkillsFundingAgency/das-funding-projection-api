@@ -5,12 +5,12 @@ namespace SFA.DAS.FundingProjection.Api.Models.Mappers;
 
 public static class EmployerFundingProjectionExtensions
 {
-    public static GetEmployerFundingProjectionResponse ToGetResponse(this EmployerFundingProjectionEntity entity) => new()
+    public static MonthlyFundingBreakdown ToGetResponse(this EmployerFundingProjectionEntity entity) => new()
     {
             EmployerAccountId = entity.EmployerAccountId,
-            CommittedLearnerCostTotal = entity.CommittedLearnerCostTotal,
-            CommittedTransferOutTotal = entity.CommittedTransferOutTotal,
-            LastRecalculatedDate = entity.LastRecalculatedDate,
-            CreatedDate = entity.CreatedDate
+            Month = entity.CalendarPeriodMonth,
+            Year = entity.CalendarPeriodYear,
+            CommittedLearnerCost = entity.CommittedLearnerCostTotal,
+            CommittedTransferOut = entity.CommittedTransferOutTotal,
     };
 }

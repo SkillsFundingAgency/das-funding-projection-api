@@ -10,28 +10,25 @@ using SFA.DAS.FundingProjection.Data.Services;
 namespace SFA.DAS.FundingProjection.Api.Controllers;
 
 [ApiController]
-public class FundingProjectionController(
-    [FromServices] IEmployerFundingProjectionRepository repository,
-    ILogger<FundingProjectionController> logger) : ControllerBase
+public class FundingProjectionController(ILogger<FundingProjectionController> logger) : ControllerBase
 {
     [HttpGet]
     [Route($"{RouteNames.EmployerFundingProjection}/{{accountId:long}}/{RouteElements.FundingProjection}")]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(GetEmployerFundingProjectionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<MonthlyFundingBreakdown>), StatusCodes.Status200OK)]
     public async Task<IResult> GetEmployerFundingProjection(
         [FromRoute] [Required] long accountId,
-        CancellationToken token)
+        [FromServices] IEmployerFundingProjectionRepository repository,
+        [FromQuery] int months = 12,
+        CancellationToken token = default)
     {
         try
         {
             logger.LogInformation("Funding Projection API: Received query to get projection by accountId : {Id}", accountId);
 
-            var response = await repository.GetByEmployerAccountIdAsync(accountId, token);
+            var response = await repository.GetTotalCostByMonthsAsync(accountId, months, token);
 
-            return response == null
-                ? Results.NotFound()
-                : TypedResults.Ok(response.ToGetResponse());
+            return TypedResults.Ok(response.Select(x => x.ToGetResponse()));
         }
         catch (Exception e)
         {

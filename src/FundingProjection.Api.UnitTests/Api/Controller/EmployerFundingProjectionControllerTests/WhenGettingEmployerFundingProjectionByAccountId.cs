@@ -17,52 +17,36 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
     [Test, RecursiveMoqAutoData]
     public async Task Get_ReturnsOk_WhenEmployerFundingProjectionEntityExists(
         long accountId,
-        EmployerFundingProjectionEntity mockResponse,
-        [Frozen] Mock<IEmployerFundingProjectionRepository> provider,
+        int months,
+        List<EmployerFundingProjectionEntity> mockResponse,
+        [Frozen] Mock<IEmployerFundingProjectionRepository> repository,
         [Greedy] FundingProjectionController controller,
         CancellationToken token)
     {
         // Arrange
-        provider.Setup(p => p.GetByEmployerAccountIdAsync(accountId, token)).ReturnsAsync(mockResponse);
+        repository.Setup(p => p.GetTotalCostByMonthsAsync(accountId, months, token)).ReturnsAsync(mockResponse);
 
         // Act
-        var result = await controller.GetEmployerFundingProjection(accountId, token);
+        var result = await controller.GetEmployerFundingProjection(accountId, repository.Object, months, token);
 
         // Assert
-        result.Should().BeOfType<Ok<GetEmployerFundingProjectionResponse>>();
-        var okResult = result as Ok<GetEmployerFundingProjectionResponse>;
-        okResult!.Value.Should().BeEquivalentTo(mockResponse.ToGetResponse());
-    }
-
-    [Test, RecursiveMoqAutoData]
-    public async Task Get_ReturnsNotFound_WhenEmployerFundingProjectionEntityDoesNotExist(long accountId,
-        EmployerFundingProjectionEntity mockResponse,
-        [Frozen] Mock<IEmployerFundingProjectionRepository> provider,
-        [Greedy] FundingProjectionController controller,
-        CancellationToken token)
-    {
-        // Arrange
-        provider.Setup(p => p.GetByEmployerAccountIdAsync(accountId, token)).ReturnsAsync((EmployerFundingProjectionEntity)null!);
-
-        // Act
-        var result = await controller.GetEmployerFundingProjection(accountId, token);
-
-        // Assert
-        result.Should().BeOfType<NotFound>();
+        result.Should().BeOfType<Ok<IEnumerable<MonthlyFundingBreakdown>>>();
+        var okResult = result as Ok<IEnumerable<MonthlyFundingBreakdown>>;
+        okResult!.Value.Should().BeEquivalentTo(mockResponse.Select(x => x.ToGetResponse()));
     }
 
     [Test, RecursiveMoqAutoData]
     public async Task Get_ReturnsInternalServerException_WhenException_Thrown(long accountId,
-        EmployerFundingProjectionEntity mockResponse,
-        [Frozen] Mock<IEmployerFundingProjectionRepository> provider,
+        List<EmployerFundingProjectionEntity> mockResponse,
+        [Frozen] Mock<IEmployerFundingProjectionRepository> repository,
         [Greedy] FundingProjectionController controller,
         CancellationToken token)
     {
         // Arrange
-        provider.Setup(p => p.GetByEmployerAccountIdAsync(accountId, token)).ThrowsAsync(new Exception());
+        repository.Setup(p => p.GetTotalCostByMonthsAsync(accountId, 12, token)).ThrowsAsync(new Exception());
 
         // Act
-        var result = await controller.GetEmployerFundingProjection(accountId, token);
+        var result = await controller.GetEmployerFundingProjection(accountId, repository.Object, 12, token);
 
         // Assert
         result.Should().BeOfType<ProblemHttpResult>();

@@ -22,6 +22,16 @@
             }
           },
           {
+            "name": "months",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32",
+              "default": 12
+            }
+          },
+          {
             "name": "X-Version",
             "in": "header",
             "required": true,
@@ -32,42 +42,31 @@
           "500": {
             "description": "Internal Server Error"
           },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetEmployerFundingProjectionResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MonthlyFundingBreakdown"
+                  }
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetEmployerFundingProjectionResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MonthlyFundingBreakdown"
+                  }
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetEmployerFundingProjectionResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MonthlyFundingBreakdown"
+                  }
                 }
               }
             }
@@ -744,35 +743,6 @@
         },
         "additionalProperties": false
       },
-      "GetEmployerFundingProjectionResponse": {
-        "type": "object",
-        "properties": {
-          "employerAccountId": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer",
-            "format": "int64"
-          },
-          "committedLearnerCostTotal": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": "number",
-            "format": "double"
-          },
-          "committedTransferOutTotal": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": "number",
-            "format": "double"
-          },
-          "lastRecalculatedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
       "ImportJobStateResponse": {
         "type": "object",
         "properties": {
@@ -828,6 +798,37 @@
           "ImportLearnerCost"
         ],
         "type": "string"
+      },
+      "MonthlyFundingBreakdown": {
+        "type": "object",
+        "properties": {
+          "employerAccountId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "month": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          },
+          "year": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          },
+          "committedLearnerCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "committedTransferOut": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
       },
       "PaymentStatus": {
         "enum": [

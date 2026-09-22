@@ -51,7 +51,7 @@ internal class EmployerFundingProjectionEntityConfiguration : IEntityTypeConfigu
         // Unique Constraint
         builder.HasIndex(e => new { e.EmployerAccountId, e.CalendarPeriodYear, e.CalendarPeriodMonth })
             .IsUnique()
-            .HasName("UQ_EmployerFundingProjection_EmployerMonth");
+            .HasDatabaseName("UQ_EmployerFundingProjection_EmployerMonth");
 
         // Check Constraints (EF Core 5.0+)
         builder.ToTable(t => t.HasCheckConstraint(

@@ -3,10 +3,10 @@
 namespace SFA.DAS.FundingProjection.Api.Controllers;
 
 [ApiController]
+[Route("ping")]
 public class PingController : ControllerBase
 {
     [HttpGet]
-    [Route("ping")]
     public IActionResult Get()
     {
         return Ok("pong");

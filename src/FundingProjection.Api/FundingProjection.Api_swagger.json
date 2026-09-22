@@ -47,26 +47,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MonthlyFundingBreakdown"
-                  }
+                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MonthlyFundingBreakdown"
-                  }
+                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MonthlyFundingBreakdown"
-                  }
+                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
                 }
               }
             }
@@ -739,6 +730,18 @@
           },
           "importStatus": {
             "$ref": "#/components/schemas/ImportStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetEmployerFundingProjectionByAccountIdResponse": {
+        "type": "object",
+        "properties": {
+          "fundingBreakdowns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyFundingBreakdown"
+            }
           }
         },
         "additionalProperties": false

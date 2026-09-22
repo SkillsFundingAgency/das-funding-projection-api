@@ -15,7 +15,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
     [HttpGet]
     [Route($"{RouteNames.EmployerFundingProjection}/{{accountId:long}}/{RouteElements.FundingProjection}")]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [ProducesResponseType(typeof(List<MonthlyFundingBreakdown>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetEmployerFundingProjectionByAccountIdResponse), StatusCodes.Status200OK)]
     public async Task<IResult> GetEmployerFundingProjection(
         [FromRoute] [Required] long accountId,
         [FromServices] IEmployerFundingProjectionRepository repository,
@@ -28,7 +28,10 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
 
             var response = await repository.GetTotalCostByMonthsAsync(accountId, months, token);
 
-            return TypedResults.Ok(response.Select(x => x.ToGetResponse()));
+            return TypedResults.Ok(new GetEmployerFundingProjectionByAccountIdResponse
+            {
+                FundingBreakdowns = [.. response.Select(x => x.ToGetResponse())]
+            });
         }
         catch (Exception e)
         {

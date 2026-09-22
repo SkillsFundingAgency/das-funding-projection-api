@@ -30,9 +30,10 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         var result = await controller.GetEmployerFundingProjection(accountId, repository.Object, months, token);
 
         // Assert
-        result.Should().BeOfType<Ok<IEnumerable<MonthlyFundingBreakdown>>>();
-        var okResult = result as Ok<IEnumerable<MonthlyFundingBreakdown>>;
-        okResult!.Value.Should().BeEquivalentTo(mockResponse.Select(x => x.ToGetResponse()));
+        result.Should().BeOfType<Ok<GetEmployerFundingProjectionByAccountIdResponse>>();
+        var okResult = result as Ok<GetEmployerFundingProjectionByAccountIdResponse>;
+        okResult!.Value!.FundingBreakdowns.Count.Should().BeGreaterThan(0);
+        okResult.Value.FundingBreakdowns.Should().BeEquivalentTo(mockResponse.Select(x => x.ToGetResponse()));
     }
 
     [Test, RecursiveMoqAutoData]

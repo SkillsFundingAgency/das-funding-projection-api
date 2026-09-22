@@ -132,7 +132,7 @@ internal class Startup
         services.AddAuthorization();
     }
 
-    public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         if (env.IsDevelopment())
         {

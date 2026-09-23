@@ -1,5 +1,4 @@
-﻿CREATE TABLE dbo.[ImportJobState]
-(
+﻿CREATE TABLE dbo.[ImportJobState](
     [Id]                           UniqueIdentifier NOT NULL DEFAULT NEWSEQUENTIALID(),
     [JobName]                      NVARCHAR(100)   NOT NULL,
     [LastSuccessfulImportDate]     DATETIME2       NOT NULL,
@@ -11,22 +10,20 @@
     [CreatedDate]                  DATETIME2       NOT NULL    DEFAULT GETUTCDATE(),
 
     CONSTRAINT [PK_ImportJobState]
-PRIMARY KEY CLUSTERED ([Id]),
+        PRIMARY KEY CLUSTERED ([Id]),
+    CONSTRAINT [UQ_ImportJobState_JobName]
+        UNIQUE ([JobName]),
 
-CONSTRAINT [UQ_ImportJobState_JobName]
-UNIQUE ([JobName]),
-
-CONSTRAINT [CK_JobName_NotEmpty]
-CHECK (LEN([JobName]) > 0)
-    )
+    CONSTRAINT [CK_JobName_NotEmpty]
+        CHECK (LEN([JobName]) > 0))
 GO
 
-    -- Create indexes for common queries
+-- Create indexes for common queries
 CREATE NONCLUSTERED INDEX [IX_ImportJobState_JobName]
-ON [dbo].[ImportJobState] ([JobName])
-INCLUDE ([LastSuccessfulImportDate], [LastAttemptSuccessful])
+    ON [dbo].[ImportJobState] ([JobName])
+    INCLUDE ([LastSuccessfulImportDate], [LastAttemptSuccessful])
 GO
 
-    CREATE NONCLUSTERED INDEX [IX_ImportJobState_LastAttempt]
-ON [dbo].[ImportJobState] ([LastAttemptedDate] DESC)
+CREATE NONCLUSTERED INDEX [IX_ImportJobState_LastAttempt]
+    ON [dbo].[ImportJobState] ([LastAttemptedDate] DESC)
 GO

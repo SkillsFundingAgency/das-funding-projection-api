@@ -46,7 +46,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RecalculateFundingProjectionResponse), StatusCodes.Status200OK)]
     public async Task<IResult> RecalculateFundingProjection(
-        [FromQuery] DateTime cutOffDateTime,
+        [FromBody] DateTime cutOffDateTime,
         [FromServices] IFundingProjectionServices fundingProjectionServices,
         CancellationToken token)
     {

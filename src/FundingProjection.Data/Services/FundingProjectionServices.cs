@@ -16,35 +16,25 @@ public class FundingProjectionServices(
 {
     public async Task<RecalculatedResponse> UpdateProjection(DateTime cutOffDateTime, CancellationToken cancellationToken)
     {
-        var totalRecordsUpdated = 0;
-        var totalRecordsProcessed = 0;
-        var totalRecordsInserted = 0;
-
         var affectedEmployerAccountIds = await committedLearnerRepository
-                .GetAll()
-                .Where(x => x.LastUpdatedDate >= cutOffDateTime)
-                .Select(x => x.EmployerAccountId)
-                .Distinct()
-                .ToListAsync(cancellationToken);
+            .GetAll()
+            .Where(x => x.LastUpdatedDate >= cutOffDateTime)
+            .Select(x => x.EmployerAccountId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
 
         if (affectedEmployerAccountIds.Count == 0)
-        {
-            return new RecalculatedResponse(totalRecordsProcessed, totalRecordsUpdated, totalRecordsInserted);
-        }
+            return new RecalculatedResponse(0, 0, 0);
 
-        var learners =
-            await committedLearnerRepository
-                .GetAll()
-                .Where(x => affectedEmployerAccountIds.Contains(x.EmployerAccountId))
-                .ToListAsync(cancellationToken);
+        var now = DateTime.UtcNow;
+
+        var learners = await committedLearnerRepository
+            .GetAll()
+            .Where(x => affectedEmployerAccountIds.Contains(x.EmployerAccountId))
+            .ToListAsync(cancellationToken);
 
         var projections = learners
-            .GroupBy(x => new
-            {
-                EmployerAccountId = x.EmployerAccountId,
-                Year = x.StartDate.Year,
-                Month = x.StartDate.Month
-            })
+            .GroupBy(x => new { x.EmployerAccountId, x.StartDate.Year, x.StartDate.Month })
             .Select(g => new EmployerFundingProjectionEntity
             {
                 Id = Guid.NewGuid(),
@@ -53,28 +43,25 @@ public class FundingProjectionServices(
                 CommittedTransferOutTotal = 0m,
                 CalendarPeriodMonth = g.Key.Month,
                 CalendarPeriodYear = g.Key.Year,
-                LastRecalculatedDate = DateTime.UtcNow,
-                CreatedDate = DateTime.UtcNow
+                LastRecalculatedDate = now,
+                CreatedDate = now
             })
             .OrderBy(x => x.EmployerAccountId)
             .ThenBy(x => x.CalendarPeriodYear)
             .ThenBy(x => x.CalendarPeriodMonth)
             .ToList();
 
-        foreach (var employerFundingProjectionEntity in projections)
-        {
-            var upsertResult = await employerFundingProjectionRepository.UpsertOneAsync(
-                employerFundingProjectionEntity,
-                cancellationToken);
-            
-            totalRecordsProcessed++;
+        var totalRecordsInserted = 0;
 
-            if (upsertResult.Created)
-                totalRecordsInserted++;
-            else
-                totalRecordsUpdated++;
+        foreach (var projection in projections)
+        {
+            var result = await employerFundingProjectionRepository.UpsertOneAsync(projection, cancellationToken);
+            if (result.Created) totalRecordsInserted++;
         }
 
-        return new RecalculatedResponse(totalRecordsProcessed, totalRecordsUpdated, totalRecordsInserted);
+        return new RecalculatedResponse(
+            TotalRecordsProcessed: projections.Count,
+            TotalRecordsUpdated: projections.Count - totalRecordsInserted,
+            TotalRecordsInserted: totalRecordsInserted);
     }
 }

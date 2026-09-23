@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SFA.DAS.FundingProjection.Data.Models;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Entities;
 
@@ -6,15 +7,19 @@ namespace SFA.DAS.FundingProjection.Data.Services;
 
 public interface IFundingProjectionServices
 {
-    Task<bool> UpdateProjection(DateTime cutOffDateTime, CancellationToken cancellationToken);
+    Task<RecalculatedResponse> UpdateProjection(DateTime cutOffDateTime, CancellationToken cancellationToken);
 }
 public class FundingProjectionServices(
     ICommittedLearnerRepository committedLearnerRepository,
     IEmployerFundingProjectionRepository employerFundingProjectionRepository)
     : IFundingProjectionServices
 {
-    public async Task<bool> UpdateProjection(DateTime cutOffDateTime, CancellationToken cancellationToken)
+    public async Task<RecalculatedResponse> UpdateProjection(DateTime cutOffDateTime, CancellationToken cancellationToken)
     {
+        var totalRecordsUpdated = 0;
+        var totalRecordsProcessed = 0;
+        var totalRecordsInserted = 0;
+
         var affectedEmployerAccountIds = await committedLearnerRepository
                 .GetAll()
                 .Where(x => x.LastUpdatedDate >= cutOffDateTime)
@@ -24,7 +29,7 @@ public class FundingProjectionServices(
 
         if (affectedEmployerAccountIds.Count == 0)
         {
-            return true;
+            return new RecalculatedResponse(totalRecordsProcessed, totalRecordsUpdated, totalRecordsInserted);
         }
 
         var learners =
@@ -36,7 +41,7 @@ public class FundingProjectionServices(
         var projections = learners
             .GroupBy(x => new
             {
-                x.EmployerAccountId,
+                EmployerAccountId = x.EmployerAccountId,
                 Year = x.StartDate.Year,
                 Month = x.StartDate.Month
             })
@@ -58,11 +63,18 @@ public class FundingProjectionServices(
 
         foreach (var employerFundingProjectionEntity in projections)
         {
-            await employerFundingProjectionRepository.UpsertOneAsync(
+            var upsertResult = await employerFundingProjectionRepository.UpsertOneAsync(
                 employerFundingProjectionEntity,
                 cancellationToken);
+            
+            totalRecordsProcessed++;
+
+            if (upsertResult.Created)
+                totalRecordsInserted++;
+            else
+                totalRecordsUpdated++;
         }
 
-        return true;
+        return new RecalculatedResponse(totalRecordsProcessed, totalRecordsUpdated, totalRecordsInserted);
     }
 }

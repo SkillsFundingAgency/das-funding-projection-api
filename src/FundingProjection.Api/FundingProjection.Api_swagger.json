@@ -65,7 +65,7 @@
         }
       }
     },
-    "/api/employer/funding-projection/update": {
+    "/api/employer/funding-projection/re-calculate": {
       "post": {
         "tags": [
           "FundingProjection"
@@ -115,17 +115,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "boolean"
+                  "$ref": "#/components/schemas/RecalculateFundingProjectionResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "boolean"
+                  "$ref": "#/components/schemas/RecalculateFundingProjectionResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "boolean"
+                  "$ref": "#/components/schemas/RecalculateFundingProjectionResponse"
                 }
               }
             }
@@ -944,6 +944,32 @@
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecalculateFundingProjectionResponse": {
+        "required": [
+          "totalRecordsProcessed",
+          "totalRecordsUpdated",
+          "totalRecordsInserted"
+        ],
+        "type": "object",
+        "properties": {
+          "totalRecordsProcessed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalRecordsUpdated": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalRecordsInserted": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
           }
         },
         "additionalProperties": false

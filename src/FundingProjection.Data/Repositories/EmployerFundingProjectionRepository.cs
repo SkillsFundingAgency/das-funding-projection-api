@@ -22,7 +22,7 @@ public class EmployerFundingProjectionRepository(IFundingProjectionDataContext c
     public async Task<List<EmployerFundingProjectionEntity>> GetTotalCostByMonthsAsync(long employerAccountId, int months, CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
-        var from = new DateTime(now.Year, now.Month, 1).AddMonths(-12);
+        var from = new DateTime(now.Year, now.Month, 1).AddMonths(-months);
 
         return await context.EmployerFundingProjections
             .Where(x => x.EmployerAccountId == employerAccountId

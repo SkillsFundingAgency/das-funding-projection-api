@@ -10,10 +10,11 @@ using SFA.DAS.FundingProjection.Data.Services;
 namespace SFA.DAS.FundingProjection.Api.Controllers;
 
 [ApiController]
+[Route($"{RouteNames.EmployerFundingProjection}")]
 public class FundingProjectionController(ILogger<FundingProjectionController> logger) : ControllerBase
 {
     [HttpGet]
-    [Route($"{RouteNames.EmployerFundingProjection}/{{accountId:long}}/{RouteElements.FundingProjection}")]
+    [Route($"{{accountId:long}}/{RouteElements.FundingProjection}")]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(GetEmployerFundingProjectionByAccountIdResponse), StatusCodes.Status200OK)]
     public async Task<IResult> GetEmployerFundingProjection(
@@ -41,7 +42,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
     }
 
     [HttpPost]
-    [Route($"{RouteNames.EmployerFundingProjection}/{RouteElements.FundingProjection}/re-calculate")]
+    [Route($"{RouteElements.FundingProjection}/re-calculate")]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RecalculateFundingProjectionResponse), StatusCodes.Status200OK)]

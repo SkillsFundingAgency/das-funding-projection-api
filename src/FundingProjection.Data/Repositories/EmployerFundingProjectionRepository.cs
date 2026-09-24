@@ -19,7 +19,7 @@ public class EmployerFundingProjectionRepository(IFundingProjectionDataContext c
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<EmployerFundingProjectionEntity>> GetTotalCostByMonthsAsync(long employerAccountId, int months, CancellationToken cancellationToken)
+    public async Task<List<EmployerFundingProjectionEntity>> GetTotalCostByMonthsAsync(long employerAccountId, int months = 12, CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
         var from = new DateTime(now.Year, now.Month, 1).AddMonths(-months);

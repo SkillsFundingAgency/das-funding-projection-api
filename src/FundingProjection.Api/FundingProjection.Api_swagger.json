@@ -1,0 +1,1055 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "SFA.DAS.FundingProjection.Api | swagger",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/employer/{accountId}/funding-projection": {
+      "get": {
+        "tags": [
+          "FundingProjection"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "months",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32",
+              "default": 12
+            }
+          },
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/employer/funding-projection/re-calculate": {
+      "post": {
+        "tags": [
+          "FundingProjection"
+        ],
+        "parameters": [
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecalculateFundingProjectionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecalculateFundingProjectionResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecalculateFundingProjectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/{jobName}": {
+      "post": {
+        "tags": [
+          "Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "jobName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/JobName"
+            }
+          },
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJobStateResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJobStateResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJobStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/{id}": {
+      "put": {
+        "tags": [
+          "Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutImportJobStateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutImportJobStateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutImportJobStateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJobStateResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJobStateResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJobStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/employer/learners/by/status": {
+      "get": {
+        "tags": [
+          "Learner"
+        ],
+        "parameters": [
+          {
+            "name": "importStatus",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ImportStatus"
+            }
+          },
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/employer/{accountId}/learners": {
+      "post": {
+        "tags": [
+          "Learner"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostCommittedLearnerRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostCommittedLearnerRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostCommittedLearnerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/employer/{accountId}/learners/{id}": {
+      "put": {
+        "tags": [
+          "Learner"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutCommittedLearnerRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutCommittedLearnerRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutCommittedLearnerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ping": {
+      "get": {
+        "tags": [
+          "Ping"
+        ],
+        "parameters": [
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Service Status"
+        ],
+        "responses": {
+          "200": {
+            "description": null,
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "enum": [
+                    "Healthy"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": null,
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "enum": [
+                    "Unhealthy"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetCommittedLearnerResponse": {
+        "required": [
+          "paymentStatus",
+          "importStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "apprenticeshipId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "commitmentId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "cost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "createdOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "importedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paymentStatus": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          },
+          "importStatus": {
+            "$ref": "#/components/schemas/ImportStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetEmployerFundingProjectionByAccountIdResponse": {
+        "type": "object",
+        "properties": {
+          "fundingBreakdowns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyFundingBreakdown"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImportJobStateResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jobName": {
+            "$ref": "#/components/schemas/JobName"
+          },
+          "lastSuccessfulImportDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastAttemptedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastAttemptSuccessful": {
+            "type": "boolean"
+          },
+          "totalRecordsLastRun": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedRecordsLastRun": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImportStatus": {
+        "enum": [
+          "Pending",
+          "Imported",
+          "Failed"
+        ],
+        "type": "string"
+      },
+      "JobName": {
+        "enum": [
+          "ImportLearners"
+        ],
+        "type": "string"
+      },
+      "MonthlyFundingBreakdown": {
+        "type": "object",
+        "properties": {
+          "employerAccountId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "month": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          },
+          "year": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          },
+          "committedLearnerCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "committedTransferOut": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PaymentStatus": {
+        "enum": [
+          "Active",
+          "Paused",
+          "Withdrawn",
+          "Completed"
+        ],
+        "type": "string"
+      },
+      "PostCommittedLearnerRequest": {
+        "required": [
+          "paymentStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "apprenticeshipId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paymentStatus": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PutCommittedLearnerRequest": {
+        "required": [
+          "paymentStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "commitmentId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "cost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "apprenticeshipId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paymentStatus": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PutImportJobStateRequest": {
+        "type": "object",
+        "properties": {
+          "lastSuccessfulImportDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastAttemptedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastAttemptSuccessful": {
+            "type": "boolean"
+          },
+          "totalRecordsLastRun": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedRecordsLastRun": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecalculateFundingProjectionResponse": {
+        "required": [
+          "totalRecordsProcessed",
+          "totalRecordsUpdated",
+          "totalRecordsInserted"
+        ],
+        "type": "object",
+        "properties": {
+          "totalRecordsProcessed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalRecordsUpdated": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalRecordsInserted": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ValidationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "FundingProjection"
+    },
+    {
+      "name": "Jobs"
+    },
+    {
+      "name": "Learner"
+    },
+    {
+      "name": "Ping"
+    }
+  ]
+}

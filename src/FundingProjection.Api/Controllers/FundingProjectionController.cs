@@ -5,6 +5,7 @@ using System.Net;
 using SFA.DAS.FundingProjection.Api.Core;
 using SFA.DAS.FundingProjection.Api.Models.Mappers;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
+using SFA.DAS.FundingProjection.Api.Projection;
 using SFA.DAS.FundingProjection.Data.Services;
 
 namespace SFA.DAS.FundingProjection.Api.Controllers;
@@ -20,18 +21,29 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
     public async Task<IResult> GetEmployerFundingProjection(
         [FromRoute] [Required] long accountId,
         [FromServices] IEmployerFundingProjectionRepository repository,
-        [FromQuery] int months = 12,
+        [FromQuery] int months = 6,
         CancellationToken token = default)
     {
         try
         {
             logger.LogInformation("Funding Projection API: Received query to get projection by accountId : {Id}", accountId);
 
-            var response = await repository.GetTotalCostByMonthsAsync(accountId, months, token);
-
+            var apprenticeshipSummaries = await repository.GetApprenticeshipSummariesAsync(accountId, months, DateTime.UtcNow);
+            var projections = CommitmentsProjector.CreateProjection(apprenticeshipSummaries, months);
+            
             return TypedResults.Ok(new GetEmployerFundingProjectionByAccountIdResponse
             {
-                FundingBreakdowns = [.. response.Select(x => x.ToGetResponse())]
+                FundingBreakdowns =
+                [
+                    .. projections.Select(x => new MonthlyFundingBreakdown
+                    {
+                        EmployerAccountId = accountId,
+                        Month = x.Period.Month,
+                        Year = x.Period.Year,
+                        CommittedLearnerCost = x.TotalMonthlyPayments,
+                        CommittedLearnerFinalPaymentCost = x.TotalFinalPayments,
+                    })
+                ]
             });
         }
         catch (Exception e)

@@ -12,7 +12,7 @@ public static class PaymentScheduleGenerator
         {
             ApprenticeshipStatus.Completed => CreateForCompletedApprenticeship(summary, now),
             ApprenticeshipStatus.Live => CreateForLiveApprenticeship(summary, now),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => new PaymentSchedule { ApprenticeshipId = summary.ApprenticeshipId }
         };
     }
 

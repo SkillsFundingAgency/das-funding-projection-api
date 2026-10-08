@@ -10,7 +10,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
     public void Then_An_Apprenticeship_That_Has_Just_Started_Produces_Scheduled_Payments_In_The_Future()
     {
         // arrange
-        var now = DateTime.UtcNow;
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         var summary = new ApprenticeshipPaymentSummaryEntity
         {
             ApprenticeshipId = 1,
@@ -46,7 +46,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
     public void Then_An_Apprenticeship_That_Started_A_Month_Ago_Has_Current_And_Future_Scheduled_Payments()
     {
         // arrange
-        var now = DateTime.UtcNow;
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         var summary = new ApprenticeshipPaymentSummaryEntity
         {
             ApprenticeshipId = 1,
@@ -82,7 +82,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
     public void Then_An_Apprenticeship_That_Ends_In_The_Current_Period_Produces_Only_The_Remaining_Payments()
     {
         // arrange
-        var now = DateTime.UtcNow;
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         var summary = new ApprenticeshipPaymentSummaryEntity
         {
             ApprenticeshipId = 1,

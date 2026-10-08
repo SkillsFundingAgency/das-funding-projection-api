@@ -14,6 +14,7 @@ public interface IFundingProjectionDataContext
     DbSet<CommittedLearnerEntity> CommittedLearners { get; }
     DbSet<CommittedTransferOutEntity> CommittedTransferOuts { get; }
     DbSet<EmployerFundingProjectionEntity> EmployerFundingProjections { get; }
+    DbSet<ApprenticeshipPaymentSummaryEntity> ApprenticeshipPaymentSummaries { get; }
     DatabaseFacade Database { get; }
     Task Ping(CancellationToken cancellationToken);
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
@@ -48,6 +49,7 @@ public class FundingProjectionDataContext : DbContext, IFundingProjectionDataCon
         modelBuilder.ApplyConfiguration(new CommittedTransferOutEntityConfiguration());
         modelBuilder.ApplyConfiguration(new EmployerFundingProjectionEntityConfiguration());
         modelBuilder.ApplyConfiguration(new ImportJobStateConfiguration());
+        modelBuilder.ApplyConfiguration(new ApprenticeshipPaymentSummaryEntityConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 
@@ -55,6 +57,7 @@ public class FundingProjectionDataContext : DbContext, IFundingProjectionDataCon
     public DbSet<CommittedLearnerEntity> CommittedLearners { get; set; }
     public DbSet<CommittedTransferOutEntity> CommittedTransferOuts { get; set; }
     public DbSet<EmployerFundingProjectionEntity> EmployerFundingProjections { get; set; }
+    public DbSet<ApprenticeshipPaymentSummaryEntity> ApprenticeshipPaymentSummaries { get; set; }
 
     public async Task Ping(CancellationToken cancellationToken)
     {

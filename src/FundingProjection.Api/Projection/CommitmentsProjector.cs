@@ -7,7 +7,7 @@ public class CommitmentsProjector
     public static List<CommittedLevyProjection> CreateProjection(List<ApprenticeshipPaymentSummaryEntity> apprenticeshipSummaries, int months)
     {
         var now = DateTime.UtcNow;
-        var startPeriod = now.ToPeriod(); 
+        var startPeriod = now.ToPeriod();
             
         var scheduledPayments = apprenticeshipSummaries
             .Select(PaymentScheduleGenerator.CreateFrom)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.FundingProjection.Data.Models;
 using SFA.DAS.FundingProjection.Domain.Entities;
+//using SFA.DAS.FundingProjection.Domain.Enums;
 
 namespace SFA.DAS.FundingProjection.Data.Repositories;
 
@@ -8,6 +9,7 @@ public interface IEmployerFundingProjectionRepository : IReadRepository<Employer
 {
     Task<List<EmployerFundingProjectionEntity>> GetByEmployerAccountIdAsync(long employerAccountId, int month, int year, CancellationToken cancellationToken);
     Task<List<EmployerFundingProjectionEntity>> GetTotalCostByMonthsAsync(long employerAccountId, int months = 12, CancellationToken cancellationToken = default);
+    Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipSummariesAsync(long accountId, int months, DateTime utcNow);
 }
 
 public class EmployerFundingProjectionRepository(IFundingProjectionDataContext context) : IEmployerFundingProjectionRepository
@@ -35,6 +37,69 @@ public class EmployerFundingProjectionRepository(IFundingProjectionDataContext c
             .OrderBy(x => x.CalendarPeriodYear)
             .ThenBy(x => x.CalendarPeriodMonth)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipSummariesAsync(long accountId, int months, DateTime utcNow)
+    {
+        return await context.ApprenticeshipPaymentSummaries.Where(x => x.AccountId == accountId).ToListAsync();
+        // return [
+        //     new ()
+        //     {
+        //         ApprenticeshipId = 1,
+        //         AccountId = 1,
+        //         TotalCost = 1000,
+        //         TotalPaid = 0,
+        //         StartDate = DateTime.UtcNow.AddMonths(-10),
+        //         EndDate = DateTime.UtcNow.AddMonths(-1),
+        //         Status = ApprenticeshipStatus.Live,
+        //     },
+        //     new () // start in current period
+        //     {
+        //         ApprenticeshipId = 2,
+        //         AccountId = 1,
+        //         TotalCost = 1500m,
+        //         TotalPaid = 0m,
+        //         StartDate = DateTime.UtcNow.AddMonths(0),
+        //         EndDate = DateTime.UtcNow.AddMonths(5),
+        //         Status = ApprenticeshipStatus.Live,
+        //     },
+        //     new () // started 1 month ago - early in current period so no payments made
+        //     {
+        //         ApprenticeshipId = 2,
+        //         AccountId = 1,
+        //         TotalCost = 1500m,
+        //         TotalPaid = 0m,
+        //         StartDate = DateTime.UtcNow.AddMonths(-1),
+        //         EndDate = DateTime.UtcNow.AddMonths(4),
+        //         LastPaymentDate = null,
+        //         LastPaymentAmount = 0m,
+        //         Status = ApprenticeshipStatus.Live,
+        //     },
+        //     new () // started 1 month ago - late in current period so payment made
+        //     {
+        //         ApprenticeshipId = 2,
+        //         AccountId = 1,
+        //         TotalCost = 1500m,
+        //         TotalPaid = 200m,
+        //         StartDate = DateTime.UtcNow.AddMonths(-1),
+        //         EndDate = DateTime.UtcNow.AddMonths(4),
+        //         LastPaymentDate = DateTime.UtcNow.AddMonths(0),
+        //         LastPaymentAmount = 200m,
+        //         Status = ApprenticeshipStatus.Live,
+        //     },
+        //     new () // started 1 month ago - late in current period so payment made
+        //     {
+        //         ApprenticeshipId = 2,
+        //         AccountId = 1,
+        //         TotalCost = 1500m,
+        //         TotalPaid = 200m,
+        //         StartDate = DateTime.UtcNow.AddMonths(-1),
+        //         EndDate = DateTime.UtcNow.AddMonths(4),
+        //         LastPaymentDate = DateTime.UtcNow.AddMonths(0),
+        //         LastPaymentAmount = 200m,
+        //         Status = ApprenticeshipStatus.Live,
+        //     }
+        // ];
     }
 
     public async Task<EmployerFundingProjectionEntity?> GetOneAsync(long key, CancellationToken cancellationToken)

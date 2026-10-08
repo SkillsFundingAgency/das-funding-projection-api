@@ -10,7 +10,7 @@ public class WhenCreatingPaymentScheduleForCompletedApprenticeship
     public void Then_An_Apprenticeship_That_Ended_Last_Month_Produces_The_Final_Payment_In_The_Current_Month()
     {
         // arrange
-        var now = DateTime.UtcNow;
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         var summary = new ApprenticeshipPaymentSummaryEntity
         {
             ApprenticeshipId = 1,
@@ -46,7 +46,7 @@ public class WhenCreatingPaymentScheduleForCompletedApprenticeship
          */
         
         // arrange
-        var now = DateTime.UtcNow;
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         var summary = new ApprenticeshipPaymentSummaryEntity
         {
             ApprenticeshipId = 1,
@@ -77,7 +77,7 @@ public class WhenCreatingPaymentScheduleForCompletedApprenticeship
     public void Then_An_Apprenticeship_Which_Completed_Two_Months_Ago_Produces_No_Scheduled_Payments()
     {
         // arrange
-        var now = DateTime.UtcNow;
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         var summary = new ApprenticeshipPaymentSummaryEntity
         {
             ApprenticeshipId = 1,

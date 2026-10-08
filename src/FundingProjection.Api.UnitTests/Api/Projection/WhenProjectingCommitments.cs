@@ -28,7 +28,7 @@ public class WhenProjectingCommitments
     public void Then_The_Specified_Number_Of_Periods_Should_Be_Returned_Even_If_The_Data_Extends_Beyond_The_Requested_Number()
     {
         // arrange
-        var now = DateTime.UtcNow;
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         List<ApprenticeshipPaymentSummaryEntity> summaries =
         [
             new()
@@ -62,7 +62,7 @@ public class WhenProjectingCommitments
     public void Then_The_Payments_Are_Returned_In_The_Periods()
     {
         // arrange
-        var now = DateTime.UtcNow;
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         List<ApprenticeshipPaymentSummaryEntity> summaries =
         [
             new()
@@ -92,7 +92,7 @@ public class WhenProjectingCommitments
     public void Then_The_Total_Payments_Are_Returned_In_The_Periods()
     {
         // arrange
-        var now = DateTime.UtcNow;
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         List<ApprenticeshipPaymentSummaryEntity> summaries =
         [
             new()

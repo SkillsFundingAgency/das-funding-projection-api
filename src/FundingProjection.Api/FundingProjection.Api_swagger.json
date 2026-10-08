@@ -28,7 +28,7 @@
               "pattern": "^-?(?:0|[1-9]\\d*)$",
               "type": "integer",
               "format": "int32",
-              "default": 12
+              "default": 6
             }
           },
           {
@@ -836,6 +836,11 @@
             "format": "int32"
           },
           "committedLearnerCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "committedLearnerFinalPaymentCost": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": "number",
             "format": "double"

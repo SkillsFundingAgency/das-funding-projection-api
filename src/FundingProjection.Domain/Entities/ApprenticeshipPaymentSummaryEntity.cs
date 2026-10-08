@@ -11,12 +11,16 @@ public class ApprenticeshipPaymentSummaryEntity
     public long ApprenticeshipId { get; set; }
     public long AccountId { get; set; }
     public long Uln { get; set; }
-    public DateTime Dob { get; set; }
+    public DateOnly? Dob { get; set; }
     public ApprenticeshipStatus Status { get; set; }
+    [Column(TypeName = "decimal(18,2)")]
     public decimal TotalCost { get; set; }
+    [Column(TypeName = "decimal(18,2)")]
     public decimal TotalPaid { get; set; }
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public DateTime? LastPaymentDate { get; set; }
+    public DateOnly StartDate { get; set; }
+    public DateOnly EndDate { get; set; }
+    public DateOnly? LastPaymentDate { get; set; }
+    [Column(TypeName = "decimal(18,2)")]
     public decimal? LastPaymentAmount { get; set; }
+    public DateTime? LastUpdatedDate { get; set; }
 }

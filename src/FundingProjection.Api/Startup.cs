@@ -33,7 +33,6 @@ internal class Startup
             .AddConfiguration(configuration)
             .AddAzureTableStorage(options =>
             {
-                options.ConfigurationNameIncludesVersionNumber = true;
                 options.ConfigurationKeys = configuration["ConfigNames"]!.Split(",");
                 options.EnvironmentName = _environmentName;
                 options.PreFixConfigurationKeys = false;

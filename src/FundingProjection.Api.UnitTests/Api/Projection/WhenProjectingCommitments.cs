@@ -10,7 +10,8 @@ public class WhenProjectingCommitments
     public void Then_The_Specified_Number_Of_Periods_Should_Be_Returned_Regardless_Of_No_Input_Data()
     {
         // act
-        var results = CommitmentsProjector.CreateProjection([], 6);
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
+        var results = CommitmentsProjector.CreateProjection(now, 6, []);
 
         // assert
         results.Should().HaveCount(6);
@@ -46,7 +47,7 @@ public class WhenProjectingCommitments
         ];
         
         // act
-        var results = CommitmentsProjector.CreateProjection(summaries, 3);
+        var results = CommitmentsProjector.CreateProjection(now, 3, summaries);
 
         // assert
         results.Should().HaveCount(3);
@@ -80,7 +81,7 @@ public class WhenProjectingCommitments
         ];
         
         // act
-        var results = CommitmentsProjector.CreateProjection(summaries, 3);
+        var results = CommitmentsProjector.CreateProjection(now, 3, summaries);
 
         // assert
         results.Should().HaveCount(3);
@@ -134,7 +135,7 @@ public class WhenProjectingCommitments
         ];
         
         // act
-        var results = CommitmentsProjector.CreateProjection(summaries, 3);
+        var results = CommitmentsProjector.CreateProjection(now, 3, summaries);
 
         // assert
         results.Should().HaveCount(3);

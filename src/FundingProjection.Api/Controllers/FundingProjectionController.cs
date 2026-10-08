@@ -28,14 +28,15 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         {
             logger.LogInformation("Funding Projection API: Received query to get projection by accountId : {Id}", accountId);
 
-            var apprenticeshipSummaries = await repository.GetApprenticeshipSummariesAsync(accountId, months, DateTime.UtcNow);
-            var projections = CommitmentsProjector.CreateProjection(apprenticeshipSummaries, months);
+            var now = DateOnly.FromDateTime(DateTime.UtcNow);
+            var apprenticeshipSummaries = await repository.GetApprenticeshipSummariesAsync(accountId);
+            var commitmentProjections = CommitmentsProjector.CreateProjection(now, months, apprenticeshipSummaries);
             
             return TypedResults.Ok(new GetEmployerFundingProjectionByAccountIdResponse
             {
                 FundingBreakdowns =
                 [
-                    .. projections.Select(x => new MonthlyFundingBreakdown
+                    .. commitmentProjections.Select(x => new MonthlyFundingBreakdown
                     {
                         EmployerAccountId = accountId,
                         Month = x.Period.Month,

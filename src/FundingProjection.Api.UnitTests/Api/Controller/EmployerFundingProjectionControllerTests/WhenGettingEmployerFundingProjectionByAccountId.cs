@@ -24,7 +24,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         // arrange
         const int months = 8;
         repository
-            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId, months, It.IsAny<DateTime>()))
+            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId))
             .ReturnsAsync([]);
 
         // act
@@ -52,7 +52,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         // arrange
         const int months = 8;
         repository
-            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId, months, It.IsAny<DateTime>()))
+            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId))
             .ThrowsAsync(new Exception());
 
         // act

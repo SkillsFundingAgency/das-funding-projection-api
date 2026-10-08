@@ -4,11 +4,9 @@ namespace SFA.DAS.FundingProjection.Api.Projection;
 
 public class CommitmentsProjector
 {
-    public static List<CommittedLevyProjection> CreateProjection(List<ApprenticeshipPaymentSummaryEntity> apprenticeshipSummaries, int months)
+    public static List<CommittedLevyProjection> CreateProjection(DateOnly now, int months, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipSummaries)
     {
-        var now = DateTime.UtcNow;
         var startPeriod = now.ToPeriod();
-            
         var scheduledPayments = apprenticeshipSummaries
             .Select(PaymentScheduleGenerator.CreateFrom)
             .SelectMany(x => x.ScheduledPayments);

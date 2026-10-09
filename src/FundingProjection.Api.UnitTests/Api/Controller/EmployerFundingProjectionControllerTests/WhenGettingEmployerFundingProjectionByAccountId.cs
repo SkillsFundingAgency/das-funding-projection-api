@@ -38,6 +38,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         result.Value.Projections.Should().HaveCount(request.Months);
         result.Value.Projections.Should().AllSatisfy(x => {
             x.EmployerAccountId.Should().Be(accountId);
+            x.OpeningBalance.Should().Be(0);
             x.CommittedLearnerCost.Should().Be(0);
             x.CommittedLearnerFinalPaymentCost.Should().Be(0);
             x.CommittedTransferOut.Should().Be(0);

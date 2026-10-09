@@ -7,8 +7,14 @@ public static class EstimatesTimelineExtensions
 {
     extension(EstimatesTimeline)
     {
-        public static EstimatesTimeline From(long accountId, DateOnly startPeriod, int months, List<CommittedLevyProjection> commitmentProjections, List<LevyInMonthSummary> levyInProjections)
+        public static EstimatesTimeline From(
+            long accountId,
+            DateOnly startPeriod,
+            int months,
+            decimal openingBalance,
+            List<CommittedLevyProjection> commitmentProjections, List<LevyInMonthSummary> levyInProjections)
         {
+            var cumulativeBalance = openingBalance;
             var currentPeriod = startPeriod;
             var estimates = new List<MonthlyFundingBreakdown>();
             for (var i = 0; i < months; i++)
@@ -20,11 +26,16 @@ public static class EstimatesTimelineExtensions
                     EmployerAccountId = accountId,
                     Month = currentPeriod.Month,
                     Year = currentPeriod.Year,
+                    OpeningBalance = cumulativeBalance,
                     CommittedLearnerCost = commitment?.TotalMonthlyPayments ?? 0m,
                     CommittedLearnerFinalPaymentCost = commitment?.TotalFinalPayments ?? 0m,
                     CommittedTransferOut = 0m,
                     LevyIn = levyIn?.Amount ?? 0m
                 };
+                cumulativeBalance += estimate.LevyIn;
+                cumulativeBalance -= estimate.CommittedLearnerCost;
+                cumulativeBalance -= estimate.CommittedLearnerFinalPaymentCost;
+                cumulativeBalance -= estimate.CommittedTransferOut;
                 currentPeriod = currentPeriod.AddMonths(1);
                 estimates.Add(estimate);
             }

@@ -31,7 +31,13 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         var commitmentProjections = CommitmentsProjector.CreateProjection(now, request.Months, apprenticeshipSummaries);
         var levyInProjections = LevyInProjector.CreateProjection(now, request.Months, request.HistoricLevyIn);
 
-        var timeline = EstimatesTimeline.From(accountId, now, request.Months, commitmentProjections, levyInProjections);
+        var timeline = EstimatesTimeline.From(
+            accountId,
+            now,
+            request.Months,
+            0m,
+            commitmentProjections,
+            levyInProjections);
         return TypedResults.Ok(timeline);
     }
 

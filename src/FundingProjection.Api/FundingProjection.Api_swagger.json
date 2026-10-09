@@ -6,7 +6,7 @@
   },
   "paths": {
     "/api/employer/{accountId}/funding-projection": {
-      "get": {
+      "post": {
         "tags": [
           "FundingProjection"
         ],
@@ -22,42 +22,49 @@
             }
           },
           {
-            "name": "months",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32",
-              "default": 6
-            }
-          },
-          {
             "name": "X-Version",
             "in": "header",
             "required": true,
             "example": "1.0"
           }
         ],
-        "responses": {
-          "500": {
-            "description": "Internal Server Error"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostEmployerFundingProjectionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostEmployerFundingProjectionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostEmployerFundingProjectionRequest"
+              }
+            }
           },
+          "required": true
+        },
+        "responses": {
           "200": {
             "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
+                  "$ref": "#/components/schemas/EstimatesTimeline"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
+                  "$ref": "#/components/schemas/EstimatesTimeline"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
+                  "$ref": "#/components/schemas/EstimatesTimeline"
                 }
               }
             }
@@ -691,6 +698,23 @@
   },
   "components": {
     "schemas": {
+      "EstimatesTimeline": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "projections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyFundingBreakdown"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
       "GetCommittedLearnerResponse": {
         "required": [
           "paymentStatus",
@@ -745,18 +769,6 @@
           },
           "importStatus": {
             "$ref": "#/components/schemas/ImportStatus"
-          }
-        },
-        "additionalProperties": false
-      },
-      "GetEmployerFundingProjectionByAccountIdResponse": {
-        "type": "object",
-        "properties": {
-          "fundingBreakdowns": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MonthlyFundingBreakdown"
-            }
           }
         },
         "additionalProperties": false
@@ -817,6 +829,25 @@
         ],
         "type": "string"
       },
+      "LevyInMonthSummary": {
+        "required": [
+          "period",
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "format": "date"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "MonthlyFundingBreakdown": {
         "type": "object",
         "properties": {
@@ -846,6 +877,11 @@
             "format": "double"
           },
           "committedTransferOut": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "levyIn": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": "number",
             "format": "double"
@@ -891,6 +927,23 @@
           },
           "paymentStatus": {
             "$ref": "#/components/schemas/PaymentStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PostEmployerFundingProjectionRequest": {
+        "type": "object",
+        "properties": {
+          "months": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          },
+          "historicLevyIn": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LevyInMonthSummary"
+            }
           }
         },
         "additionalProperties": false

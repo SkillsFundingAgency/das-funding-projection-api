@@ -6,7 +6,7 @@ namespace SFA.DAS.FundingProjection.Api.UnitTests.Api.Projection;
 
 public class WhenProjectingCommitments
 {
-    [Test, MoqAutoData]
+    [Test]
     public void Then_The_Specified_Number_Of_Periods_Should_Be_Returned_Regardless_Of_No_Input_Data()
     {
         // act
@@ -25,7 +25,7 @@ public class WhenProjectingCommitments
         }
     }
     
-    [Test, MoqAutoData]
+    [Test]
     public void Then_The_Specified_Number_Of_Periods_Should_Be_Returned_Even_If_The_Data_Extends_Beyond_The_Requested_Number()
     {
         // arrange
@@ -59,7 +59,7 @@ public class WhenProjectingCommitments
         }
     }
     
-    [Test, MoqAutoData]
+    [Test]
     public void Then_The_Payments_Are_Returned_In_The_Periods()
     {
         // arrange
@@ -89,7 +89,7 @@ public class WhenProjectingCommitments
         results[^1].TotalFinalPayments.Should().Be(75m);
     }
     
-    [Test, MoqAutoData]
+    [Test]
     public void Then_The_Total_Payments_Are_Returned_In_The_Periods()
     {
         // arrange

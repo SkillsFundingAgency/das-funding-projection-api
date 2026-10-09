@@ -6,7 +6,7 @@ namespace SFA.DAS.FundingProjection.Api.UnitTests.Api.Projection;
 
 public class WhenCreatingPaymentScheduleForCompletedApprenticeship
 {
-    [Test, MoqAutoData]
+    [Test]
     public void Then_An_Apprenticeship_That_Ended_Last_Month_Produces_The_Final_Payment_In_The_Current_Month()
     {
         // arrange
@@ -37,7 +37,7 @@ public class WhenCreatingPaymentScheduleForCompletedApprenticeship
         result.ScheduledPayments[0].PaymentPeriod.Should().Be(now.ToPeriod());
     }
     
-    [Test, MoqAutoData]
+    [Test]
     public void Then_An_Apprenticeship_Which_Completed_Last_Month_Produces_A_Scheduled_Payment_Even_Though_It_Has_Already_Been_Paid()
     {
         /*
@@ -73,7 +73,7 @@ public class WhenCreatingPaymentScheduleForCompletedApprenticeship
         result.ScheduledPayments[0].PaymentPeriod.Should().Be(now.ToPeriod());
     }
     
-    [Test, MoqAutoData]
+    [Test]
     public void Then_An_Apprenticeship_Which_Completed_Two_Months_Ago_Produces_No_Scheduled_Payments()
     {
         // arrange

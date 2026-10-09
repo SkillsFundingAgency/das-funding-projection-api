@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using SFA.DAS.FundingProjection.Api.Core;
 using SFA.DAS.FundingProjection.Api.Models.Mappers;
+using SFA.DAS.FundingProjection.Api.Models.Requests;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Api.Projection;
 using SFA.DAS.FundingProjection.Data.Services;
@@ -14,44 +15,24 @@ namespace SFA.DAS.FundingProjection.Api.Controllers;
 [Route($"{RouteNames.EmployerFundingProjection}")]
 public class FundingProjectionController(ILogger<FundingProjectionController> logger) : ControllerBase
 {
-    [HttpGet]
+    [HttpPost]
     [Route($"{{accountId:long}}/{RouteElements.FundingProjection}")]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [ProducesResponseType(typeof(GetEmployerFundingProjectionByAccountIdResponse), StatusCodes.Status200OK)]
-    public async Task<IResult> GetEmployerFundingProjection(
-        [FromRoute] [Required] long accountId,
+    [ProducesResponseType(typeof(EstimatesTimeline), StatusCodes.Status200OK)]
+    public async Task<IResult> PostEmployerFundingProjection(
         [FromServices] IEmployerFundingProjectionRepository repository,
-        [FromQuery] int months = 6,
+        [FromRoute] [Required] long accountId,
+        [FromBody] PostEmployerFundingProjectionRequest request,
         CancellationToken token = default)
     {
-        try
-        {
-            logger.LogInformation("Funding Projection API: Received query to get projection by accountId : {Id}", accountId);
+        logger.LogInformation("Funding Projection API: Received query to get projection by accountId : {Id}", accountId);
+        var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
+        
+        var apprenticeshipSummaries = await repository.GetApprenticeshipSummariesAsync(accountId);
+        var commitmentProjections = CommitmentsProjector.CreateProjection(now, request.Months, apprenticeshipSummaries);
+        var levyInProjections = LevyInProjector.CreateProjection(now, request.Months, request.HistoricLevyIn);
 
-            var now = DateOnly.FromDateTime(DateTime.UtcNow);
-            var apprenticeshipSummaries = await repository.GetApprenticeshipSummariesAsync(accountId);
-            var commitmentProjections = CommitmentsProjector.CreateProjection(now, months, apprenticeshipSummaries);
-            
-            return TypedResults.Ok(new GetEmployerFundingProjectionByAccountIdResponse
-            {
-                FundingBreakdowns =
-                [
-                    .. commitmentProjections.Select(x => new MonthlyFundingBreakdown
-                    {
-                        EmployerAccountId = accountId,
-                        Month = x.Period.Month,
-                        Year = x.Period.Year,
-                        CommittedLearnerCost = x.TotalMonthlyPayments,
-                        CommittedLearnerFinalPaymentCost = x.TotalFinalPayments,
-                    })
-                ]
-            });
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Unable to Get funding projection : An error occurred");
-            return Results.Problem(statusCode: (int)HttpStatusCode.InternalServerError);
-        }
+        var timeline = EstimatesTimeline.From(accountId, now, request.Months, commitmentProjections, levyInProjections);
+        return TypedResults.Ok(timeline);
     }
 
     [HttpPost]

@@ -8,4 +8,5 @@ public sealed record MonthlyFundingBreakdown
     public decimal CommittedLearnerCost { get; init; }
     public decimal CommittedLearnerFinalPaymentCost { get; init; }
     public decimal CommittedTransferOut { get; init; }
+    public decimal LevyIn { get; init; }
 }

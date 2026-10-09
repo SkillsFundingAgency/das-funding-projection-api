@@ -1,13 +1,9 @@
-﻿using AutoFixture.NUnit4;
-using FluentAssertions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Moq;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using SFA.DAS.FundingProjection.Api.Controllers;
-using SFA.DAS.FundingProjection.Api.Models.Mappers;
+using SFA.DAS.FundingProjection.Api.Models.Requests;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Entities;
-using SFA.DAS.Testing.AutoFixture;
 
 namespace SFA.DAS.FundingProjection.Api.UnitTests.Api.Controller.EmployerFundingProjectionControllerTests;
 
@@ -22,43 +18,30 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         CancellationToken token)
     {
         // arrange
-        const int months = 8;
         repository
             .Setup(x => x.GetApprenticeshipSummariesAsync(accountId))
             .ReturnsAsync([]);
+        
+        var request = new PostEmployerFundingProjectionRequest()
+        {
+            Months = 8,
+            HistoricLevyIn = []
+        };
 
         // act
-        var result = await controller.GetEmployerFundingProjection(accountId, repository.Object, months, token) as Ok<GetEmployerFundingProjectionByAccountIdResponse>;
+        var result = await controller.PostEmployerFundingProjection(repository.Object, accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
         result.Value.Should().NotBeNull();
-        result.Value.FundingBreakdowns.Should().HaveCount(months);
-        result.Value.FundingBreakdowns.Should().AllSatisfy(x => {
+        result.Value.AccountId.Should().Be(accountId);
+        result.Value.Projections.Should().HaveCount(request.Months);
+        result.Value.Projections.Should().AllSatisfy(x => {
             x.EmployerAccountId.Should().Be(accountId);
             x.CommittedLearnerCost.Should().Be(0);
             x.CommittedLearnerFinalPaymentCost.Should().Be(0);
             x.CommittedTransferOut.Should().Be(0);
+            x.LevyIn.Should().Be(0);
         });
-    }
-
-    [Test, RecursiveMoqAutoData]
-    public async Task Then_A_Problem_Is_Returned_If_An_Exception_Occurs(long accountId,
-        List<EmployerFundingProjectionEntity> mockResponse,
-        [Frozen] Mock<IEmployerFundingProjectionRepository> repository,
-        [Greedy] FundingProjectionController controller,
-        CancellationToken token)
-    {
-        // arrange
-        const int months = 8;
-        repository
-            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId))
-            .ThrowsAsync(new Exception());
-
-        // act
-        var result = await controller.GetEmployerFundingProjection(accountId, repository.Object, months, token);
-
-        // assert
-        result.Should().BeOfType<ProblemHttpResult>();
     }
 }

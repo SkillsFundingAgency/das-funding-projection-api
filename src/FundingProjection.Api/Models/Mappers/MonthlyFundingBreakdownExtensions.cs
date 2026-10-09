@@ -20,22 +20,28 @@ public static class EstimatesTimelineExtensions
             for (var i = 0; i < months; i++)
             {
                 var commitment = commitmentProjections.FirstOrDefault(c => c.Period == currentPeriod);
-                var levyIn = levyInProjections.FirstOrDefault(l => l.Period == currentPeriod);
+                var levyIn = levyInProjections.FirstOrDefault(l => l.Period == currentPeriod)?.Amount ?? 0m;
+                var committedLearnerCost = commitment?.TotalMonthlyPayments ?? 0m;
+                var committedLearnerFinalPaymentCost = commitment?.TotalFinalPayments ?? 0m;
+                var committedTransferOut = 0m;
+                
+                cumulativeBalance += levyIn;
+                cumulativeBalance -= committedLearnerCost;
+                cumulativeBalance -= committedLearnerFinalPaymentCost;
+                cumulativeBalance -= committedTransferOut;
+                
                 var estimate = new MonthlyFundingBreakdown
                 {
                     EmployerAccountId = accountId,
                     Month = currentPeriod.Month,
                     Year = currentPeriod.Year,
-                    OpeningBalance = cumulativeBalance,
-                    CommittedLearnerCost = commitment?.TotalMonthlyPayments ?? 0m,
-                    CommittedLearnerFinalPaymentCost = commitment?.TotalFinalPayments ?? 0m,
-                    CommittedTransferOut = 0m,
-                    LevyIn = levyIn?.Amount ?? 0m
+                    CommittedLearnerCost = committedLearnerCost,
+                    CommittedLearnerFinalPaymentCost = committedLearnerFinalPaymentCost,
+                    CommittedTransferOut = committedTransferOut,
+                    LevyIn = levyIn,
+                    ClosingBalance = cumulativeBalance,
                 };
-                cumulativeBalance += estimate.LevyIn;
-                cumulativeBalance -= estimate.CommittedLearnerCost;
-                cumulativeBalance -= estimate.CommittedLearnerFinalPaymentCost;
-                cumulativeBalance -= estimate.CommittedTransferOut;
+                
                 currentPeriod = currentPeriod.AddMonths(1);
                 estimates.Add(estimate);
             }

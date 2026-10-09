@@ -866,7 +866,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "openingBalance": {
+          "closingBalance": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": "number",
             "format": "double"

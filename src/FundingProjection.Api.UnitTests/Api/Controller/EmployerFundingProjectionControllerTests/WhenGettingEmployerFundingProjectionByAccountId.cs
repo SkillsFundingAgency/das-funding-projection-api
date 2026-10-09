@@ -3,7 +3,6 @@ using SFA.DAS.FundingProjection.Api.Controllers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Data.Repositories;
-using SFA.DAS.FundingProjection.Domain.Entities;
 
 namespace SFA.DAS.FundingProjection.Api.UnitTests.Api.Controller.EmployerFundingProjectionControllerTests;
 
@@ -38,7 +37,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         result.Value.Projections.Should().HaveCount(request.Months);
         result.Value.Projections.Should().AllSatisfy(x => {
             x.EmployerAccountId.Should().Be(accountId);
-            x.OpeningBalance.Should().Be(0);
+            x.ClosingBalance.Should().Be(0);
             x.CommittedLearnerCost.Should().Be(0);
             x.CommittedLearnerFinalPaymentCost.Should().Be(0);
             x.CommittedTransferOut.Should().Be(0);

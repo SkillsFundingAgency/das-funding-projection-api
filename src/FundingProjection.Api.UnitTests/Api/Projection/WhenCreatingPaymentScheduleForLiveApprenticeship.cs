@@ -6,7 +6,7 @@ namespace SFA.DAS.FundingProjection.Api.UnitTests.Api.Projection;
 
 public class WhenCreatingPaymentScheduleForLiveApprenticeship
 {
-    [Test, MoqAutoData]
+    [Test]
     public void Then_An_Apprenticeship_That_Has_Just_Started_Produces_Scheduled_Payments_In_The_Future()
     {
         // arrange
@@ -42,7 +42,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
         }
     }
     
-    [Test, MoqAutoData]
+    [Test]
     public void Then_An_Apprenticeship_That_Started_A_Month_Ago_Has_Current_And_Future_Scheduled_Payments()
     {
         // arrange
@@ -78,7 +78,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
         }
     }
     
-    [Test, MoqAutoData]
+    [Test]
     public void Then_An_Apprenticeship_That_Ends_In_The_Current_Period_Produces_Only_The_Remaining_Payments()
     {
         // arrange

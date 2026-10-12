@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SFA.DAS.FundingProjection.Data.Repositories;
-using System.ComponentModel.DataAnnotations;
-using System.Net;
 using SFA.DAS.FundingProjection.Api.Core;
 using SFA.DAS.FundingProjection.Api.Models.Mappers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Api.Projection;
-using SFA.DAS.FundingProjection.Data.Services;
+using SFA.DAS.FundingProjection.Data.Repositories;
+using System.ComponentModel.DataAnnotations;
 
 namespace SFA.DAS.FundingProjection.Api.Controllers;
 
@@ -39,30 +37,5 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             commitmentProjections,
             levyInProjections);
         return TypedResults.Ok(timeline);
-    }
-
-    [HttpPost]
-    [Route($"{RouteElements.FundingProjection}/re-calculate")]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(RecalculateFundingProjectionResponse), StatusCodes.Status200OK)]
-    public async Task<IResult> RecalculateFundingProjection(
-        [FromBody] DateTime cutOffDateTime,
-        [FromServices] IFundingProjectionServices fundingProjectionServices,
-        CancellationToken token)
-    {
-        try
-        {
-            logger.LogInformation("Funding Projection API: Received request to re-calculate projection");
-
-            var result = await fundingProjectionServices.UpdateProjection(cutOffDateTime, token);
-
-            return Results.Ok(result.ToRecalculateFundingProjectionResponse());
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Unable to re-calculate funding projection : An error occurred");
-            return Results.Problem(statusCode: (int)HttpStatusCode.InternalServerError);
-        }
     }
 }

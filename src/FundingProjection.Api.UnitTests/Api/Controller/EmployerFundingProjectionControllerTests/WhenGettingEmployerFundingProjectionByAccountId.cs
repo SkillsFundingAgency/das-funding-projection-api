@@ -38,10 +38,10 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         result.Value.Projections.Should().AllSatisfy(x => {
             x.EmployerAccountId.Should().Be(accountId);
             x.ClosingBalance.Should().Be(0);
-            x.CommittedLearnerCost.Should().Be(0);
-            x.CommittedLearnerFinalPaymentCost.Should().Be(0);
-            x.CommittedTransferOut.Should().Be(0);
-            x.LevyIn.Should().Be(0);
+            x.LevyOutSummary.CommittedLearnerCost.Should().Be(0);
+            x.LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(0);
+            x.LevyOutSummary.CommittedTransferOut.Should().Be(0);
+            x.LevyInSummary.LevyIn.Should().Be(0);
         });
     }
 }

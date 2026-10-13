@@ -6,8 +6,21 @@ public sealed record MonthlyFundingBreakdown
     public int Month { get; init; }
     public int Year { get; init; }
     public decimal ClosingBalance { get; set; }
-    public decimal CommittedLearnerCost { get; init; }
-    public decimal CommittedLearnerFinalPaymentCost { get; init; }
-    public decimal CommittedTransferOut { get; init; }
-    public decimal LevyIn { get; init; }
+    public required LevyInSummary LevyInSummary { get; init; }
+    public required LevyOutSummary LevyOutSummary { get; init; }
+}
+
+public sealed record LevyOutSummary
+{
+    public decimal Total => CommittedLearnerCost + CommittedLearnerFinalPaymentCost + CommittedTransferOut + ExpiredLevy;
+    public decimal CommittedLearnerCost { get; init; } = 0m;
+    public decimal CommittedLearnerFinalPaymentCost { get; init; } = 0m;
+    public decimal CommittedTransferOut { get; init; } = 0m;
+    public decimal ExpiredLevy { get; init; } = 0m;
+}
+
+public sealed record LevyInSummary
+{
+    public decimal Total => LevyIn;
+    public decimal LevyIn { get; init; } = 0m;
 }

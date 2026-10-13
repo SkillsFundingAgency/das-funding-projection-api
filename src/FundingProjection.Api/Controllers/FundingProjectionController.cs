@@ -24,15 +24,15 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
     {
         logger.LogInformation("Funding Projection API: Received query to get projection by accountId : {Id}", accountId);
         var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
-        
+        var cappedMonths = Math.Min(request.Months, 120);
         var apprenticeshipSummaries = await repository.GetApprenticeshipSummariesAsync(accountId);
-        var commitmentProjections = CommitmentsProjector.CreateProjection(now, request.Months, apprenticeshipSummaries);
-        var levyInProjections = LevyInProjector.CreateProjection(now, request.Months, request.HistoricLevyIn);
+        var commitmentProjections = CommitmentsProjector.CreateProjection(now, cappedMonths, apprenticeshipSummaries);
+        var levyInProjections = LevyInProjector.CreateProjection(now, cappedMonths, request.HistoricLevyIn);
 
         var timeline = EstimatesTimeline.From(
             accountId,
             now,
-            request.Months,
+            cappedMonths,
             0m,
             commitmentProjections,
             levyInProjections);

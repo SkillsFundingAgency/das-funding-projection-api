@@ -371,7 +371,58 @@
         },
         "additionalProperties": false
       },
+      "LevyInSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "levyIn": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LevyOutSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "committedLearnerCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "committedLearnerFinalPaymentCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "committedTransferOut": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "expiredLevy": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "MonthlyFundingBreakdown": {
+        "required": [
+          "levyInSummary",
+          "levyOutSummary"
+        ],
         "type": "object",
         "properties": {
           "employerAccountId": {
@@ -394,25 +445,11 @@
             "type": "number",
             "format": "double"
           },
-          "committedLearnerCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": "number",
-            "format": "double"
+          "levyInSummary": {
+            "$ref": "#/components/schemas/LevyInSummary"
           },
-          "committedLearnerFinalPaymentCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": "number",
-            "format": "double"
-          },
-          "committedTransferOut": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": "number",
-            "format": "double"
-          },
-          "levyIn": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": "number",
-            "format": "double"
+          "levyOutSummary": {
+            "$ref": "#/components/schemas/LevyOutSummary"
           }
         },
         "additionalProperties": false

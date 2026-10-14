@@ -7,6 +7,7 @@ using SFA.DAS.Api.Common.Infrastructure;
 using SFA.DAS.Api.Common.Middleware;
 using SFA.DAS.Configuration.AzureTableStorage;
 using SFA.DAS.FundingProjection.Api.AppStart;
+using SFA.DAS.FundingProjection.Api.NServiceBus;
 using SFA.DAS.FundingProjection.Data;
 using SFA.DAS.FundingProjection.Domain.Configuration;
 using System.Diagnostics.CodeAnalysis;
@@ -95,7 +96,6 @@ internal class Startup
             });
 
         services.AddApplicationDependencies();
-        services.AddServiceRegistration();
         services.AddDatabaseRegistration(connectionStrings!, Configuration["EnvironmentName"]);
         services.AddOpenTelemetryRegistration(Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]!);
         services.ConfigureHealthChecks();
@@ -158,5 +158,10 @@ internal class Startup
             endpoints.MapOpenApi();
             endpoints.MapControllers();
         });
+    }
+
+    public void ConfigureContainer(UpdateableServiceProvider serviceProvider)
+    {
+        serviceProvider.StartNServiceBus(Configuration);
     }
 }

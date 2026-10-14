@@ -1,7 +1,8 @@
 ﻿CREATE TABLE dbo.[ApprenticeshipPaymentSummaries]
 (
     [ApprenticeshipId]   BIGINT         NOT NULL,
-    [AccountId]          BIGINT         NOT NULL,
+    [AccountId]          BIGINT         NOT NULL,   -- the account whose levy funds the apprenticeship
+    [IsTransfer]         BIT            NOT NULL DEFAULT 0,   -- 1 = AccountId funds another employer's apprentice via a levy transfer
     [Uln]                BIGINT         NOT NULL,
     [Dob]                DATE           NULL,
     [Status]             NVARCHAR(30)   NOT NULL,

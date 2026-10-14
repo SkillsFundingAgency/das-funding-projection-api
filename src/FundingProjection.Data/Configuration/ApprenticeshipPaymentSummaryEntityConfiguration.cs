@@ -22,6 +22,12 @@ public class ApprenticeshipPaymentSummaryEntityConfiguration: IEntityTypeConfigu
             .HasColumnType("BIGINT")
             .IsRequired();
 
+        builder.Property(x => x.IsTransfer)
+            .HasColumnName("IsTransfer")
+            .HasColumnType("BIT")
+            .HasDefaultValue(false)
+            .IsRequired();
+
         builder.Property(x => x.Uln)
             .HasColumnName("Uln")
             .HasColumnType("BIGINT")

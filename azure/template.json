@@ -91,7 +91,7 @@
         "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
         "databaseName": "[concat(replace(variables('resourceNamePrefix'), 'api', ''), '-db')]",
         "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]",
-        "configNames": "SFA.DAS.FundingProjection.Api_1.0"
+        "configNames": "SFA.DAS.FundingProjection.Api"
     },
     "resources": [
         {

@@ -14,12 +14,12 @@ internal class WhenGettingApprenticeshipSummariesAsync
         long accountId,
         CancellationToken token,
         [Frozen] Mock<IFundingProjectionDataContext> context,
-        [Greedy] EmployerFundingProjectionRepository repository)
+        [Greedy] ApprenticeshipPaymentSummariesRepository repository)
     {
         context.Setup(x => x.ApprenticeshipPaymentSummaries)
             .ReturnsDbSet(new List<ApprenticeshipPaymentSummaryEntity>());
 
-        var actual = await repository.GetApprenticeshipSummariesAsync(accountId, token);
+        var actual = await repository.GetApprenticeshipPaymentSummariesAsync(accountId, token);
 
         actual.Should().BeEmpty();
     }
@@ -30,12 +30,12 @@ internal class WhenGettingApprenticeshipSummariesAsync
         CancellationToken token,
         List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaryEntities,
         [Frozen] Mock<IFundingProjectionDataContext> context,
-        [Greedy] EmployerFundingProjectionRepository repository)
+        [Greedy] ApprenticeshipPaymentSummariesRepository repository)
     {
         context.Setup(x => x.ApprenticeshipPaymentSummaries)
             .ReturnsDbSet(apprenticeshipPaymentSummaryEntities);
 
-        var actual = await repository.GetApprenticeshipSummariesAsync(accountId, token);
+        var actual = await repository.GetApprenticeshipPaymentSummariesAsync(accountId, token);
 
         actual.Should().BeEmpty();
     }
@@ -46,7 +46,7 @@ internal class WhenGettingApprenticeshipSummariesAsync
         CancellationToken token,
         List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaryEntities,
         [Frozen] Mock<IFundingProjectionDataContext> context,
-        [Greedy] EmployerFundingProjectionRepository repository)
+        [Greedy] ApprenticeshipPaymentSummariesRepository repository)
     {
         foreach (var entity in apprenticeshipPaymentSummaryEntities)
         {
@@ -54,7 +54,7 @@ internal class WhenGettingApprenticeshipSummariesAsync
         }
         context.Setup(x => x.ApprenticeshipPaymentSummaries)
             .ReturnsDbSet(apprenticeshipPaymentSummaryEntities);
-        var actual = await repository.GetApprenticeshipSummariesAsync(accountId, token);
+        var actual = await repository.GetApprenticeshipPaymentSummariesAsync(accountId, token);
         actual.Should().BeEquivalentTo(apprenticeshipPaymentSummaryEntities);
     }
 }

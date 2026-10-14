@@ -3,6 +3,7 @@ using SFA.DAS.FundingProjection.Data;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Configuration;
 using System.Diagnostics.CodeAnalysis;
+using SFA.DAS.FundingProjection.Domain.Services;
 
 namespace SFA.DAS.FundingProjection.Api.AppStart;
 
@@ -41,6 +42,12 @@ public static class AddServiceRegistrationExtension
 
         services.AddScoped<IEmployerFundingProjectionRepository, EmployerFundingProjectionRepository>();
         services.AddScoped<IImportJobStateRepository, ImportJobStateRepository>();
+        services.AddScoped<IApprenticeshipPaymentSummariesRepository, ApprenticeshipPaymentSummariesRepository>();
+    }
+
+    public static void AddServiceRegistration(this IServiceCollection services)
+    {
+        services.AddSingleton<IEventService, EventService>();
     }
 
     public static void ConfigureHealthChecks(this IServiceCollection services)

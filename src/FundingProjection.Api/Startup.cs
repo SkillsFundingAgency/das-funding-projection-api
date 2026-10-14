@@ -1,15 +1,16 @@
-﻿using Microsoft.Extensions.Options;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
+﻿using Asp.Versioning;
+using Microsoft.Extensions.Options;
+using NServiceBus.ObjectBuilder.MSDependencyInjection;
 using SFA.DAS.Api.Common.AppStart;
 using SFA.DAS.Api.Common.Configuration;
 using SFA.DAS.Api.Common.Infrastructure;
 using SFA.DAS.Api.Common.Middleware;
 using SFA.DAS.Configuration.AzureTableStorage;
-using Asp.Versioning;
 using SFA.DAS.FundingProjection.Api.AppStart;
 using SFA.DAS.FundingProjection.Data;
 using SFA.DAS.FundingProjection.Domain.Configuration;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace SFA.DAS.FundingProjection.Api;
 
@@ -94,6 +95,7 @@ internal class Startup
             });
 
         services.AddApplicationDependencies();
+        services.AddServiceRegistration();
         services.AddDatabaseRegistration(connectionStrings!, Configuration["EnvironmentName"]);
         services.AddOpenTelemetryRegistration(Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]!);
         services.ConfigureHealthChecks();

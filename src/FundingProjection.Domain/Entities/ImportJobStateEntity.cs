@@ -11,6 +11,9 @@ public class ImportJobStateEntity
     public Guid Id { get; set; }
 
     [Required]
+    public long AccountId { get; set; }
+
+    [Required]
     [StringLength(100)]
     public JobName JobName { get; set; }
 

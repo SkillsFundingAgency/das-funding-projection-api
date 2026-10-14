@@ -6,10 +6,12 @@ namespace SFA.DAS.FundingProjection.Data.Repositories;
 
 public interface IImportJobStateRepository
 {
+    Task<ImportJobStateEntity?> GetJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken);
+
     /// <summary>
     /// Gets existing job state or creates a new one
     /// </summary>
-    Task<ImportJobStateEntity> GetOrCreateJobStateAsync(JobName jobName, CancellationToken cancellationToken);
+    Task<ImportJobStateEntity> GetOrCreateJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken);
 
     /// <summary>
     /// Updates an existing job state
@@ -21,10 +23,14 @@ public interface IImportJobStateRepository
 
 public class ImportJobStateRepository(IFundingProjectionDataContext dataContext) : IImportJobStateRepository
 {
-    public async Task<ImportJobStateEntity> GetOrCreateJobStateAsync(JobName jobName, CancellationToken cancellationToken)
+    public async Task<ImportJobStateEntity?> GetJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken)
     {
-        var jobState = await dataContext.ImportJobStates
-            .FirstOrDefaultAsync(j => j.JobName == jobName, cancellationToken);
+        return await dataContext.ImportJobStates.FirstOrDefaultAsync(j => j.AccountId == accountId && j.JobName == jobName, cancellationToken);
+    }
+
+    public async Task<ImportJobStateEntity> GetOrCreateJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken)
+    {
+        var jobState = await GetJobStateAsync(accountId, jobName, cancellationToken);
 
         if (jobState != null)
         {
@@ -33,6 +39,7 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
 
         jobState = new ImportJobStateEntity
         {
+            AccountId = accountId,
             JobName = jobName,
             LastSuccessfulImportDate = DateTime.UtcNow.AddDays(-30),
             LastAttemptedDate = DateTime.UtcNow,
@@ -56,11 +63,10 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
 
-        var existingJobState = await dataContext.ImportJobStates
-            .FirstOrDefaultAsync(j => j.Id == entity.Id, cancellationToken);
+        var existingJobState = await GetJobStateAsync(entity.AccountId, entity.JobName, cancellationToken);
 
         if (existingJobState == null)
-            throw new InvalidOperationException($"Job state with ID {entity.Id} not found");
+            throw new InvalidOperationException($"Job state with account ID {entity.AccountId} and job name {entity.JobName} not found");
 
         // Update properties
         existingJobState.LastSuccessfulImportDate = entity.LastSuccessfulImportDate;

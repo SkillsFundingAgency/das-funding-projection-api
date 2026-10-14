@@ -23,6 +23,10 @@ public class ImportJobStateConfiguration : IEntityTypeConfiguration<ImportJobSta
             .HasDefaultValueSql("NEWSEQUENTIALID()")
             .IsRequired();
 
+        builder.Property(e => e.AccountId)
+            .HasColumnType("bigint")
+            .IsRequired();
+
         builder.Property(e => e.JobName)
             .HasColumnType("nvarchar(100)")
             .IsRequired();

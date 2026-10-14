@@ -20,7 +20,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
     {
         // arrange
         repository
-            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId))
+            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId, token))
             .ReturnsAsync([]);
         
         var request = new PostEmployerFundingProjectionRequest()
@@ -58,7 +58,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         // arrange
         var now = DateOnly.FromDateTime(DateTime.UtcNow);
         repository
-            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId))
+            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId, token))
             .ReturnsAsync([
                 new ApprenticeshipPaymentSummaryEntity
                 {

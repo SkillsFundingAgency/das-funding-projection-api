@@ -6,14 +6,16 @@ namespace SFA.DAS.FundingProjection.Data.Repositories;
 
 public interface IEmployerFundingProjectionRepository : IReadRepository<EmployerFundingProjectionEntity, long>, IWriteRepository<EmployerFundingProjectionEntity, long>
 {
-    Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipSummariesAsync(long accountId);
+    Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipSummariesAsync(long accountId, CancellationToken cancellationToken);
 }
 
 public class EmployerFundingProjectionRepository(IFundingProjectionDataContext context) : IEmployerFundingProjectionRepository
 {
-    public async Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipSummariesAsync(long accountId)
+    public async Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipSummariesAsync(long accountId, CancellationToken cancellationToken)    
     {
-        return await context.ApprenticeshipPaymentSummaries.Where(x => x.AccountId == accountId).ToListAsync();
+        return await context.ApprenticeshipPaymentSummaries
+            .Where(x => x.AccountId == accountId)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<EmployerFundingProjectionEntity?> GetOneAsync(long key, CancellationToken cancellationToken)

@@ -19,7 +19,7 @@ internal class WhenGettingApprenticeshipSummariesAsync
         context.Setup(x => x.ApprenticeshipPaymentSummaries)
             .ReturnsDbSet(new List<ApprenticeshipPaymentSummaryEntity>());
 
-        var actual = await repository.GetApprenticeshipSummariesAsync(accountId);
+        var actual = await repository.GetApprenticeshipSummariesAsync(accountId, token);
 
         actual.Should().BeEmpty();
     }
@@ -35,7 +35,7 @@ internal class WhenGettingApprenticeshipSummariesAsync
         context.Setup(x => x.ApprenticeshipPaymentSummaries)
             .ReturnsDbSet(apprenticeshipPaymentSummaryEntities);
 
-        var actual = await repository.GetApprenticeshipSummariesAsync(accountId);
+        var actual = await repository.GetApprenticeshipSummariesAsync(accountId, token);
 
         actual.Should().BeEmpty();
     }
@@ -54,7 +54,7 @@ internal class WhenGettingApprenticeshipSummariesAsync
         }
         context.Setup(x => x.ApprenticeshipPaymentSummaries)
             .ReturnsDbSet(apprenticeshipPaymentSummaryEntities);
-        var actual = await repository.GetApprenticeshipSummariesAsync(accountId);
+        var actual = await repository.GetApprenticeshipSummariesAsync(accountId, token);
         actual.Should().BeEquivalentTo(apprenticeshipPaymentSummaryEntities);
     }
 }

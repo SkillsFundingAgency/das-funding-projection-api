@@ -12,10 +12,11 @@ public sealed record MonthlyFundingBreakdown
 
 public sealed record LevyOutSummary
 {
-    public decimal Total => CommittedLearnerCost + CommittedLearnerFinalPaymentCost + CommittedTransferOut + ExpiredLevy;
+    public decimal Total => CommittedLearnerCost + CommittedLearnerFinalPaymentCost + CommittedTransferOut + CommittedTransferOutFinalPaymentCost + ExpiredLevy;
     public decimal CommittedLearnerCost { get; init; } = 0m;
     public decimal CommittedLearnerFinalPaymentCost { get; init; } = 0m;
     public decimal CommittedTransferOut { get; init; } = 0m;
+    public decimal CommittedTransferOutFinalPaymentCost { get; init; } = 0m;
     public decimal ExpiredLevy { get; init; } = 0m;
 }
 

@@ -12,7 +12,9 @@ public static class EstimatesTimelineExtensions
             DateOnly startPeriod,
             int months,
             decimal openingBalance,
-            List<CommittedLevyProjection> commitmentProjections, List<LevyInMonthSummary> levyInProjections)
+            List<CommittedLevyProjection> commitmentProjections,
+            List<CommittedLevyProjection> transferOutProjections,
+            List<LevyInMonthSummary> levyInProjections)
         {
             var closingBalance = openingBalance;
             var currentPeriod = startPeriod;
@@ -20,6 +22,7 @@ public static class EstimatesTimelineExtensions
             for (var i = 0; i < months; i++)
             {
                 var commitment = commitmentProjections.FirstOrDefault(c => c.Period == currentPeriod);
+                var transferOut = transferOutProjections.FirstOrDefault(t => t.Period == currentPeriod);
                 var levyInSummary = new LevyInSummary
                 {
                     LevyIn = levyInProjections.FirstOrDefault(l => l.Period == currentPeriod)?.Amount ?? 0m
@@ -29,7 +32,8 @@ public static class EstimatesTimelineExtensions
                 {
                     CommittedLearnerCost = commitment?.TotalMonthlyPayments ?? 0m,
                     CommittedLearnerFinalPaymentCost = commitment?.TotalFinalPayments ?? 0m,
-                    CommittedTransferOut = 0m,
+                    CommittedTransferOut = transferOut?.TotalMonthlyPayments ?? 0m,
+                    CommittedTransferOutFinalPaymentCost = transferOut?.TotalFinalPayments ?? 0m,
                     ExpiredLevy = 0m,
                 };
                 

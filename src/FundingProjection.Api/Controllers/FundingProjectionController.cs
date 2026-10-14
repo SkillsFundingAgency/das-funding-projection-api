@@ -26,7 +26,8 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
         var cappedMonths = Math.Min(request.Months, 120);
         var apprenticeshipSummaries = await repository.GetApprenticeshipSummariesAsync(accountId);
-        var commitmentProjections = CommitmentsProjector.CreateProjection(now, cappedMonths, apprenticeshipSummaries);
+        var commitmentProjections = CommitmentsProjector.CreateProjection(now, cappedMonths, [.. apprenticeshipSummaries.Where(x => !x.IsTransfer)]);
+        var transferOutProjections = CommitmentsProjector.CreateProjection(now, cappedMonths, [.. apprenticeshipSummaries.Where(x => x.IsTransfer)]);
         var levyInProjections = LevyInProjector.CreateProjection(now, cappedMonths, request.HistoricLevyIn);
 
         var timeline = EstimatesTimeline.From(
@@ -35,6 +36,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             cappedMonths,
             0m,
             commitmentProjections,
+            transferOutProjections,
             levyInProjections);
         return TypedResults.Ok(timeline);
     }

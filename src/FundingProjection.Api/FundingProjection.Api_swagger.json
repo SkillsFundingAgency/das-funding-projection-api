@@ -410,6 +410,11 @@
             "type": "number",
             "format": "double"
           },
+          "committedTransferOutFinalPaymentCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
           "expiredLevy": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": "number",

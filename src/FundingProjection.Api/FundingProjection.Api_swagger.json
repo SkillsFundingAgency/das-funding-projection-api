@@ -467,6 +467,11 @@
             "type": "integer",
             "format": "int32"
           },
+          "currentLevyFunds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
           "historicLevyIn": {
             "type": "array",
             "items": {

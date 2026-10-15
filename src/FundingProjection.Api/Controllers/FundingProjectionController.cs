@@ -42,7 +42,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             accountId,
             now,
             cappedMonths,
-            openingBalance: 0m,
+            openingBalance: request.CurrentLevyFunds,
             commitmentProjections,
             transferOutProjections,
             levyInProjections);

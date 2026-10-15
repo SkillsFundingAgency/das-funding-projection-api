@@ -4,7 +4,7 @@ using SFA.DAS.FundingProjection.Domain.Enums;
 
 namespace SFA.DAS.FundingProjection.Domain.Entities;
 
-[Table("ApprenticeshipPaymentSummary", Schema = "dbo")]
+[Table("ApprenticeshipPaymentSummaries", Schema = "dbo")]
 public class ApprenticeshipPaymentSummaryEntity
 {
     [Key]

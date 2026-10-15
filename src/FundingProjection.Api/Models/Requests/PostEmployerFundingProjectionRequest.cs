@@ -5,5 +5,6 @@ namespace SFA.DAS.FundingProjection.Api.Models.Requests;
 public class PostEmployerFundingProjectionRequest
 {
     public int Months { get; set; } = 6;
+    public decimal CurrentLevyFunds { get; set; } = 0m;
     public List<LevyInMonthSummary> HistoricLevyIn { get; set; } = [];
 }

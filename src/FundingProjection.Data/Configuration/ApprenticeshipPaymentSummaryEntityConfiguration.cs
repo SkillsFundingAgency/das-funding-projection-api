@@ -9,7 +9,7 @@ public class ApprenticeshipPaymentSummaryEntityConfiguration: IEntityTypeConfigu
 {
     public void Configure(EntityTypeBuilder<ApprenticeshipPaymentSummaryEntity> builder)
     {
-        builder.ToTable("ApprenticeshipPaymentSummary", "dbo");
+        builder.ToTable("ApprenticeshipPaymentSummaries", "dbo");
         builder.HasKey(x => x.ApprenticeshipId);
 
         builder.Property(x => x.ApprenticeshipId)

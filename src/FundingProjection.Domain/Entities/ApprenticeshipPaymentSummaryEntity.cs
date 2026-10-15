@@ -4,12 +4,13 @@ using SFA.DAS.FundingProjection.Domain.Enums;
 
 namespace SFA.DAS.FundingProjection.Domain.Entities;
 
-[Table("ApprenticeshipPaymentSummary", Schema = "dbo")]
+[Table("ApprenticeshipPaymentSummaries", Schema = "dbo")]
 public class ApprenticeshipPaymentSummaryEntity
 {
     [Key]
     public long ApprenticeshipId { get; set; }
     public long AccountId { get; set; }
+    public bool IsTransfer { get; set; }
     public long Uln { get; set; }
     public DateOnly? Dob { get; set; }
     public ApprenticeshipStatus Status { get; set; }

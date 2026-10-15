@@ -1,13 +1,10 @@
-﻿using AutoFixture.NUnit4;
-using FluentAssertions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Moq;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using SFA.DAS.FundingProjection.Api.Controllers;
-using SFA.DAS.FundingProjection.Api.Models.Mappers;
+using SFA.DAS.FundingProjection.Api.Models.Requests;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Entities;
-using SFA.DAS.Testing.AutoFixture;
+using SFA.DAS.FundingProjection.Domain.Enums;
 
 namespace SFA.DAS.FundingProjection.Api.UnitTests.Api.Controller.EmployerFundingProjectionControllerTests;
 
@@ -22,43 +19,92 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         CancellationToken token)
     {
         // arrange
-        const int months = 8;
         repository
-            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId))
+            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId, token))
             .ReturnsAsync([]);
+        
+        var request = new PostEmployerFundingProjectionRequest()
+        {
+            Months = 8,
+            HistoricLevyIn = []
+        };
 
         // act
-        var result = await controller.GetEmployerFundingProjection(accountId, repository.Object, months, token) as Ok<GetEmployerFundingProjectionByAccountIdResponse>;
+        var result = await controller.PostEmployerFundingProjection(repository.Object, accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
         result.Value.Should().NotBeNull();
-        result.Value.FundingBreakdowns.Should().HaveCount(months);
-        result.Value.FundingBreakdowns.Should().AllSatisfy(x => {
+        result.Value.AccountId.Should().Be(accountId);
+        result.Value.Projections.Should().HaveCount(request.Months);
+        result.Value.Projections.Should().AllSatisfy(x => {
             x.EmployerAccountId.Should().Be(accountId);
-            x.CommittedLearnerCost.Should().Be(0);
-            x.CommittedLearnerFinalPaymentCost.Should().Be(0);
-            x.CommittedTransferOut.Should().Be(0);
+            x.ClosingBalance.Should().Be(0);
+            x.LevyOutSummary.CommittedLearnerCost.Should().Be(0);
+            x.LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(0);
+            x.LevyOutSummary.CommittedTransferOut.Should().Be(0);
+            x.LevyOutSummary.CommittedTransferOutFinalPaymentCost.Should().Be(0);
+            x.LevyInSummary.LevyIn.Should().Be(0);
         });
     }
 
     [Test, RecursiveMoqAutoData]
-    public async Task Then_A_Problem_Is_Returned_If_An_Exception_Occurs(long accountId,
-        List<EmployerFundingProjectionEntity> mockResponse,
+    public async Task Then_Transfer_Costs_Are_Projected_Separately_From_Committed_Learner_Costs(
+        long accountId,
         [Frozen] Mock<IEmployerFundingProjectionRepository> repository,
         [Greedy] FundingProjectionController controller,
         CancellationToken token)
     {
         // arrange
-        const int months = 8;
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         repository
-            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId))
-            .ThrowsAsync(new Exception());
+            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId, token))
+            .ReturnsAsync([
+                new ApprenticeshipPaymentSummaryEntity
+                {
+                    ApprenticeshipId = 1,
+                    AccountId = accountId,
+                    IsTransfer = false,
+                    TotalCost = 375m,
+                    TotalPaid = 0m,
+                    StartDate = now.AddMonths(-1),
+                    EndDate = now.AddMonths(1),
+                    Status = ApprenticeshipStatus.Live,
+                },
+                new ApprenticeshipPaymentSummaryEntity
+                {
+                    ApprenticeshipId = 2,
+                    AccountId = accountId,
+                    IsTransfer = true,
+                    TotalCost = 750m,
+                    TotalPaid = 0m,
+                    StartDate = now.AddMonths(-1),
+                    EndDate = now.AddMonths(1),
+                    Status = ApprenticeshipStatus.Live,
+                }
+            ]);
+
+        var request = new PostEmployerFundingProjectionRequest()
+        {
+            Months = 3,
+            HistoricLevyIn = []
+        };
 
         // act
-        var result = await controller.GetEmployerFundingProjection(accountId, repository.Object, months, token);
+        var result = await controller.PostEmployerFundingProjection(repository.Object, accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
-        result.Should().BeOfType<ProblemHttpResult>();
+        result.Should().NotBeNull();
+        var projections = result.Value!.Projections;
+        projections.Should().HaveCount(request.Months);
+        projections.Should().AllSatisfy(x => {
+            x.LevyOutSummary.CommittedLearnerCost.Should().Be(100m);
+            x.LevyOutSummary.CommittedTransferOut.Should().Be(200m);
+        });
+        projections[0].LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(0m);
+        projections[0].LevyOutSummary.CommittedTransferOutFinalPaymentCost.Should().Be(0m);
+        projections[^1].LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(75m);
+        projections[^1].LevyOutSummary.CommittedTransferOutFinalPaymentCost.Should().Be(150m);
+        projections[^1].ClosingBalance.Should().Be(-1125m);
     }
 }

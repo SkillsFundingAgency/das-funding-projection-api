@@ -46,4 +46,8 @@
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Api\Mappers\" />
+  </ItemGroup>
+
 </Project>

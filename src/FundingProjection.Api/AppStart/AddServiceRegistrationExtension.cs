@@ -3,7 +3,6 @@ using SFA.DAS.FundingProjection.Data;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Configuration;
 using System.Diagnostics.CodeAnalysis;
-using SFA.DAS.FundingProjection.Data.Services;
 
 namespace SFA.DAS.FundingProjection.Api.AppStart;
 
@@ -41,10 +40,7 @@ public static class AddServiceRegistrationExtension
             new Lazy<FundingProjectionDataContext>(provider.GetRequiredService<FundingProjectionDataContext>));
 
         services.AddScoped<IEmployerFundingProjectionRepository, EmployerFundingProjectionRepository>();
-        services.AddScoped<ICommittedLearnerRepository, CommittedLearnerRepository>();
         services.AddScoped<IImportJobStateRepository, ImportJobStateRepository>();
-
-        services.AddScoped<IFundingProjectionServices, FundingProjectionServices>();
     }
 
     public static void ConfigureHealthChecks(this IServiceCollection services)

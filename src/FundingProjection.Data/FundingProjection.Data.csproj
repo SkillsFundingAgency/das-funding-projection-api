@@ -14,4 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FundingProjection.Domain\FundingProjection.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
 </Project>

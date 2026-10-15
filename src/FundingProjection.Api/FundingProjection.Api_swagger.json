@@ -6,7 +6,7 @@
   },
   "paths": {
     "/api/employer/{accountId}/funding-projection": {
-      "get": {
+      "post": {
         "tags": [
           "FundingProjection"
         ],
@@ -22,56 +22,6 @@
             }
           },
           {
-            "name": "months",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32",
-              "default": 6
-            }
-          },
-          {
-            "name": "X-Version",
-            "in": "header",
-            "required": true,
-            "example": "1.0"
-          }
-        ],
-        "responses": {
-          "500": {
-            "description": "Internal Server Error"
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetEmployerFundingProjectionByAccountIdResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/employer/funding-projection/re-calculate": {
-      "post": {
-        "tags": [
-          "FundingProjection"
-        ],
-        "parameters": [
-          {
             "name": "X-Version",
             "in": "header",
             "required": true,
@@ -82,65 +32,39 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "format": "date-time"
+                "$ref": "#/components/schemas/PostEmployerFundingProjectionRequest"
               }
             },
             "text/json": {
               "schema": {
-                "type": "string",
-                "format": "date-time"
+                "$ref": "#/components/schemas/PostEmployerFundingProjectionRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "type": "string",
-                "format": "date-time"
+                "$ref": "#/components/schemas/PostEmployerFundingProjectionRequest"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "500": {
-            "description": "Internal Server Error"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/RecalculateFundingProjectionResponse"
+                  "$ref": "#/components/schemas/EstimatesTimeline"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RecalculateFundingProjectionResponse"
+                  "$ref": "#/components/schemas/EstimatesTimeline"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RecalculateFundingProjectionResponse"
+                  "$ref": "#/components/schemas/EstimatesTimeline"
                 }
               }
             }
@@ -305,334 +229,6 @@
         }
       }
     },
-    "/api/employer/learners/by/status": {
-      "get": {
-        "tags": [
-          "Learner"
-        ],
-        "parameters": [
-          {
-            "name": "importStatus",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/ImportStatus"
-            }
-          },
-          {
-            "name": "X-Version",
-            "in": "header",
-            "required": true,
-            "example": "1.0"
-          }
-        ],
-        "responses": {
-          "500": {
-            "description": "Internal Server Error"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "Created",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/employer/{accountId}/learners": {
-      "post": {
-        "tags": [
-          "Learner"
-        ],
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "X-Version",
-            "in": "header",
-            "required": true,
-            "example": "1.0"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostCommittedLearnerRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostCommittedLearnerRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostCommittedLearnerRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "500": {
-            "description": "Internal Server Error"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "Created",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/employer/{accountId}/learners/{id}": {
-      "put": {
-        "tags": [
-          "Learner"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "X-Version",
-            "in": "header",
-            "required": true,
-            "example": "1.0"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PutCommittedLearnerRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PutCommittedLearnerRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/PutCommittedLearnerRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "500": {
-            "description": "Internal Server Error"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "Created",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCommittedLearnerResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/ping": {
       "get": {
         "tags": [
@@ -691,68 +287,15 @@
   },
   "components": {
     "schemas": {
-      "GetCommittedLearnerResponse": {
-        "required": [
-          "paymentStatus",
-          "importStatus"
-        ],
+      "EstimatesTimeline": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "apprenticeshipId": {
+          "accountId": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": "integer",
             "format": "int64"
           },
-          "commitmentId": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int64"
-          },
-          "cost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": "number",
-            "format": "double"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "createdOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "importedOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "paymentStatus": {
-            "$ref": "#/components/schemas/PaymentStatus"
-          },
-          "importStatus": {
-            "$ref": "#/components/schemas/ImportStatus"
-          }
-        },
-        "additionalProperties": false
-      },
-      "GetEmployerFundingProjectionByAccountIdResponse": {
-        "type": "object",
-        "properties": {
-          "fundingBreakdowns": {
+          "projections": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MonthlyFundingBreakdown"
@@ -803,21 +346,88 @@
         },
         "additionalProperties": false
       },
-      "ImportStatus": {
-        "enum": [
-          "Pending",
-          "Imported",
-          "Failed"
-        ],
-        "type": "string"
-      },
       "JobName": {
         "enum": [
           "ImportLearners"
         ],
         "type": "string"
       },
+      "LevyInMonthSummary": {
+        "required": [
+          "period",
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "format": "date"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LevyInSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "levyIn": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LevyOutSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "committedLearnerCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "committedLearnerFinalPaymentCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "committedTransferOut": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "committedTransferOutFinalPaymentCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "expiredLevy": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "MonthlyFundingBreakdown": {
+        "required": [
+          "levyInSummary",
+          "levyOutSummary"
+        ],
         "type": "object",
         "properties": {
           "employerAccountId": {
@@ -835,108 +445,38 @@
             "type": "integer",
             "format": "int32"
           },
-          "committedLearnerCost": {
+          "closingBalance": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": "number",
             "format": "double"
           },
-          "committedLearnerFinalPaymentCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": "number",
-            "format": "double"
+          "levyInSummary": {
+            "$ref": "#/components/schemas/LevyInSummary"
           },
-          "committedTransferOut": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": "number",
-            "format": "double"
+          "levyOutSummary": {
+            "$ref": "#/components/schemas/LevyOutSummary"
           }
         },
         "additionalProperties": false
       },
-      "PaymentStatus": {
-        "enum": [
-          "Active",
-          "Paused",
-          "Withdrawn",
-          "Completed"
-        ],
-        "type": "string"
-      },
-      "PostCommittedLearnerRequest": {
-        "required": [
-          "paymentStatus"
-        ],
+      "PostEmployerFundingProjectionRequest": {
         "type": "object",
         "properties": {
-          "apprenticeshipId": {
+          "months": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "paymentStatus": {
-            "$ref": "#/components/schemas/PaymentStatus"
-          }
-        },
-        "additionalProperties": false
-      },
-      "PutCommittedLearnerRequest": {
-        "required": [
-          "paymentStatus"
-        ],
-        "type": "object",
-        "properties": {
-          "commitmentId": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int64"
-          },
-          "cost": {
+          "currentLevyFunds": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": "number",
             "format": "double"
           },
-          "apprenticeshipId": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer",
-            "format": "int64"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "paymentStatus": {
-            "$ref": "#/components/schemas/PaymentStatus"
+          "historicLevyIn": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LevyInMonthSummary"
+            }
           }
         },
         "additionalProperties": false
@@ -964,32 +504,6 @@
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": "integer",
             "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "RecalculateFundingProjectionResponse": {
-        "required": [
-          "totalRecordsProcessed",
-          "totalRecordsUpdated",
-          "totalRecordsInserted"
-        ],
-        "type": "object",
-        "properties": {
-          "totalRecordsProcessed": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalRecordsUpdated": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalRecordsInserted": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer",
-            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -1049,9 +563,6 @@
     },
     {
       "name": "Jobs"
-    },
-    {
-      "name": "Learner"
     },
     {
       "name": "Ping"

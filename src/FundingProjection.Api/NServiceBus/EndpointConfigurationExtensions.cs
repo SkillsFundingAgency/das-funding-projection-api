@@ -26,7 +26,12 @@ public static class EndpointConfigurationExtensions
         {
             if (string.IsNullOrEmpty(connectionString))
             {
-                endpointConfiguration.UseTransport<LearningTransport>();
+                var learningTransportDirectory = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, ".learningtransport");
+                if (!Directory.Exists(learningTransportDirectory))
+                {
+                    Directory.CreateDirectory(learningTransportDirectory);
+                }
+                endpointConfiguration.UseTransport<LearningTransport>().StorageDirectory(learningTransportDirectory);
             }
             else
             {

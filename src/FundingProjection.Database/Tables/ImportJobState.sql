@@ -2,6 +2,7 @@
     [Id]                           UniqueIdentifier NOT NULL DEFAULT NEWSEQUENTIALID(),
     [AccountId]                    BIGINT           NOT NULL,
     [JobName]                      NVARCHAR(100)    NOT NULL,
+    [JobState]                     NVARCHAR(30)     NOT NULL,
     [LastSuccessfulImportDate]     DATETIME2        NOT NULL,
     [LastAttemptedDate]            DATETIME2        NOT NULL,
     [LastAttemptSuccessful]        BIT              NOT NULL    DEFAULT 0,

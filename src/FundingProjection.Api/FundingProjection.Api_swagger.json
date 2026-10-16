@@ -446,6 +446,14 @@
         ],
         "type": "string"
       },
+      "JobState": {
+        "enum": [
+          "Pending",
+          "Completed",
+          "Failed"
+        ],
+        "type": "string"
+      },
       "LevyInMonthSummary": {
         "required": [
           "period",
@@ -649,6 +657,9 @@
           },
           "jobName": {
             "$ref": "#/components/schemas/JobName"
+          },
+          "jobState": {
+            "$ref": "#/components/schemas/JobState"
           },
           "lastSuccessfulImportDate": {
             "type": "string",

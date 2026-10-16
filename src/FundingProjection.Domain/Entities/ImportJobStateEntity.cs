@@ -18,6 +18,10 @@ public class ImportJobStateEntity
     public JobName JobName { get; set; }
 
     [Required]
+    [StringLength(30)]
+    public JobState JobState { get; set; }
+
+    [Required]
     public DateTime LastSuccessfulImportDate { get; set; }
 
     [Required]

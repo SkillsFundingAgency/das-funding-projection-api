@@ -31,6 +31,10 @@ public class ImportJobStateConfiguration : IEntityTypeConfiguration<ImportJobSta
             .HasColumnType("nvarchar(100)")
             .IsRequired();
 
+        builder.Property(e => e.JobState)
+            .HasColumnType("nvarchar(30)")
+            .IsRequired();
+
         builder.Property(e => e.LastSuccessfulImportDate)
             .IsRequired();
 

@@ -41,6 +41,7 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
         {
             AccountId = accountId,
             JobName = jobName,
+            JobState = JobState.Pending,
             LastSuccessfulImportDate = DateTime.UtcNow.AddDays(-30),
             LastAttemptedDate = DateTime.UtcNow,
             LastAttemptSuccessful = false,
@@ -69,6 +70,7 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
             throw new InvalidOperationException($"Job state with account ID {entity.AccountId} and job name {entity.JobName} not found");
 
         // Update properties
+        existingJobState.JobState = existingJobState.JobState;
         existingJobState.LastSuccessfulImportDate = entity.LastSuccessfulImportDate;
         existingJobState.LastAttemptedDate = entity.LastAttemptedDate;
         existingJobState.LastAttemptSuccessful = entity.LastAttemptSuccessful;

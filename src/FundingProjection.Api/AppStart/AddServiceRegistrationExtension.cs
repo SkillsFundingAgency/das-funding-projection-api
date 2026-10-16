@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿extern alias AzureIdentity;
+using Azure.Messaging.ServiceBus;
+using Microsoft.EntityFrameworkCore;
 using SFA.DAS.FundingProjection.Data;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Configuration;
@@ -21,6 +23,16 @@ public static class AddServiceRegistrationExtension
 
             // domain services
             services.AddSingleton<IEventService, EventService>();
+        }
+
+        public void AddServiceBusRegistration(IConfiguration configuration)
+        {
+            var fqdn = configuration[$"{QueueConstants.ServiceBusConnection}:fullyQualifiedNamespace"];
+            var connectionString = configuration[QueueConstants.ServiceBusConnection];
+
+            services.AddSingleton(_ => fqdn != null
+                ? new ServiceBusClient(fqdn, new AzureIdentity::Azure.Identity.DefaultAzureCredential())
+                : new ServiceBusClient(connectionString));
         }
 
         public void AddDatabaseRegistration(ConnectionStrings config,

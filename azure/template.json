@@ -85,6 +85,9 @@
         },
         "sharedServiceBusName": {
             "type": "string"
+        },
+        "sharedServiceBusFqdn": {
+            "type": "string"
         }
     },
     "variables": {
@@ -235,6 +238,10 @@
                                 {
                                     "name": "LoggingRedisKey",
                                     "value": "[parameters('loggingRedisKey')]"
+                                },
+                                {
+                                    "name": "ServiceBusConnection__fullyQualifiedNamespace",
+                                    "value": "[parameters('sharedServiceBusFqdn')]"
                                 }
                             ]
                         }

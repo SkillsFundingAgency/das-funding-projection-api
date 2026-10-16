@@ -1,4 +1,3 @@
-using SFA.DAS.NServiceBus.Configuration.MicrosoftDependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.FundingProjection.Api;
@@ -25,7 +24,6 @@ public class Program
     private static IHostBuilder CreateHostBuilder(string[] args)
     {
         return Host.CreateDefaultBuilder(args)
-            .UseNServiceBusContainer()
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>();

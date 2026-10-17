@@ -5,6 +5,7 @@ using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Entities;
 using SFA.DAS.FundingProjection.Domain.Enums;
+using SFA.DAS.FundingProjection.Domain.Services;
 
 namespace SFA.DAS.FundingProjection.Api.UnitTests.Api.Controller.EmployerFundingProjectionControllerTests;
 
@@ -14,23 +15,33 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
     [Test, RecursiveMoqAutoData]
     public async Task Then_The_Projection_Is_Returned_Even_When_There_Is_No_Data(
         long accountId,
-        [Frozen] Mock<IEmployerFundingProjectionRepository> repository,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
         [Greedy] FundingProjectionController controller,
         CancellationToken token)
     {
         // arrange
-        repository
-            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId, token))
+        apprenticeshipSummariesRepository   
+            .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
             .ReturnsAsync([]);
-        
-        var request = new PostEmployerFundingProjectionRequest()
+
+        importJobStateRepository
+            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .ReturnsAsync(importJobState);
+
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+
+        var request = new PostEmployerFundingProjectionRequest
         {
             Months = 8,
             HistoricLevyIn = []
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(repository.Object, accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
@@ -51,14 +62,17 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
     [Test, RecursiveMoqAutoData]
     public async Task Then_Transfer_Costs_Are_Projected_Separately_From_Committed_Learner_Costs(
         long accountId,
-        [Frozen] Mock<IEmployerFundingProjectionRepository> repository,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
         [Greedy] FundingProjectionController controller,
         CancellationToken token)
     {
         // arrange
         var now = DateOnly.FromDateTime(DateTime.UtcNow);
-        repository
-            .Setup(x => x.GetApprenticeshipSummariesAsync(accountId, token))
+        apprenticeshipSummariesRepository
+            .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
             .ReturnsAsync([
                 new ApprenticeshipPaymentSummaryEntity
                 {
@@ -83,6 +97,11 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
                     Status = ApprenticeshipStatus.Live,
                 }
             ]);
+        importJobStateRepository
+            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .ReturnsAsync(importJobState);
+
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
 
         var request = new PostEmployerFundingProjectionRequest()
         {
@@ -91,7 +110,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(repository.Object, accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();

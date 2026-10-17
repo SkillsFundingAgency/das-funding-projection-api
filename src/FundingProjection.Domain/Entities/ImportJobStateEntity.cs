@@ -11,8 +11,15 @@ public class ImportJobStateEntity
     public Guid Id { get; set; }
 
     [Required]
+    public long AccountId { get; set; }
+
+    [Required]
     [StringLength(100)]
     public JobName JobName { get; set; }
+
+    [Required]
+    [StringLength(30)]
+    public JobState JobState { get; set; }
 
     [Required]
     public DateTime LastSuccessfulImportDate { get; set; }

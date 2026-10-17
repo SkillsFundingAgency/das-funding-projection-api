@@ -1,8 +1,8 @@
 ﻿namespace SFA.DAS.FundingProjection.Domain.Enums;
 
-public enum ImportStatus : short
+public enum JobState : short
 {
     Pending = 0,
-    Imported = 1,
+    Completed = 1,
     Failed = 2
 }

@@ -5,6 +5,83 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/employer/{accountId}/apprenticeship-payment-summary/{apprenticeshipId}": {
+      "post": {
+        "tags": [
+          "ApprenticeshipPaymentSummary"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostApprenticeshipPaymentSummaryRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostApprenticeshipPaymentSummaryRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostApprenticeshipPaymentSummaryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprenticeshipPaymentSummaryResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprenticeshipPaymentSummaryResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprenticeshipPaymentSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/employer/{accountId}/funding-projection": {
       "post": {
         "tags": [
@@ -65,74 +142,6 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EstimatesTimeline"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/jobs/{jobName}": {
-      "post": {
-        "tags": [
-          "Jobs"
-        ],
-        "parameters": [
-          {
-            "name": "jobName",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/JobName"
-            }
-          },
-          {
-            "name": "X-Version",
-            "in": "header",
-            "required": true,
-            "example": "1.0"
-          }
-        ],
-        "responses": {
-          "500": {
-            "description": "Internal Server Error"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportJobStateResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportJobStateResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportJobStateResponse"
                 }
               }
             }
@@ -287,6 +296,91 @@
   },
   "components": {
     "schemas": {
+      "ApprenticeshipPaymentSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "apprenticeshipId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "isTransfer": {
+            "type": "boolean"
+          },
+          "uln": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "dob": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApprenticeshipStatus"
+          },
+          "totalCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "totalPaid": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "lastPaymentDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "lastPaymentAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double"
+          },
+          "lastUpdatedDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ApprenticeshipStatus": {
+        "enum": [
+          "WaitingToStart",
+          "Live",
+          "Paused",
+          "Stopped",
+          "Completed",
+          "Unknown"
+        ],
+        "type": "string"
+      },
       "EstimatesTimeline": {
         "type": "object",
         "properties": {
@@ -348,7 +442,15 @@
       },
       "JobName": {
         "enum": [
-          "ImportLearners"
+          "ImportLearnersCost"
+        ],
+        "type": "string"
+      },
+      "JobState": {
+        "enum": [
+          "Pending",
+          "Completed",
+          "Failed"
         ],
         "type": "string"
       },
@@ -459,6 +561,70 @@
         },
         "additionalProperties": false
       },
+      "PostApprenticeshipPaymentSummaryRequest": {
+        "type": "object",
+        "properties": {
+          "isTransfer": {
+            "type": "boolean"
+          },
+          "uln": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "dob": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApprenticeshipStatus"
+          },
+          "totalCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "totalPaid": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "lastPaymentDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "lastPaymentAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double"
+          },
+          "lastUpdatedDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "PostEmployerFundingProjectionRequest": {
         "type": "object",
         "properties": {
@@ -484,6 +650,17 @@
       "PutImportJobStateRequest": {
         "type": "object",
         "properties": {
+          "accountId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "jobName": {
+            "$ref": "#/components/schemas/JobName"
+          },
+          "jobState": {
+            "$ref": "#/components/schemas/JobState"
+          },
           "lastSuccessfulImportDate": {
             "type": "string",
             "format": "date-time"
@@ -558,6 +735,9 @@
     }
   },
   "tags": [
+    {
+      "name": "ApprenticeshipPaymentSummary"
+    },
     {
       "name": "FundingProjection"
     },

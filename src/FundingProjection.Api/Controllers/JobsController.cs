@@ -33,6 +33,7 @@ public class JobsController(ILogger<JobsController> logger) : ControllerBase
                 Id = id,
                 AccountId = request.AccountId,
                 JobName = request.JobName,
+                JobState = request.JobState,
                 LastSuccessfulImportDate = request.LastSuccessfulImportDate,
                 LastAttemptedDate = request.LastAttemptedDate,
                 LastAttemptSuccessful = request.LastAttemptSuccessful,

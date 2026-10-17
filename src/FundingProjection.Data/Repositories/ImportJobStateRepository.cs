@@ -70,8 +70,9 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
             throw new InvalidOperationException($"Job state with account ID {entity.AccountId} and job name {entity.JobName} not found");
 
         // Update properties
-        existingJobState.JobState = existingJobState.JobState;
-        existingJobState.LastSuccessfulImportDate = entity.LastSuccessfulImportDate;
+        existingJobState.JobState = entity.JobState;
+        if (entity.LastAttemptSuccessful)
+            existingJobState.LastSuccessfulImportDate = entity.LastSuccessfulImportDate;
         existingJobState.LastAttemptedDate = entity.LastAttemptedDate;
         existingJobState.LastAttemptSuccessful = entity.LastAttemptSuccessful;
         existingJobState.TotalRecordsLastRun = entity.TotalRecordsLastRun;

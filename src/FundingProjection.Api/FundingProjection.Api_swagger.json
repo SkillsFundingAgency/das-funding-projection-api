@@ -389,6 +389,16 @@
             "type": "integer",
             "format": "int64"
           },
+          "estimatedCommitedCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
+          "estimatedCommitedTransferCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
           "projections": {
             "type": "array",
             "items": {

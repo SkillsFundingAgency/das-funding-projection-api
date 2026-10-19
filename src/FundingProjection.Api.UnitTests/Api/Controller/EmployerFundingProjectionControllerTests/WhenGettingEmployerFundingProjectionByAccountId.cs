@@ -47,6 +47,8 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         result.Should().NotBeNull();
         result.Value.Should().NotBeNull();
         result.Value.AccountId.Should().Be(accountId);
+        result.Value.TotalEstimatedCommitedCost.Should().Be(0);
+        result.Value.TotalEstimatedCommitedTransferCost.Should().Be(0);
         result.Value.Projections.Should().HaveCount(request.Months);
         result.Value.Projections.Should().AllSatisfy(x => {
             x.EmployerAccountId.Should().Be(accountId);
@@ -125,5 +127,86 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         projections[^1].LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(75m);
         projections[^1].LevyOutSummary.CommittedTransferOutFinalPaymentCost.Should().Be(150m);
         projections[^1].ClosingBalance.Should().Be(-1125m);
+    }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_The_Estimated_Committed_Costs_Are_The_Remaining_Costs_Split_By_Transfer(
+        long accountId,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
+        [Greedy] FundingProjectionController controller,
+        CancellationToken token)
+    {
+        // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
+        apprenticeshipSummariesRepository
+            .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
+            .ReturnsAsync([
+                new ApprenticeshipPaymentSummaryEntity
+                {
+                    ApprenticeshipId = 1,
+                    AccountId = accountId,
+                    IsTransfer = false,
+                    TotalCost = 375m,
+                    TotalPaid = 100m,
+                    StartDate = now.AddMonths(-2),
+                    EndDate = now.AddMonths(1),
+                    Status = ApprenticeshipStatus.Live,
+                },
+                new ApprenticeshipPaymentSummaryEntity
+                {
+                    ApprenticeshipId = 2,
+                    AccountId = accountId,
+                    IsTransfer = false,
+                    TotalCost = 1500m,
+                    TotalPaid = 0m,
+                    StartDate = now,
+                    EndDate = now.AddMonths(12),
+                    Status = ApprenticeshipStatus.Live,
+                },
+                new ApprenticeshipPaymentSummaryEntity
+                {
+                    ApprenticeshipId = 3,
+                    AccountId = accountId,
+                    IsTransfer = true,
+                    TotalCost = 750m,
+                    TotalPaid = 200m,
+                    StartDate = now.AddMonths(-2),
+                    EndDate = now.AddMonths(1),
+                    Status = ApprenticeshipStatus.Live,
+                },
+                new ApprenticeshipPaymentSummaryEntity
+                {
+                    ApprenticeshipId = 4,
+                    AccountId = accountId,
+                    IsTransfer = true,
+                    TotalCost = 1000m,
+                    TotalPaid = 1000m,
+                    StartDate = now.AddMonths(-12),
+                    EndDate = now.AddMonths(-1),
+                    Status = ApprenticeshipStatus.Completed,
+                }
+            ]);
+        importJobStateRepository
+            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .ReturnsAsync(importJobState);
+
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+
+        var request = new PostEmployerFundingProjectionRequest
+        {
+            Months = 3,
+            HistoricLevyIn = []
+        };
+
+        // act
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
+
+        // assert
+        result.Should().NotBeNull();
+        result.Value!.TotalEstimatedCommitedCost.Should().Be(275m + 1500m);
+        result.Value.TotalEstimatedCommitedTransferCost.Should().Be(550m);
     }
 }

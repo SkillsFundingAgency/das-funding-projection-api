@@ -47,9 +47,12 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             now,
             cappedMonths,
             openingBalance: request.CurrentLevyFunds,
+            payments.Sum(c=>c.TotalCost - c.TotalPaid),
+            transfers.Sum(c=>c.TotalCost - c.TotalPaid),
             commitmentProjections,
             transferOutProjections,
-            levyInProjections);
+            levyInProjections
+            );
 
         var job = await importJobStateRepository.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token);
 

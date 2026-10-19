@@ -389,12 +389,12 @@
             "type": "integer",
             "format": "int64"
           },
-          "estimatedCommitedCost": {
+          "totalEstimatedCommitedCost": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": "number",
             "format": "double"
           },
-          "estimatedCommitedTransferCost": {
+          "totalEstimatedCommitedTransferCost": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": "number",
             "format": "double"

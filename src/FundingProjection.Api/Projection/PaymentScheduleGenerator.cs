@@ -7,18 +7,19 @@ public static class PaymentScheduleGenerator
 {
     public static PaymentSchedule CreateFrom(ApprenticeshipPaymentSummaryEntity summary)
     {
-        var now = DateTime.UtcNow;
+        var now = DateTime.UtcNow.ToPeriod();
         return summary.Status switch
         {
-            ApprenticeshipStatus.Completed => CreateForCompletedApprenticeship(summary, now),
-            ApprenticeshipStatus.Live => CreateForLiveApprenticeship(summary, now),
-            _ => new PaymentSchedule { ApprenticeshipId = summary.ApprenticeshipId }
+            ApprenticeshipStatus.Completed
+                or ApprenticeshipStatus.Live
+                or ApprenticeshipStatus.WaitingToStart => CreateForwardPaymentsForApprenticeship(summary, now),
+            ApprenticeshipStatus.Paused
+                or ApprenticeshipStatus.Stopped => throw new NotImplementedException(),
+            _ => throw new NotSupportedException($"Projecting apprenticeships in the {summary.Status} state is not supported")
         };
     }
 
-    private static PaymentSchedule CreateForCompletedApprenticeship(ApprenticeshipPaymentSummaryEntity summary, DateTime now) => CreateForLiveApprenticeship(summary, now);
-
-    private static PaymentSchedule CreateForLiveApprenticeship(ApprenticeshipPaymentSummaryEntity summary, DateTime now)
+    private static PaymentSchedule CreateForwardPaymentsForApprenticeship(ApprenticeshipPaymentSummaryEntity summary, DateOnly now)
     {
         // TotalPaid includes the completion payment once it has been made, so split what is still owed
         // between the 20% completion payment and the remaining monthly instalments
@@ -30,8 +31,7 @@ public static class PaymentScheduleGenerator
         var firstPaymentPeriod = summary.StartDate.AddMonths(1).ToPeriod();
         var lastPaymentPeriod = summary.EndDate.AddMonths(1).ToPeriod();
 
-        var thisPaymentPeriod = now.ToPeriod();
-        var currentPaymentPeriod = thisPaymentPeriod;
+        var currentPaymentPeriod = now;
         
         var paymentSchedule = new PaymentSchedule { ApprenticeshipId = summary.ApprenticeshipId };
         
@@ -60,7 +60,7 @@ public static class PaymentScheduleGenerator
         var remainingPaymentPeriods = paymentSchedule.ScheduledPayments;
         
         // current month already handled, reduce the number of remaining payments to calc
-        if (thisPaymentPeriod == previousPaymentPeriod)
+        if (now == previousPaymentPeriod)
         {
             if (remainingPaymentPeriods.Count == 1)
             {

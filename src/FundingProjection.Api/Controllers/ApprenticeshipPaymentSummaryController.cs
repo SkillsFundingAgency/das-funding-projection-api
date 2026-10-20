@@ -12,10 +12,10 @@ namespace SFA.DAS.FundingProjection.Api.Controllers;
 [Route($"{RouteNames.ApprenticeshipPaymentSummary}")]
 public class ApprenticeshipPaymentSummaryController(ILogger<ApprenticeshipPaymentSummaryController> logger) : ControllerBase
 {
-    [HttpPost]
+    [HttpPut]
     [Route($"{{accountId:long}}/{RouteElements.ApprenticeshipPaymentSummary}/{{apprenticeshipId:long}}")]
     [ProducesResponseType(typeof(ApprenticeshipPaymentSummaryResponse), StatusCodes.Status200OK)]
-    public async Task<IResult> Post(
+    public async Task<IResult> Put(
         [FromServices] IApprenticeshipPaymentSummariesRepository apprenticeshipSummariesRepository,
         [FromRoute, Required] long accountId,
         [FromRoute, Required] long apprenticeshipId,

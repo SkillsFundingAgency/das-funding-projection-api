@@ -14,7 +14,7 @@ namespace SFA.DAS.FundingProjection.Api.UnitTests.Api.Controller.ApprenticePayme
 internal class WhenPostingApprenticeshipPaymentSummary
 {
     [Test, RecursiveMoqAutoData]
-    public async Task Post_ReturnsCreated_WhenEntityIsNew(long accountId,
+    public async Task Put_ReturnsCreated_WhenEntityIsNew(long accountId,
     long apprenticeshipId,
     PostApprenticeshipPaymentSummaryRequest request,
     ApprenticeshipPaymentSummaryEntity entity,
@@ -31,7 +31,7 @@ internal class WhenPostingApprenticeshipPaymentSummary
             .ReturnsAsync(upsertResult);
 
         // Act
-        var result = await endpoint.Post(
+        var result = await endpoint.Put(
             repository.Object, accountId, apprenticeshipId, request, CancellationToken.None);
 
         // Assert
@@ -41,7 +41,7 @@ internal class WhenPostingApprenticeshipPaymentSummary
     }
 
     [Test, RecursiveMoqAutoData]
-    public async Task Post_ReturnsOk_WhenEntityAlreadyExists(long accountId,
+    public async Task Put_ReturnsOk_WhenEntityAlreadyExists(long accountId,
         long apprenticeshipId,
         PostApprenticeshipPaymentSummaryRequest request,
         ApprenticeshipPaymentSummaryEntity entity,
@@ -58,7 +58,7 @@ internal class WhenPostingApprenticeshipPaymentSummary
             .ReturnsAsync(upsertResult);
 
         // Act
-        var result = await endpoint.Post(
+        var result = await endpoint.Put(
             repository.Object, accountId, apprenticeshipId, request, CancellationToken.None);
 
         // Assert
@@ -67,7 +67,7 @@ internal class WhenPostingApprenticeshipPaymentSummary
     }
 
     [Test, RecursiveMoqAutoData]
-    public async Task Post_MapsRouteParametersOntoEntity(
+    public async Task Put_MapsRouteParametersOntoEntity(
         long accountId,
         long apprenticeshipId,
         PostApprenticeshipPaymentSummaryRequest request,
@@ -83,7 +83,7 @@ internal class WhenPostingApprenticeshipPaymentSummary
             .ReturnsAsync(UpsertResult.Create(entity, true));
 
         // Act
-        await endpoint.Post(
+        await endpoint.Put(
             repository.Object, accountId, apprenticeshipId, request, CancellationToken.None);
 
         // Assert — verify accountId and apprenticeshipId were threaded through to the entity

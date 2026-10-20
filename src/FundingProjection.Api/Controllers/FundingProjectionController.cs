@@ -17,19 +17,19 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
 {
     private const int MaxProjectionMonths = 120;
 
-    [HttpPost]
+    [HttpPut]
     [Route($"{{accountId:long}}/{RouteElements.FundingProjection}")]
     [ProducesResponseType(typeof(EstimatesTimeline), StatusCodes.Status200OK)]
-    public async Task<IResult> PostEmployerFundingProjection(
+    public async Task<IResult> PutEmployerFundingProjection(
         [FromServices] IApprenticeshipPaymentSummariesRepository apprenticeshipSummariesRepository,
         [FromServices] IImportJobStateRepository importJobStateRepository,
         [FromServices] IEventService eventService,
-        [FromRoute] [Required] long accountId,
-        [FromBody] [Required] PostEmployerFundingProjectionRequest request,
+        [FromRoute][Required] long accountId,
+        [FromBody][Required] PostEmployerFundingProjectionRequest request,
         CancellationToken token = default)
     {
         logger.LogInformation("Funding Projection API: Received query to get projection by accountId : {Id}", accountId);
-        
+
         var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
         var cappedMonths = Math.Clamp(request.Months, 1, MaxProjectionMonths);
 
@@ -47,8 +47,8 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             now,
             cappedMonths,
             openingBalance: request.CurrentLevyFunds,
-            payments.Sum(c=>c.TotalCost - c.TotalPaid),
-            transfers.Sum(c=>c.TotalCost - c.TotalPaid),
+            payments.Sum(c => c.TotalCost - c.TotalPaid),
+            transfers.Sum(c => c.TotalCost - c.TotalPaid),
             commitmentProjections,
             transferOutProjections,
             levyInProjections

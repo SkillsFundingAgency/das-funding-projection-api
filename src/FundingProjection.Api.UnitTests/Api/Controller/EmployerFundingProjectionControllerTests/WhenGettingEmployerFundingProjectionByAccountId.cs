@@ -40,7 +40,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PutEmployerFundingProjection(apprenticeshipSummariesRepository.Object,
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object,
             importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
@@ -112,7 +112,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PutEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
@@ -202,7 +202,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PutEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();

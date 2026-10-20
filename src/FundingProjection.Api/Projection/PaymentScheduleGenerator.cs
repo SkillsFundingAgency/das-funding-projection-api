@@ -7,16 +7,7 @@ public static class PaymentScheduleGenerator
 {
     public static PaymentSchedule CreateFrom(ApprenticeshipPaymentSummaryEntity summary)
     {
-        var now = DateTime.UtcNow.ToPeriod();
-        return summary.Status switch
-        {
-            ApprenticeshipStatus.Completed
-                or ApprenticeshipStatus.Live
-                or ApprenticeshipStatus.WaitingToStart => CreateForwardPaymentsForApprenticeship(summary, now),
-            ApprenticeshipStatus.Paused
-                or ApprenticeshipStatus.Stopped => throw new NotImplementedException(),
-            _ => throw new NotSupportedException($"Projecting apprenticeships in the {summary.Status} state is not supported")
-        };
+        return CreateForwardPaymentsForApprenticeship(summary, DateTime.UtcNow.ToPeriod());
     }
 
     private static PaymentSchedule CreateForwardPaymentsForApprenticeship(ApprenticeshipPaymentSummaryEntity summary, DateOnly now)

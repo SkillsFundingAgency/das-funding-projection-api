@@ -6,6 +6,7 @@ using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Api.Projection;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using System.ComponentModel.DataAnnotations;
+using SFA.DAS.FundingProjection.Domain.Entities;
 using SFA.DAS.FundingProjection.Domain.Enums;
 using SFA.DAS.FundingProjection.Domain.Services;
 
@@ -47,8 +48,8 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             now,
             cappedMonths,
             openingBalance: request.CurrentLevyFunds,
-            payments.Sum(c=>c.TotalCost - c.TotalPaid),
-            transfers.Sum(c=>c.TotalCost - c.TotalPaid),
+            payments.Where(ApprenticeshipsHaveRemainingCost()).Sum(c=>c.TotalCost - c.TotalPaid),
+            transfers.Where(ApprenticeshipsHaveRemainingCost()).Sum(c=>c.TotalCost - c.TotalPaid),
             commitmentProjections,
             transferOutProjections,
             levyInProjections
@@ -59,5 +60,11 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         await eventService.HandleImportLearnersCost(job.Id, accountId);
 
         return TypedResults.Ok(timeline);
+    }
+
+    private static Func<ApprenticeshipPaymentSummaryEntity, bool> ApprenticeshipsHaveRemainingCost()
+    {
+        return c=>c.Status is ApprenticeshipStatus.Live
+            or ApprenticeshipStatus.WaitingToStart or ApprenticeshipStatus.Paused;
     }
 }

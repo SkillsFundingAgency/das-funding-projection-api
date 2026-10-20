@@ -209,4 +209,66 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         result.Value!.TotalEstimatedCommitedCost.Should().Be(275m + 1500m);
         result.Value.TotalEstimatedCommitedTransferCost.Should().Be(550m);
     }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_The_Estimated_Committed_Costs_Only_Include_Apprenticeships_With_Remaining_Cost(
+        long accountId,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
+        [Greedy] FundingProjectionController controller,
+        CancellationToken token)
+    {
+        // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
+        ApprenticeshipPaymentSummaryEntity Summary(long id, bool isTransfer, ApprenticeshipStatus status, decimal totalCost, decimal totalPaid) => new()
+        {
+            ApprenticeshipId = id,
+            AccountId = accountId,
+            IsTransfer = isTransfer,
+            TotalCost = totalCost,
+            TotalPaid = totalPaid,
+            StartDate = now.AddMonths(-1),
+            EndDate = now.AddMonths(6),
+            Status = status,
+        };
+
+        apprenticeshipSummariesRepository
+            .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
+            .ReturnsAsync([
+                // included
+                Summary(1, false, ApprenticeshipStatus.Live, 375m, 100m),
+                Summary(2, false, ApprenticeshipStatus.WaitingToStart, 1500m, 0m),
+                Summary(3, false, ApprenticeshipStatus.Paused, 1000m, 0m),
+                Summary(4, true, ApprenticeshipStatus.Live, 750m, 200m),
+                Summary(5, true, ApprenticeshipStatus.WaitingToStart, 600m, 0m),
+                Summary(6, true, ApprenticeshipStatus.Paused, 800m, 0m),
+                // excluded
+                Summary(7, false, ApprenticeshipStatus.Completed, 375m, 300m),
+                Summary(8, false, ApprenticeshipStatus.Stopped, 2000m, 500m),
+                Summary(9, false, ApprenticeshipStatus.Unknown, 3000m, 0m),
+                Summary(10, true, ApprenticeshipStatus.Completed, 450m, 360m),
+                Summary(11, true, ApprenticeshipStatus.Stopped, 900m, 100m),
+            ]);
+        importJobStateRepository
+            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .ReturnsAsync(importJobState);
+
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+
+        var request = new PostEmployerFundingProjectionRequest
+        {
+            Months = 3,
+            HistoricLevyIn = []
+        };
+
+        // act
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
+
+        // assert
+        result.Should().NotBeNull();
+        result.Value!.TotalEstimatedCommitedCost.Should().Be(275m + 1500m + 1000m);
+        result.Value.TotalEstimatedCommitedTransferCost.Should().Be(550m + 600m + 800m);
+    }
 }

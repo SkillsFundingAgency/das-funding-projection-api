@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.FundingProjection.Domain.Entities;
+using SFA.DAS.FundingProjection.Domain.Enums;
 
 namespace SFA.DAS.FundingProjection.Api.Projection;
 
@@ -8,6 +9,8 @@ public static class CommitmentsProjector
     {
         var startPeriod = now.ToPeriod();
         var scheduledPayments = apprenticeshipSummaries
+            .Where(c=>c.Status is ApprenticeshipStatus.Live
+                or ApprenticeshipStatus.WaitingToStart)
             .Select(PaymentScheduleGenerator.CreateFrom)
             .SelectMany(x => x.ScheduledPayments);
 

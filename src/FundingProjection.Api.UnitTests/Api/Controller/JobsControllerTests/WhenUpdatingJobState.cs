@@ -1,14 +1,10 @@
-﻿using AutoFixture.NUnit4;
-using FluentAssertions;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Moq;
 using SFA.DAS.FundingProjection.Api.Controllers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Entities;
-using SFA.DAS.Testing.AutoFixture;
 
 namespace SFA.DAS.FundingProjection.Api.UnitTests.Api.Controller.JobsControllerTests;
 

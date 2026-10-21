@@ -45,4 +45,7 @@
     <ProjectReference Include="..\FundingProjection.Data\FundingProjection.Data.csproj" />
     <ProjectReference Include="..\FundingProjection.Domain\FundingProjection.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Validators\" />
+  </ItemGroup>
 </Project>

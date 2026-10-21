@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.FundingProjection.Api.Projection;
 
-public class CommitmentsProjector
+public static class CommitmentsProjector
 {
     public static List<CommittedLevyProjection> CreateProjection(DateOnly now, int months, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipSummaries)
     {
@@ -11,32 +11,32 @@ public class CommitmentsProjector
             .Select(PaymentScheduleGenerator.CreateFrom)
             .SelectMany(x => x.ScheduledPayments);
 
-        var projections = Project(scheduledPayments, startPeriod, months);
-        return [.. projections.OrderBy(x => x.Period)];
+        return Project(scheduledPayments, startPeriod, months);
     }
 
-    internal static List<CommittedLevyProjection> Project(IEnumerable<ScheduledPayment> scheduledPayments, DateOnly startPeriod, int months)
+    private static List<CommittedLevyProjection> Project(
+        IEnumerable<ScheduledPayment> scheduledPayments, DateOnly startPeriod, int months)
     {
-        var lookup = new Dictionary<DateOnly, CommittedLevyProjection>();
-        for (var i=0; i<months; i++)
+        var projections = new CommittedLevyProjection[months];
+        for (var i = 0; i < months; i++)
         {
-            var period = startPeriod;
-            lookup.Add(period, new CommittedLevyProjection
+            projections[i] = new CommittedLevyProjection
             {
-                Period = period
-            });
-            startPeriod = startPeriod.AddMonths(1);
+                Period = startPeriod.AddMonths(i)
+            };
         }
 
         foreach (var scheduledPayment in scheduledPayments)
         {
-            if (lookup.TryGetValue(scheduledPayment.PaymentPeriod, out var projection))
-            {
-                projection.TotalMonthlyPayments += scheduledPayment.ScheduledAmount;
-                projection.TotalFinalPayments += scheduledPayment.FinalPayment;
-            }
+            var offset = (scheduledPayment.PaymentPeriod.Year - startPeriod.Year) * 12
+                         + (scheduledPayment.PaymentPeriod.Month - startPeriod.Month);
+
+            if ((uint) offset >= (uint) months) continue;
+
+            projections[offset].TotalMonthlyPayments += scheduledPayment.ScheduledAmount;
+            projections[offset].TotalFinalPayments += scheduledPayment.FinalPayment;
         }
 
-        return [.. lookup.Select(x => x.Value)];
+        return [.. projections];
     }
 }

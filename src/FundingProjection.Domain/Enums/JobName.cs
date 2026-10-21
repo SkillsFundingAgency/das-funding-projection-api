@@ -2,5 +2,5 @@
 
 public enum JobName : short
 {
-    ImportLearners = 0
+    ImportLearnersCost = 0
 }

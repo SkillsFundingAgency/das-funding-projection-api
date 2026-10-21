@@ -12,9 +12,12 @@ public static class EstimatesTimelineExtensions
             DateOnly startPeriod,
             int months,
             decimal openingBalance,
+            decimal totalRemainingCost,
+            decimal totalRemainingTransferCost,
             List<CommittedLevyProjection> commitmentProjections,
             List<CommittedLevyProjection> transferOutProjections,
-            List<LevyInMonthSummary> levyInProjections)
+            List<LevyInMonthSummary> levyInProjections
+            )
         {
             var closingBalance = openingBalance;
             var currentPeriod = startPeriod;
@@ -55,6 +58,8 @@ public static class EstimatesTimelineExtensions
             return new EstimatesTimeline
             {
                 AccountId = accountId,
+                TotalEstimatedCommitedCost = totalRemainingCost,
+                TotalEstimatedCommitedTransferCost = totalRemainingTransferCost,
                 Projections = estimates
             };
         }

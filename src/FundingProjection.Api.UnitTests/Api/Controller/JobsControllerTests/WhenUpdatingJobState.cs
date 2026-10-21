@@ -22,6 +22,8 @@ internal class WhenUpdatingJobState
         var mockJobState = new ImportJobStateEntity
         {
             Id = id,
+            AccountId = request.AccountId,
+            JobName = request.JobName,
             LastSuccessfulImportDate = request.LastSuccessfulImportDate,
             LastAttemptedDate = request.LastAttemptedDate,
             LastAttemptSuccessful = request.LastAttemptSuccessful,

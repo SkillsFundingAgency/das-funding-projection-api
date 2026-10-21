@@ -7,26 +7,22 @@ public static class PaymentScheduleGenerator
 {
     public static PaymentSchedule CreateFrom(ApprenticeshipPaymentSummaryEntity summary)
     {
-        var now = DateTime.UtcNow;
-        return summary.Status switch
-        {
-            ApprenticeshipStatus.Completed => CreateForCompletedApprenticeship(summary, now),
-            ApprenticeshipStatus.Live => CreateForLiveApprenticeship(summary, now),
-            _ => new PaymentSchedule { ApprenticeshipId = summary.ApprenticeshipId }
-        };
+        return CreateForwardPaymentsForApprenticeship(summary, DateTime.UtcNow.ToPeriod());
     }
 
-    private static PaymentSchedule CreateForCompletedApprenticeship(ApprenticeshipPaymentSummaryEntity summary, DateTime now) => CreateForLiveApprenticeship(summary, now);
-
-    private static PaymentSchedule CreateForLiveApprenticeship(ApprenticeshipPaymentSummaryEntity summary, DateTime now)
+    private static PaymentSchedule CreateForwardPaymentsForApprenticeship(ApprenticeshipPaymentSummaryEntity summary, DateOnly now)
     {
-        var remainingCost = summary.TotalCost * 0.8m - summary.TotalPaid;
+        // TotalPaid includes the completion payment once it has been made, so split what is still owed
+        // between the 20% completion payment and the remaining monthly instalments
+        var completionPayment = summary.TotalCost * 0.2m;
+        var remainingCost = Math.Max(0m, summary.TotalCost - summary.TotalPaid);
+        var remainingCompletionPayment = Math.Min(completionPayment, remainingCost);
+        var remainingMonthlyCost = remainingCost - remainingCompletionPayment;
         
         var firstPaymentPeriod = summary.StartDate.AddMonths(1).ToPeriod();
         var lastPaymentPeriod = summary.EndDate.AddMonths(1).ToPeriod();
 
-        var thisPaymentPeriod = now.ToPeriod();
-        var currentPaymentPeriod = thisPaymentPeriod;
+        var currentPaymentPeriod = now;
         
         var paymentSchedule = new PaymentSchedule { ApprenticeshipId = summary.ApprenticeshipId };
         
@@ -55,12 +51,14 @@ public static class PaymentScheduleGenerator
         var remainingPaymentPeriods = paymentSchedule.ScheduledPayments;
         
         // current month already handled, reduce the number of remaining payments to calc
-        if (thisPaymentPeriod == previousPaymentPeriod)
+        if (now == previousPaymentPeriod)
         {
             if (remainingPaymentPeriods.Count == 1)
             {
                 // the last payment includes the final payment
-                paymentSchedule.ScheduledPayments[0].ScheduledAmount = summary.LastPaymentAmount!.Value - (summary.TotalCost * 0.2m);
+                paymentSchedule.ScheduledPayments[0].ScheduledAmount = summary.LastPaymentAmount!.Value - completionPayment;
+                paymentSchedule.ScheduledPayments[0].FinalPayment = completionPayment;
+                return paymentSchedule;
             }
             else
             {
@@ -72,7 +70,7 @@ public static class PaymentScheduleGenerator
         // avoid dividing by zero
         if (remainingPaymentPeriods is { Count: > 0 })
         {
-            var monthlyPayment = remainingCost / remainingPaymentPeriods.Count;
+            var monthlyPayment = remainingMonthlyCost / remainingPaymentPeriods.Count;
             foreach (var payment in remainingPaymentPeriods)
             {
                 payment.ScheduledAmount = monthlyPayment;
@@ -82,7 +80,7 @@ public static class PaymentScheduleGenerator
         if (paymentSchedule.ScheduledPayments is { Count: > 0 })
         {
             // set the final payment
-            paymentSchedule.ScheduledPayments[^1].FinalPayment = summary.TotalCost * 0.2m;
+            paymentSchedule.ScheduledPayments[^1].FinalPayment = remainingCompletionPayment;
         }
 
         return paymentSchedule;

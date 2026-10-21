@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.FundingProjection.Api.Core;
 using SFA.DAS.FundingProjection.Api.Models.Mappers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
@@ -6,6 +6,7 @@ using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Api.Projection;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using System.ComponentModel.DataAnnotations;
+using SFA.DAS.EmployerFinance.Types.Models;
 using SFA.DAS.FundingProjection.Domain.Entities;
 using SFA.DAS.FundingProjection.Domain.Enums;
 using SFA.DAS.FundingProjection.Domain.Services;
@@ -25,6 +26,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         [FromServices] IApprenticeshipPaymentSummariesRepository apprenticeshipSummariesRepository,
         [FromServices] IImportJobStateRepository importJobStateRepository,
         [FromServices] IEventService eventService,
+        [FromServices] IExpiredFunds expiredFunds,
         [FromRoute] [Required] long accountId,
         [FromBody] [Required] PostEmployerFundingProjectionRequest request,
         CancellationToken token = default)
@@ -52,7 +54,12 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             transfers.Where(ApprenticeshipsHaveRemainingCost()).Sum(c=>c.TotalCost - c.TotalPaid),
             commitmentProjections,
             transferOutProjections,
-            levyInProjections
+            levyInProjections,
+            expiredFunds,
+            request.LevyFundsInForExpiry,
+            request.PaymentFundsOutForExpiry,
+            request.ShortTermExpiredFunds,
+            request.LongTermExpiredFunds
             );
 
         var job = await importJobStateRepository.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token);

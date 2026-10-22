@@ -7,7 +7,7 @@ namespace FundingProjection.Api.Testing.DataCreation;
 public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSummaryEntity entity)
 {
     private bool _statusSet;
-    private const int DefaultApprenticeshipLengthInMonths = 8;
+    private const int DefaultApprenticeshipLengthInMonths = 8; // do not change as tests rely on this
     private readonly DateOnly _now = DateTime.UtcNow.ToPeriod();
     
     public ApprenticeshipPaymentSummaryEntityBuilder Started(int monthsAgo = 0) => StartsIn(-monthsAgo);

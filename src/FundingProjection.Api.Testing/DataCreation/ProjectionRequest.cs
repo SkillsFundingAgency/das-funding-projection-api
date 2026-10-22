@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.FundingProjection.Api.Models.Requests;
+using SFA.DAS.FundingProjection.Api.Projection;
 
 namespace FundingProjection.Api.Testing.DataCreation;
 
@@ -9,8 +10,18 @@ public static class ProjectionRequest
         return new PostEmployerFundingProjectionRequest
         {
             Months = months,
-            CurrentLevyFunds = 1000,
+            CurrentLevyFunds = openingBalance,
             HistoricLevyIn = HistoricLevy.Generate(fixedMonthlyAmount: monthlyLevyIn)
+        };
+    }
+    
+    public static PostEmployerFundingProjectionRequest Create(int months, decimal openingBalance, List<LevyInMonthSummary> historicLevyIn)
+    {
+        return new PostEmployerFundingProjectionRequest
+        {
+            Months = months,
+            CurrentLevyFunds = openingBalance,
+            HistoricLevyIn = historicLevyIn
         };
     }
 }

@@ -8,19 +8,17 @@ public class SqlTestDataManager(FundingProjectionDataContext dataContext, IFixtu
 {
     private readonly string _schemaPrefix = $"[{schemaName}].[dbo]";
     
-    public async Task<T> AddAsync<T>(T entity) where T : class
+    public async Task<T> AddAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class
     {
-        await dataContext.AddAsync(entity);
-        await dataContext.SaveChangesAsync();
-        dataContext.Entry(entity).State = EntityState.Detached;
+        await dataContext.AddAsync(entity, cancellationToken);
+        await dataContext.SaveChangesAsync(cancellationToken);
         return entity;
     }
     
-    public async Task<List<T>> AddManyAsync<T>(List<T> entities) where T : class
+    public async Task<List<T>> AddManyAsync<T>(List<T> entities, CancellationToken cancellationToken = default) where T : class
     {
-        await dataContext.AddRangeAsync(entities);
-        await dataContext.SaveChangesAsync();
-        dataContext.Entry(entities).State = EntityState.Detached;
+        await dataContext.AddRangeAsync(entities, cancellationToken);
+        await dataContext.SaveChangesAsync(cancellationToken);
         return entities;
     }
     
@@ -47,7 +45,7 @@ public class SqlTestDataManager(FundingProjectionDataContext dataContext, IFixtu
         return entities;
     }
 
-    public async Task<T?> Get<T>(object id) where T : class
+    public async Task<T?> GetAsync<T>(object id) where T : class
     {
         return await dataContext.Set<T>().FindAsync(id);
     }
@@ -62,7 +60,7 @@ public class SqlTestDataManager(FundingProjectionDataContext dataContext, IFixtu
         await dataContext.Database.EnsureDeletedAsync(cancellationToken);
     }
 
-    public async Task WipeDataAsync()
+    public async Task WipeDataAsync(CancellationToken cancellationToken = default)
     {
         var tableNames = dataContext.Model
             .GetEntityTypes()
@@ -73,17 +71,17 @@ public class SqlTestDataManager(FundingProjectionDataContext dataContext, IFixtu
 
         foreach (var sql in tableNames.Select(tableName => $"ALTER TABLE {_schemaPrefix}.[{tableName}] NOCHECK CONSTRAINT ALL"))
         {
-            await dataContext.Database.ExecuteSqlRawAsync(sql);
+            await dataContext.Database.ExecuteSqlRawAsync(sql, cancellationToken: cancellationToken);
         }
 
         foreach (var sql in tableNames.Select(tableName => $"DELETE FROM {_schemaPrefix}.[{tableName}]"))
         {
-            await dataContext.Database.ExecuteSqlRawAsync(sql);
+            await dataContext.Database.ExecuteSqlRawAsync(sql, cancellationToken: cancellationToken);
         }
 
         foreach (var sql in tableNames.Select(tableName => $"ALTER TABLE {_schemaPrefix}.[{tableName}] CHECK CONSTRAINT ALL"))
         {
-            await dataContext.Database.ExecuteSqlRawAsync(sql);
+            await dataContext.Database.ExecuteSqlRawAsync(sql, cancellationToken: cancellationToken);
         }
     }
 }

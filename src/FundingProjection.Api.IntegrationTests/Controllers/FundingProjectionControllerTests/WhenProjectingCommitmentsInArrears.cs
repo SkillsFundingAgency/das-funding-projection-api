@@ -6,7 +6,7 @@ using SFA.DAS.FundingProjection.Domain.Entities;
 
 namespace FundingProjection.Api.IntegrationTests.Controllers.FundingProjectionControllerTests;
 
-public class WhenCalculatingCommitmentsInArrears : SqlBaseFixture
+public class WhenProjectingCommitmentsInArrears : SqlBaseFixture
 {
     [Test, MoqAutoData]
     public async Task Then_Payments_Are_Made_In_Arrears(long accountId)

@@ -42,4 +42,28 @@ public class WhenCalculatingSummaryTotals: SqlBaseFixture
         timeline.TotalEstimatedCommitedCost.Should().Be(expectedTotal);
         timeline.TotalEstimatedCommitedTransferCost.Should().Be(0);
     }
+    
+    [Test]
+    [TestCaseSource(nameof(WhenCalculatingSummaryTotalsData))]
+    public async Task Then_Total_Committed_Transfer_Costs_Are_Reduced_As_The_Apprenticeship_Payments_Are_Made(
+        int monthsAgo,
+        decimal totalPaid,
+        decimal expectedTotal)
+    {
+        // arrange
+        var accountId = AccountIdGenerator.Next();
+        await DbData.AddManyAsync([
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Started(monthsAgo).TotalPaid(totalPaid).Transferred()),
+        ]);
+        
+        // act
+        var response = await Client.PostAsJsonAsync(ProjectionUrl.Create(accountId), ProjectionRequest.Create());
+        var timeline = await response.ReadContentAsAsync<EstimatesTimeline>();
+
+        // assert
+        response.Is.Ok();
+        timeline.Should().NotBeNull();
+        timeline.TotalEstimatedCommitedCost.Should().Be(0);
+        timeline.TotalEstimatedCommitedTransferCost.Should().Be(expectedTotal);
+    }
 }

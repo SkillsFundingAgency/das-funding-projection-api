@@ -50,6 +50,12 @@ public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSumm
         _statusSet = true;
         return this;
     }
+    
+    public ApprenticeshipPaymentSummaryEntityBuilder Transferred()
+    {
+        entity.IsTransfer = true;
+        return this;
+    }
 
     public ApprenticeshipPaymentSummaryEntityBuilder LastPayment(decimal amount, DateOnly when)
     {

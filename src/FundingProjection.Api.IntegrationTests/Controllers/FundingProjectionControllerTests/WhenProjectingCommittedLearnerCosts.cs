@@ -23,6 +23,8 @@ public class WhenProjectingCommittedLearnerCosts : SqlBaseFixture
         // assert
         response.Is.Ok();
         timeline.Should().NotBeNull();
+        timeline.TotalEstimatedCommitedCost.Should().Be(1125);
+        timeline.TotalEstimatedCommitedTransferCost.Should().Be(0);
         timeline.Projections.Should().HaveCount(4);
         timeline.Projections[0].LevyOutSummary.CommittedLearnerCost.Should().Be(200);
         timeline.Projections[1].LevyOutSummary.CommittedLearnerCost.Should().Be(300);
@@ -46,6 +48,8 @@ public class WhenProjectingCommittedLearnerCosts : SqlBaseFixture
         // assert
         response.Is.Ok();
         timeline.Should().NotBeNull();
+        timeline.TotalEstimatedCommitedCost.Should().Be(1125);
+        timeline.TotalEstimatedCommitedTransferCost.Should().Be(0);
         timeline.Projections.Should().HaveCount(4);
         timeline.Projections[^1].LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(225);
     }
@@ -66,6 +70,8 @@ public class WhenProjectingCommittedLearnerCosts : SqlBaseFixture
         // assert
         response.Is.Ok();
         timeline.Should().NotBeNull();
+        timeline.TotalEstimatedCommitedCost.Should().Be(0);
+        timeline.TotalEstimatedCommitedTransferCost.Should().Be(0);
         timeline.Projections.Should().HaveCount(4);
         timeline.Projections.Should().AllSatisfy(x => x.LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(0));
     }

@@ -178,7 +178,6 @@ public class WhenProjectingCommitments
 
     [TestCase(ApprenticeshipStatus.Paused)]
     [TestCase(ApprenticeshipStatus.Stopped)]
-    [TestCase(ApprenticeshipStatus.Completed)]
     [TestCase(ApprenticeshipStatus.Unknown)]
     public void Then_Apprenticeships_Not_In_A_Projectable_Status_Are_Excluded(ApprenticeshipStatus status)
     {

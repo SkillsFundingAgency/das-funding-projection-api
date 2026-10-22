@@ -49,4 +49,24 @@ public class WhenProjectingCommittedLearnerCosts : SqlBaseFixture
         timeline.Projections.Should().HaveCount(4);
         timeline.Projections[^1].LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(225);
     }
+    
+    [Test, MoqAutoData]
+    public async Task Then_Completed_Apprenticeships_Are_Not_Included_In_The_Projections(long accountId)
+    {
+        // arrange
+        await DbData.AddManyAsync([
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Started(monthsAgo: 6).Length(3).TotalCost(750)), 
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Started(monthsAgo: 6).Length(3).TotalCost(375)), 
+        ]);
+        
+        // act
+        var response = await Client.PostAsJsonAsync(ProjectionUrl.Create(accountId), ProjectionRequest.Create(4));
+        var timeline = await response.ReadContentAsAsync<EstimatesTimeline>();
+
+        // assert
+        response.Is.Ok();
+        timeline.Should().NotBeNull();
+        timeline.Projections.Should().HaveCount(4);
+        timeline.Projections.Should().AllSatisfy(x => x.LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(0));
+    }
 }

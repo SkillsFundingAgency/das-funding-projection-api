@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using SFA.DAS.EmployerFinance.Types.Models;
 using SFA.DAS.FundingProjection.Api.Controllers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
@@ -41,7 +42,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
 
         // act
         var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object,
-            importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
+            importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
@@ -112,7 +113,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
@@ -202,7 +203,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
@@ -264,11 +265,121 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
         result.Value!.TotalEstimatedCommitedCost.Should().Be(275m + 1500m + 1000m);
         result.Value.TotalEstimatedCommitedTransferCost.Should().Be(550m + 600m + 800m);
+    }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_All_Levy_Expires_Over_12_Months_When_There_Is_12_Months_Of_Levy_In_And_No_Estimated_Values(
+        long accountId,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
+        [Greedy] FundingProjectionController controller,
+        CancellationToken token)
+    {
+        // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
+        apprenticeshipSummariesRepository
+            .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
+            .ReturnsAsync([]);
+
+        importJobStateRepository
+            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .ReturnsAsync(importJobState);
+
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+
+        var levyFundsIn = Enumerable.Range(-12, 12)
+            .Select(i => now.AddMonths(i))
+            .Select(p => new CalendarPeriodAmount { Year = p.Year, Month = p.Month, Amount = p.Month * 100m })
+            .ToList();
+        var totalLevyIn = levyFundsIn.Sum(x => x.Amount);
+
+        var request = new PostEmployerFundingProjectionRequest
+        {
+            Months = 12,
+            CurrentLevyFunds = totalLevyIn,
+            HistoricLevyIn = [],
+            LevyFundsInForExpiry = levyFundsIn
+        };
+
+        // act
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
+
+        // assert
+        result.Should().NotBeNull();
+        var projections = result.Value!.Projections;
+        projections.Should().HaveCount(12);
+        for (var i = 0; i < 12; i++)
+        {
+            projections[i].LevyOutSummary.ExpiredLevy.Should().Be(levyFundsIn[i].Amount);
+        }
+        projections.Sum(x => x.LevyOutSummary.ExpiredLevy).Should().Be(totalLevyIn);
+        projections[^1].ClosingBalance.Should().Be(0m);
+    }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_No_Levy_Expires_When_The_Estimated_Spend_Matches_The_Levy_In_From_12_Months_Ago(
+        long accountId,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
+        [Greedy] FundingProjectionController controller,
+        CancellationToken token)
+    {
+        // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
+        var levyFundsIn = Enumerable.Range(-12, 12)
+            .Select(i => now.AddMonths(i))
+            .Select(p => new CalendarPeriodAmount { Year = p.Year, Month = p.Month, Amount = p.Month * 100m })
+            .ToList();
+        var totalLevyIn = levyFundsIn.Sum(x => x.Amount);
+
+        // one apprenticeship per projected month, each paid in full in that month (instalment plus completion),
+        // costing the same as the levy that came in 12 months earlier
+        apprenticeshipSummariesRepository
+            .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
+            .ReturnsAsync(levyFundsIn.Select((levyIn, i) => new ApprenticeshipPaymentSummaryEntity
+            {
+                ApprenticeshipId = i + 1,
+                AccountId = accountId,
+                IsTransfer = false,
+                TotalCost = levyIn.Amount,
+                TotalPaid = 0m,
+                StartDate = now.AddMonths(i - 1),
+                EndDate = now.AddMonths(i - 1),
+                Status = i == 0 ? ApprenticeshipStatus.Live : ApprenticeshipStatus.WaitingToStart,
+            }).ToList());
+
+        importJobStateRepository
+            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .ReturnsAsync(importJobState);
+
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+
+        var request = new PostEmployerFundingProjectionRequest
+        {
+            Months = 12,
+            CurrentLevyFunds = totalLevyIn,
+            HistoricLevyIn = [],
+            LevyFundsInForExpiry = levyFundsIn
+        };
+
+        // act
+        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
+
+        // assert
+        result.Should().NotBeNull();
+        var projections = result.Value!.Projections;
+        projections.Should().HaveCount(12);
+        projections.TrueForAll(x => x.LevyOutSummary.ExpiredLevy == 0).Should().BeTrue();
+        projections[^1].ClosingBalance.Should().Be(0m);
     }
 }

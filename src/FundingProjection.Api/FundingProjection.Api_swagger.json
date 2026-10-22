@@ -381,6 +381,27 @@
         ],
         "type": "string"
       },
+      "CalendarPeriodAmount": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          },
+          "month": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "EstimatesTimeline": {
         "type": "object",
         "properties": {
@@ -652,6 +673,30 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/LevyInMonthSummary"
+            }
+          },
+          "levyFundsInForExpiry": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarPeriodAmount"
+            }
+          },
+          "paymentFundsOutForExpiry": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarPeriodAmount"
+            }
+          },
+          "longTermExpiredFunds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarPeriodAmount"
+            }
+          },
+          "shortTermExpiredFunds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarPeriodAmount"
             }
           }
         },

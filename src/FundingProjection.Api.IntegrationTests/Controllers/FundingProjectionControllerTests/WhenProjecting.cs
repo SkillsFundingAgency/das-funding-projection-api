@@ -90,7 +90,7 @@ public class WhenProjecting: SqlBaseFixture
          */
 
         // act
-        var response = await Client.PostAsJsonAsync(ProjectionUrl.Create(accountId), ProjectionRequest.Create(6, 120001m, 20000m));
+        var response = await Measure.ThisAsync(async () => await Client.PostAsJsonAsync(ProjectionUrl.Create(accountId), ProjectionRequest.Create(6, 120001m, 20000m)));
         var timeline = await response.ReadContentAsAsync<EstimatesTimeline>();
 
         // assert

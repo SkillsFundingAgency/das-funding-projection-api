@@ -47,7 +47,8 @@ internal class Startup
 
     private bool IsEnvironmentLocalOrDev =>
         _environmentName.Equals("LOCAL", StringComparison.CurrentCultureIgnoreCase)
-        || _environmentName.Equals("DEV", StringComparison.CurrentCultureIgnoreCase);
+        || _environmentName.Equals("DEV", StringComparison.CurrentCultureIgnoreCase)
+        || _environmentName.Equals("INTEGRATION", StringComparison.CurrentCultureIgnoreCase);
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -69,7 +70,6 @@ internal class Startup
 
         services.Configure<ConnectionStrings>(Configuration.GetSection(nameof(ConnectionStrings)));
         services.AddSingleton(cfg => cfg.GetService<IOptions<ConnectionStrings>>()!.Value);
-        var connectionStrings = Configuration.GetSection(nameof(ConnectionStrings)).Get<ConnectionStrings>();
 
         services.ConfigureHttpJsonOptions(options =>
         {
@@ -95,7 +95,7 @@ internal class Startup
 
         services.AddApplicationDependencies();
         services.AddServiceBusRegistration(Configuration);
-        services.AddDatabaseRegistration(connectionStrings!, Configuration["EnvironmentName"]);
+        services.AddDatabaseRegistration(Configuration, IsEnvironmentLocalOrDev);
         services.AddOpenTelemetryRegistration(Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]!);
         services.ConfigureHealthChecks();
         services.AddTransient<VersionHeaderTransformer>();

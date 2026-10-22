@@ -7,10 +7,11 @@ namespace FundingProjection.Api.IntegrationTests.Controllers.FundingProjectionCo
 
 public class WhenProjectingUsingHistoricLevyData : SqlBaseFixture
 {
-    [Test, MoqAutoData]
-    public async Task Then_With_No_Historic_Data_The_Timeline_Levy_In_Values_Are_Zero(long accountId)
+    [Test]
+    public async Task Then_With_No_Historic_Data_The_Timeline_Levy_In_Values_Are_Zero()
     {
         // act
+        var accountId = AccountIdGenerator.Next();
         var response = await Client.PostAsJsonAsync(ProjectionUrl.Create(accountId), ProjectionRequest.Create(6, 0, []));
         var timeline = await response.ReadContentAsAsync<EstimatesTimeline>();
 
@@ -33,10 +34,11 @@ public class WhenProjectingUsingHistoricLevyData : SqlBaseFixture
         });
     }
     
-    [Test, MoqAutoData]
-    public async Task Then_The_Provided_Historic_Levy_Is_Used_To_Project_The_Timeline(long accountId)
+    [Test]
+    public async Task Then_The_Provided_Historic_Levy_Is_Used_To_Project_The_Timeline()
     {
         // arrange
+        var accountId = AccountIdGenerator.Next();
         var request = ProjectionRequest.Create(12);
         
         // act
@@ -57,10 +59,11 @@ public class WhenProjectingUsingHistoricLevyData : SqlBaseFixture
         });
     }
     
-    [Test, MoqAutoData]
-    public async Task Then_The_Provided_Historic_Levy_Is_Used_To_Project_The_Timeline_For_Multiple_Years(long accountId)
+    [Test]
+    public async Task Then_The_Provided_Historic_Levy_Is_Used_To_Project_The_Timeline_For_Multiple_Years()
     {
         // arrange
+        var accountId = AccountIdGenerator.Next();
         var request = ProjectionRequest.Create(36);
         
         // act
@@ -83,10 +86,11 @@ public class WhenProjectingUsingHistoricLevyData : SqlBaseFixture
         });
     }
     
-    [Test, MoqAutoData]
-    public async Task Then_If_The_Historic_Levy_Contains_Levy_In_For_The_Current_Period_It_Is_Used_Instead_Of_The_12_Months_Prior_Levy_In_Figure(long accountId)
+    [Test]
+    public async Task Then_If_The_Historic_Levy_Contains_Levy_In_For_The_Current_Period_It_Is_Used_Instead_Of_The_12_Months_Prior_Levy_In_Figure()
     {
         // arrange
+        var accountId = AccountIdGenerator.Next();
         var request = ProjectionRequest.Create(9, 1000m, HistoricLevy.Generate(includeCurrentMonth: true));
         var latestLevyIn = request.HistoricLevyIn.MaxBy(x => x.Period)!;
         

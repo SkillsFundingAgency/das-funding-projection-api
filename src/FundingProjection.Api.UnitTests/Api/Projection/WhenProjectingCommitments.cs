@@ -106,7 +106,7 @@ public class WhenProjectingCommitments
                 EndDate = now.AddMonths(-1),
                 LastPaymentDate = now,
                 LastPaymentAmount = 350m,
-                Status = ApprenticeshipStatus.Completed,
+                Status = ApprenticeshipStatus.Stopped,
             },
             new()
             {
@@ -233,7 +233,7 @@ public class WhenProjectingCommitments
         var results = CommitmentsProjector.CreateProjection(now, 3, summaries);
 
         // assert
-        results.Should().AllSatisfy(x => x.TotalMonthlyPayments.Should().Be(100m));
-        results[^1].TotalFinalPayments.Should().Be(75m);
+        results.Should().AllSatisfy(x => x.TotalMonthlyPayments.Should().Be(200m));
+        results[^1].TotalFinalPayments.Should().Be(150m);
     }
 }

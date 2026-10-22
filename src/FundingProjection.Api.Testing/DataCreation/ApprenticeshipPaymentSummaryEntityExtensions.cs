@@ -17,10 +17,10 @@ public static class ApprenticeshipPaymentSummaryEntityExtensions
                 Uln = UlnGenerator.Next(),
                 ApprenticeshipId = ApprenticeshipIdGenerator.Next(),
                 StartDate = now,
-                EndDate = now.AddMonths(8),
-                TotalCost = 1000,
+                EndDate = now.AddMonths(TestData.DefaultLength-1), // 8 month length, months are inclusive
+                TotalCost = TestData.DefaultTotalCost,
                 TotalPaid = 0,
-                Dob = now.AddYears(-18),
+                Dob = now.AddYears(-TestData.DefaultAge),
                 IsTransfer = false,
                 Status = ApprenticeshipStatus.Live
             };

@@ -8,10 +8,11 @@ namespace FundingProjection.Api.IntegrationTests.Controllers.FundingProjectionCo
 
 public class WhenProjectingCommitmentsInArrears : SqlBaseFixture
 {
-    [Test, MoqAutoData]
-    public async Task Then_Payments_Are_Made_In_Arrears(long accountId)
+    [Test]
+    public async Task Then_Payments_Are_Made_In_Arrears()
     {
         // arrange
+        var accountId = AccountIdGenerator.Next();
         var entity = ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Started(monthsAgo: 0).Length(3).TotalCost(375));
         await DbData.AddAsync(entity);
         
@@ -29,10 +30,11 @@ public class WhenProjectingCommitmentsInArrears : SqlBaseFixture
         timeline.Projections[^1].LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(75);
     }
     
-    [Test, MoqAutoData]
-    public async Task Then_An_Apprenticeship_Completed_In_The_Previous_Period_Has_A_Final_Payment_In_The_Current_Period(long accountId)
+    [Test]
+    public async Task Then_An_Apprenticeship_Completed_In_The_Previous_Period_Has_A_Final_Payment_In_The_Current_Period()
     {
         // arrange
+        var accountId = AccountIdGenerator.Next();
         var entity = ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x
             .Started(monthsAgo: 3).Length(3).TotalCost(375).TotalPaid(375).LastPayment(175m, DateTime.UtcNow.ToPeriod()));
         await DbData.AddAsync(entity);

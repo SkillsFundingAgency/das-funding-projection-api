@@ -37,6 +37,13 @@ public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSumm
         return this;
     }
     
+    public ApprenticeshipPaymentSummaryEntityBuilder Live()
+    {
+        entity.Status = ApprenticeshipStatus.Live;
+        _statusSet = true;
+        return this;
+    }
+    
     public ApprenticeshipPaymentSummaryEntityBuilder Paused()
     {
         entity.Status = ApprenticeshipStatus.Paused;
@@ -70,7 +77,16 @@ public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSumm
         {
             if (entity.EndDate < _now)
             {
-                entity.Status = ApprenticeshipStatus.Completed;
+                if (entity.EndDate.AddMonths(1) == _now)
+                {
+                    entity.Status = entity.LastPaymentDate == _now
+                        ? ApprenticeshipStatus.Completed
+                        : ApprenticeshipStatus.Live;
+                }
+                else
+                {
+                    entity.Status = ApprenticeshipStatus.Completed;
+                }
             } 
             else if (entity.StartDate <= _now && _now <= entity.EndDate)
             {

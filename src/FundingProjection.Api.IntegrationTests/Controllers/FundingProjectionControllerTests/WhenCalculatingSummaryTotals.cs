@@ -16,7 +16,7 @@ public class WhenCalculatingSummaryTotals: SqlBaseFixture
         [5, 500m, 500m],
         [6, 600m, 400m],
         [7, 700m, 300m],
-        [8, 800m, 0m],
+        [8, 800m, 200m],
     ];
 
     [Test]

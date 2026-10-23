@@ -30,6 +30,10 @@ public class WhenProjecting: SqlBaseFixture
                 x.Started(4).TotalPaid(400m).LastPayment(100m, DateTime.UtcNow.ToPeriod())),
             ApprenticeshipPaymentSummaryEntity.Create(accountId, x => // 6. waiting to start
                 x.StartsIn(4)),
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => // 7. Stopped
+                x.Started(4).Stopped()),
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => // 8. Paused
+                x.Started(4).Paused()),
             
             // transferred
             ApprenticeshipPaymentSummaryEntity.Create(accountId, x => // 1. completed long ago - should not be included
@@ -44,13 +48,17 @@ public class WhenProjecting: SqlBaseFixture
                 x.Started(4).TotalPaid(400m).LastPayment(100m, DateTime.UtcNow.ToPeriod()).Transferred()),
             ApprenticeshipPaymentSummaryEntity.Create(accountId, x => // 6. waiting to start
                 x.StartsIn(4).Transferred()),
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => // 7. Stopped
+                x.Started(4).Transferred().Stopped()),
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => // 8. Paused
+                x.Started(4).Transferred().Paused()),
         ]);
         
         /*
          Period 1
          Test Case  Monthly     Final   
          -------------------------------
-         1/6        0           0       
+         1/6-8      0           0       
          2          100         200     
          3          100         200     
          4          100         0       
@@ -62,7 +70,7 @@ public class WhenProjecting: SqlBaseFixture
          Periods 2-4
          Test Case  Monthly     Final 
          -----------------------------
-         1-3+6      0           0     
+         1-3+6-8    0           0     
          4          100         0     
          5          100         0     
          -----------------------------
@@ -72,7 +80,7 @@ public class WhenProjecting: SqlBaseFixture
          Period 5
          Test Case  Monthly     Final 
          -----------------------------
-         1-3+6      0           0     
+         1-3+6-8    0           0     
          4          100         200     
          5          100         200     
          -----------------------------
@@ -82,7 +90,7 @@ public class WhenProjecting: SqlBaseFixture
          Period 6
          Test Case  Monthly     Final 
          -----------------------------
-         1-5        0           0     
+         1-5+7-8    0           0     
          6          100         0
          -----------------------------
                     100         0
@@ -97,8 +105,8 @@ public class WhenProjecting: SqlBaseFixture
         response.Is.Ok();
         timeline.Should().NotBeNull();
         
-        timeline.TotalEstimatedCommitedCost.Should().Be(2600m);
-        timeline.TotalEstimatedCommitedTransferCost.Should().Be(2600m);
+        timeline.TotalEstimatedCommitedCost.Should().Be(3600m);
+        timeline.TotalEstimatedCommitedTransferCost.Should().Be(3600m);
         
         timeline.Projections.Should().HaveCount(6);
         

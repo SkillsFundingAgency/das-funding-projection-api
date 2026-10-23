@@ -6,7 +6,7 @@ public sealed record PostApprenticeshipPaymentSummaryRequest
 {
     public bool IsTransfer { get; set; }
     public long Uln { get; set; }
-    public DateOnly? Dob { get; set; }
+    public int AgeAtStart { get; set; }
     public ApprenticeshipStatus Status { get; set; }
     public decimal TotalCost { get; set; }
     public decimal TotalPaid { get; set; }

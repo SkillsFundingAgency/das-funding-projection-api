@@ -8,7 +8,7 @@ public class ApprenticeshipPaymentSummaryResponse
     public long AccountId { get; set; }
     public bool IsTransfer { get; set; }
     public long Uln { get; set; }
-    public DateOnly? Dob { get; set; }
+    public int AgeAtStart { get; set; }
     public ApprenticeshipStatus Status { get; set; }
     public decimal TotalCost { get; set; }
     public decimal TotalPaid { get; set; }

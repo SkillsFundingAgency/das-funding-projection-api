@@ -33,10 +33,10 @@ public class ApprenticeshipPaymentSummaryEntityConfiguration: IEntityTypeConfigu
             .HasColumnType("BIGINT")
             .IsRequired();
 
-        builder.Property(x => x.Dob)
-            .HasColumnName("Dob")
-            .HasColumnType("DATE")
-            .IsRequired(false);
+        builder.Property(x => x.AgeAtStart)
+            .HasColumnName("AgeAtStart")
+            .HasColumnType("TINYINT")
+            .IsRequired();
 
         builder.Property(x => x.Status)
             .HasColumnName("Status")

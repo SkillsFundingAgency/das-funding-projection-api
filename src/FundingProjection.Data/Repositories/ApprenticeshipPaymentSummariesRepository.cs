@@ -37,7 +37,7 @@ public class ApprenticeshipPaymentSummariesRepository(IFundingProjectionDataCont
         existingEntity.LastPaymentDate = entity.LastPaymentDate;
         existingEntity.LastUpdatedDate = entity.LastUpdatedDate;
         existingEntity.Uln = entity.Uln;
-        existingEntity.Dob = entity.Dob;
+        existingEntity.AgeAtStart = entity.AgeAtStart;
         existingEntity.Status = entity.Status;
         existingEntity.TotalCost = entity.TotalCost;
         existingEntity.TotalPaid = entity.TotalPaid;

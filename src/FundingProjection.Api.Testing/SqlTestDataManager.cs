@@ -2,7 +2,7 @@
 
 namespace FundingProjection.Api.Testing;
 
-public class SqlTestDataManager(FundingProjectionDataContext dataContext, string schemaName)
+public class SqlTestDataManager(FundingProjectionDataContext dataContext)
 {
     public async Task<T> AddAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class
     {

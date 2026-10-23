@@ -24,9 +24,7 @@ public abstract class SqlBaseFixture
         Client = _server.CreateClient();
         _serviceScope = _server.Services.CreateScope();
         _dataContext = _serviceScope.ServiceProvider.GetRequiredService<FundingProjectionDataContext>();
-        
-        var configuration = _server.Server.Services.GetService(typeof(IConfiguration)) as IConfiguration;
-        DbData = new SqlTestDataManager(_dataContext, configuration.GetDbSchemaName());
+        DbData = new SqlTestDataManager(_dataContext);
     }
 
     [TearDown]

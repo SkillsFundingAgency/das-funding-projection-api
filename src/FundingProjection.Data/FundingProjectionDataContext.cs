@@ -31,8 +31,6 @@ public class FundingProjectionDataContext : DbContext, IFundingProjectionDataCon
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var connection = new SqlConnection { ConnectionString = _configuration!.SqlConnectionString, };
-        optionsBuilder.UseSqlServer(connection, options => options.EnableRetryOnFailure(5, TimeSpan.FromSeconds(20), null));
         optionsBuilder.UseLazyLoadingProxies();
 
         // Note: useful to keep here

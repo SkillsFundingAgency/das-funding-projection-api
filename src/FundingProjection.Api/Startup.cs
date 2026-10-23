@@ -45,13 +45,17 @@ internal class Startup
         Configuration = config.Build();
     }
 
-    private bool IsEnvironmentLocalOrDev =>
+    private bool IsDevOrIntegration =>
+        _environmentName.Equals("DEV", StringComparison.CurrentCultureIgnoreCase)
+        || _environmentName.Equals("INTEGRATION", StringComparison.CurrentCultureIgnoreCase);
+    
+    private bool IsLocalOrDevOrIntegration =>
         _environmentName.Equals("LOCAL", StringComparison.CurrentCultureIgnoreCase)
-        || _environmentName.Equals("DEV", StringComparison.CurrentCultureIgnoreCase);
+        || IsDevOrIntegration;
 
     public void ConfigureServices(IServiceCollection services)
     {
-        if (!IsEnvironmentLocalOrDev)
+        if (!IsLocalOrDevOrIntegration)
         {
             var azureAdConfiguration = Configuration
                 .GetSection("AzureAd")
@@ -69,7 +73,6 @@ internal class Startup
 
         services.Configure<ConnectionStrings>(Configuration.GetSection(nameof(ConnectionStrings)));
         services.AddSingleton(cfg => cfg.GetService<IOptions<ConnectionStrings>>()!.Value);
-        var connectionStrings = Configuration.GetSection(nameof(ConnectionStrings)).Get<ConnectionStrings>();
 
         services.ConfigureHttpJsonOptions(options =>
         {
@@ -79,7 +82,7 @@ internal class Startup
         services
             .AddMvc(o =>
             {
-                if (!IsEnvironmentLocalOrDev)
+                if (!IsLocalOrDevOrIntegration)
                 {
                     o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string>
                     {
@@ -95,7 +98,7 @@ internal class Startup
 
         services.AddApplicationDependencies();
         services.AddServiceBusRegistration(Configuration);
-        services.AddDatabaseRegistration(connectionStrings!, Configuration["EnvironmentName"]);
+        services.AddDatabaseRegistration(Configuration, IsDevOrIntegration);
         services.AddOpenTelemetryRegistration(Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]!);
         services.ConfigureHealthChecks();
         services.AddTransient<VersionHeaderTransformer>();

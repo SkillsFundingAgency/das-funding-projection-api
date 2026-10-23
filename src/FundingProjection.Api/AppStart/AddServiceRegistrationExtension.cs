@@ -37,20 +37,22 @@ public static class AddServiceRegistrationExtension
                 : new ServiceBusClient(connectionString));
         }
 
-        public void AddDatabaseRegistration(ConnectionStrings config,
-            string? environmentName)
+        public void AddDatabaseRegistration(IConfiguration configuration, bool isLocalOrDev)
         {
+            var connectionStrings = configuration.GetSection(nameof(ConnectionStrings)).Get<ConnectionStrings>()!;
             services.AddHttpContextAccessor();
 
-            if (string.Equals(environmentName, "DEV", StringComparison.CurrentCultureIgnoreCase))
+            if (isLocalOrDev)
             {
-                services.AddDbContext<FundingProjectionDataContext>(options =>
-                    options.UseInMemoryDatabase("SFA.DAS.FundingProjection.Api"), ServiceLifetime.Transient);
+                var schemaName = configuration["TestingDbSchemaName"] ?? "SFA.DAS.FundingProjection.Api";
+                services.AddDbContext<FundingProjectionDataContext>(options => options.UseInMemoryDatabase(schemaName), ServiceLifetime.Transient);
             }
             else
             {
-                services.AddDbContext<FundingProjectionDataContext>(options =>
-                    options.UseSqlServer(config.SqlConnectionString), ServiceLifetime.Transient);
+                services.AddDbContext<FundingProjectionDataContext>(
+                    options => options.UseSqlServer(connectionStrings.SqlConnectionString, sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)),
+                    ServiceLifetime.Transient
+                );
             }
 
             services.AddScoped<IFundingProjectionDataContext, FundingProjectionDataContext>(provider =>

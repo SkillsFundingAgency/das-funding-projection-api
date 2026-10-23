@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/Tests/">
+    <Project Path="FundingProjection.Api.IntegrationTests/FundingProjection.Api.IntegrationTests.csproj" />
+    <Project Path="FundingProjection.Api.Testing/FundingProjection.Api.Testing.csproj" />
     <Project Path="FundingProjection.Api.UnitTests/FundingProjection.Api.UnitTests.csproj" Id="fb5533a1-53d3-4a1a-b287-5c4ca9402297" />
   </Folder>
   <Project Path="FundingProjection.Api/FundingProjection.Api.csproj" />

@@ -9,8 +9,7 @@ public static class CommitmentsProjector
     {
         var startPeriod = now.ToPeriod();
         var scheduledPayments = apprenticeshipSummaries
-            .Where(c=>c.Status is ApprenticeshipStatus.Live
-                or ApprenticeshipStatus.WaitingToStart)
+            .Where(c => c.Status is ApprenticeshipStatus.Live or ApprenticeshipStatus.WaitingToStart or ApprenticeshipStatus.Completed)
             .Select(PaymentScheduleGenerator.CreateFrom)
             .SelectMany(x => x.ScheduledPayments);
 

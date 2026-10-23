@@ -10,6 +10,7 @@
     [TotalPaid]          DECIMAL(18,2)  NOT NULL DEFAULT 0,
     [StartDate]          DATE           NOT NULL,
     [EndDate]            DATE           NOT NULL,
+    [ProviderOrder]      SMALLINT       NULL,
     [LastPaymentDate]    DATE           NULL,
     [LastPaymentAmount]  DECIMAL(18,2)  NULL,
     [LastUpdatedDate]    DATETIME2      NOT NULL DEFAULT GETDATE(),

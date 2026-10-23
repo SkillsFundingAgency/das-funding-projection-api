@@ -343,6 +343,14 @@
             "type": "string",
             "format": "date"
           },
+          "providerOrder": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
           "lastPaymentDate": {
             "type": [
               "null",
@@ -626,6 +634,14 @@
           "endDate": {
             "type": "string",
             "format": "date"
+          },
+          "providerOrder": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
           },
           "lastPaymentDate": {
             "type": [

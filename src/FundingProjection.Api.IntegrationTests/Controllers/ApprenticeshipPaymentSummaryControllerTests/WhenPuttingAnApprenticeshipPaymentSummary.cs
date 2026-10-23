@@ -41,6 +41,7 @@ public class WhenPuttingAnApprenticeshipPaymentSummary: SqlBaseFixture
         request.Uln = UlnGenerator.Next();
         await Client.PutAsJsonAsync(PutUrl(accountId, apprenticeshipId), request);
         request.TotalCost *= 2;
+        request.ProviderOrder += 10;
         
         // act
         var response = await Client.PutAsJsonAsync(PutUrl(accountId, apprenticeshipId), request);

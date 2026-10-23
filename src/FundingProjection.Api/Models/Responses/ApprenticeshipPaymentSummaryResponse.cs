@@ -14,6 +14,7 @@ public class ApprenticeshipPaymentSummaryResponse
     public decimal TotalPaid { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
+    public int? ProviderOrder { get; set; }
     public DateOnly? LastPaymentDate { get; set; }
     public decimal? LastPaymentAmount { get; set; }
     public DateTime? LastUpdatedDate { get; set; }

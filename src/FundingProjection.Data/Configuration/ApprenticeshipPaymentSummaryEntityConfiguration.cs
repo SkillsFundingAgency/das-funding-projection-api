@@ -63,6 +63,11 @@ public class ApprenticeshipPaymentSummaryEntityConfiguration: IEntityTypeConfigu
             .HasColumnName("EndDate")
             .HasColumnType("DATE")
             .IsRequired();
+        
+        builder.Property(x => x.ProviderOrder)
+            .HasColumnName("ProviderOrder")
+            .HasColumnType("SMALLINT")
+            .IsRequired(false);
 
         builder.Property(x => x.LastPaymentDate)
             .HasColumnName("LastPaymentDate")

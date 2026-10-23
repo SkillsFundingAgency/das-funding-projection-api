@@ -23,12 +23,4 @@ public static class Measure
         CheckTime(sw.ElapsedMilliseconds, millisecondsTimeout, callerName);
         return result;
     }
-
-    public static async Task ThisAsync<T>(Func<Task> func, int millisecondsTimeout = Tolerance, [CallerMemberName] string callerName = "")
-    {
-        var sw = Stopwatch.StartNew();
-        await func();
-        sw.Stop();
-        CheckTime(sw.ElapsedMilliseconds, millisecondsTimeout, callerName);
-    }
 }

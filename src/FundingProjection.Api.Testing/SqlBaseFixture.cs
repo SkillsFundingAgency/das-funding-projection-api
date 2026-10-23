@@ -1,6 +1,4 @@
-﻿using AutoFixture;
-using FundingProjection.Api.Testing.DataCreation;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.FundingProjection.Data;
 
@@ -14,8 +12,9 @@ public abstract class SqlBaseFixture
     private FundingProjectionDataContext _dataContext;
 
     // protected
-    protected IFixture Fixture;
     protected HttpClient Client;
+    
+    // public
     public SqlTestDataManager DbData { get; private set; }
 
     [SetUp]
@@ -23,16 +22,11 @@ public abstract class SqlBaseFixture
     {
         _server = new SqlWebApplication();
         Client = _server.CreateClient();
-        Fixture = new Fixture();
-        Fixture.Customizations.Add(new CustomDateTimeSpecimenBuilder());
-        Fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList().ForEach(b => Fixture.Behaviors.Remove(b));
-        Fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
         _serviceScope = _server.Services.CreateScope();
         _dataContext = _serviceScope.ServiceProvider.GetRequiredService<FundingProjectionDataContext>();
         
         var configuration = _server.Server.Services.GetService(typeof(IConfiguration)) as IConfiguration;
-        DbData = new SqlTestDataManager(_dataContext, Fixture, configuration.GetDbSchemaName());
+        DbData = new SqlTestDataManager(_dataContext, configuration.GetDbSchemaName());
     }
 
     [TearDown]

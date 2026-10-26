@@ -1,0 +1,78 @@
+﻿using System.Diagnostics.CodeAnalysis;
+using SFA.DAS.FundingProjection.Api.Models.Responses;
+using SFA.DAS.FundingProjection.Domain.Entities;
+using SFA.DAS.FundingProjection.Domain.Enums;
+
+namespace SFA.DAS.FundingProjection.Api.Projection;
+
+public static class CoInvestmentEstimator
+{
+    public static void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, decimal requestCurrentLevyFunds)
+    {
+        var apprenticeships = apprenticeshipPaymentSummaries.Where(x => x.Status is ApprenticeshipStatus.Live or ApprenticeshipStatus.Completed or ApprenticeshipStatus.WaitingToStart).ToList();
+        
+        // TODO: we can probably pass these in
+        var paymentSchedules = apprenticeships
+            .Select(PaymentScheduleGenerator.CreateFrom)
+            .Select(x => x.ScheduledPayments.Select(p => new KeyValuePair<string, ScheduledPayment>($"{x.ApprenticeshipId}-{p.PaymentPeriod}", p)))
+            .SelectMany(x => x)
+            .ToDictionary(x => x.Key, x => x.Value);
+        
+        var orderedApprenticeships = apprenticeships
+            .OrderByDescending(x => x.IsTransfer)
+            .ThenBy(x => x.StartDate)
+            .ThenBy(x => x.Uln)
+            .ToList();
+
+        for (var index = 0; index < timeline.Projections.Count; index++)
+        {
+            var projectedPeriod = timeline.Projections[index];
+            var balance = index == 0 
+                ? requestCurrentLevyFunds
+                : timeline.Projections[index-1].ClosingBalance;
+            var currentPeriod = new DateOnly(projectedPeriod.Year, projectedPeriod.Month, 1);
+            var copay = 0m;
+            foreach (var apprenticeship in orderedApprenticeships)
+            {
+                if (!paymentSchedules.TryGetValue($"{apprenticeship.ApprenticeshipId}-{currentPeriod}", out var payment))
+                {
+                    continue;
+                }
+                
+                balance -= payment.ScheduledAmount + payment.FinalPayment;
+                if (balance >= 0)
+                {
+                    continue;
+                }
+                
+                copay += CalculateCoPayment(apprenticeship, balance, payment);
+            }
+            projectedPeriod.CoInvestmentCosts = copay;
+        }
+    }
+
+    private static decimal CalculateCoPayment(ApprenticeshipPaymentSummaryEntity apprenticeship, decimal balance, ScheduledPayment payment)
+    {
+        var amount = payment.ScheduledAmount + payment.FinalPayment;
+        var value = Math.Min(amount + (0 - (balance + amount)), amount);
+        return Rules
+            .First(x => x.CanRun(apprenticeship))
+            .CalculateCopayment(value);
+    }
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    private static class Dates
+    {
+        
+        public static readonly DateOnly August1st2026 = new(2026, 8, 1);
+        
+    }
+    
+    private static readonly List<CopaymentRule> Rules =
+    [
+        CopaymentRule.Create(x => x.StartDate >= Dates.August1st2026 && x.AgeAtStart >= 25, x => x * 0.25m),
+        
+        // default rule - do not modify and should be last
+        CopaymentRule.Create(_ => true, _ => 0m)
+    ];
+}

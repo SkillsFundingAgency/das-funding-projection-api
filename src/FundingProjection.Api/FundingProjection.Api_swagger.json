@@ -589,6 +589,11 @@
             "type": "number",
             "format": "double"
           },
+          "coInvestmentCosts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
           "levyInSummary": {
             "$ref": "#/components/schemas/LevyInSummary"
           },

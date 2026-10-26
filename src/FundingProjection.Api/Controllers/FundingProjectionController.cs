@@ -62,6 +62,8 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             request.LongTermExpiredFunds
             );
 
+        CoInvestmentEstimator.Estimate(timeline, apprenticeshipSummaries, request.CurrentLevyFunds);
+
         var job = await importJobStateRepository.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token);
 
         await eventService.HandleImportLearnersCost(job.Id, accountId);

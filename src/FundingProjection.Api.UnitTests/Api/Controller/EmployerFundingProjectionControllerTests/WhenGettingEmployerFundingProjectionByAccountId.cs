@@ -32,7 +32,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
-        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
 
         var request = new PostEmployerFundingProjectionRequest
         {
@@ -104,7 +104,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
-        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
 
         var request = new PostEmployerFundingProjectionRequest()
         {
@@ -194,7 +194,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
-        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
 
         var request = new PostEmployerFundingProjectionRequest
         {
@@ -223,17 +223,6 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
     {
         // arrange
         var now = DateOnly.FromDateTime(DateTime.UtcNow);
-        ApprenticeshipPaymentSummaryEntity Summary(long id, bool isTransfer, ApprenticeshipStatus status, decimal totalCost, decimal totalPaid) => new()
-        {
-            ApprenticeshipId = id,
-            AccountId = accountId,
-            IsTransfer = isTransfer,
-            TotalCost = totalCost,
-            TotalPaid = totalPaid,
-            StartDate = now.AddMonths(-1),
-            EndDate = now.AddMonths(6),
-            Status = status,
-        };
 
         apprenticeshipSummariesRepository
             .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
@@ -256,7 +245,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
-        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
 
         var request = new PostEmployerFundingProjectionRequest
         {
@@ -271,6 +260,19 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         result.Should().NotBeNull();
         result.Value!.TotalEstimatedCommitedCost.Should().Be(275m + 1500m + 1000m);
         result.Value.TotalEstimatedCommitedTransferCost.Should().Be(550m + 600m + 800m);
+        return;
+
+        ApprenticeshipPaymentSummaryEntity Summary(long id, bool isTransfer, ApprenticeshipStatus status, decimal totalCost, decimal totalPaid) => new()
+        {
+            ApprenticeshipId = id,
+            AccountId = accountId,
+            IsTransfer = isTransfer,
+            TotalCost = totalCost,
+            TotalPaid = totalPaid,
+            StartDate = now.AddMonths(-1),
+            EndDate = now.AddMonths(6),
+            Status = status,
+        };
     }
 
     [Test, RecursiveMoqAutoData]
@@ -293,10 +295,10 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
-        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
 
         var levyFundsIn = Enumerable.Range(-12, 12)
-            .Select(i => now.AddMonths(i))
+            .Select(now.AddMonths)
             .Select(p => new CalendarPeriodAmount { Year = p.Year, Month = p.Month, Amount = p.Month * 100m })
             .ToList();
         var totalLevyIn = levyFundsIn.Sum(x => x.Amount);
@@ -337,7 +339,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         // arrange
         var now = DateOnly.FromDateTime(DateTime.UtcNow);
         var levyFundsIn = Enumerable.Range(-12, 12)
-            .Select(i => now.AddMonths(i))
+            .Select(now.AddMonths)
             .Select(p => new CalendarPeriodAmount { Year = p.Year, Month = p.Month, Amount = p.Month * 100m })
             .ToList();
         var totalLevyIn = levyFundsIn.Sum(x => x.Amount);
@@ -346,23 +348,25 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         // costing the same as the levy that came in 12 months earlier
         apprenticeshipSummariesRepository
             .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
-            .ReturnsAsync(levyFundsIn.Select((levyIn, i) => new ApprenticeshipPaymentSummaryEntity
-            {
-                ApprenticeshipId = i + 1,
-                AccountId = accountId,
-                IsTransfer = false,
-                TotalCost = levyIn.Amount,
-                TotalPaid = 0m,
-                StartDate = now.AddMonths(i - 1),
-                EndDate = now.AddMonths(i - 1),
-                Status = i == 0 ? ApprenticeshipStatus.Live : ApprenticeshipStatus.WaitingToStart,
-            }).ToList());
+            .ReturnsAsync([
+                .. levyFundsIn.Select((levyIn, i) => new ApprenticeshipPaymentSummaryEntity
+                {
+                    ApprenticeshipId = i + 1,
+                    AccountId = accountId,
+                    IsTransfer = false,
+                    TotalCost = levyIn.Amount,
+                    TotalPaid = 0m,
+                    StartDate = now.AddMonths(i - 1),
+                    EndDate = now.AddMonths(i - 1),
+                    Status = i == 0 ? ApprenticeshipStatus.Live : ApprenticeshipStatus.WaitingToStart,
+                })
+            ]);
 
         importJobStateRepository
             .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
-        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
 
         var request = new PostEmployerFundingProjectionRequest
         {

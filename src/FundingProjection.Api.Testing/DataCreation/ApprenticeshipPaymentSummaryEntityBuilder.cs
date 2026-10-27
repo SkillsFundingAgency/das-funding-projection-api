@@ -7,6 +7,7 @@ namespace FundingProjection.Api.Testing.DataCreation;
 public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSummaryEntity entity)
 {
     private bool _statusSet;
+    private int _ageAtStart = TestData.DefaultAge;
     private readonly DateOnly _now = DateTime.UtcNow.ToPeriod();
     
     public ApprenticeshipPaymentSummaryEntityBuilder Started(int monthsAgo = 0) => StartsIn(-monthsAgo);
@@ -72,7 +73,7 @@ public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSumm
 
     public ApprenticeshipPaymentSummaryEntityBuilder Age(int age)
     {
-        entity.AgeAtStart = age;
+        _ageAtStart = age;
         return this;
     }
 
@@ -103,6 +104,7 @@ public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSumm
             }
         }
         
+        entity.Dob = entity.StartDate.AddYears(-_ageAtStart);
         return entity;
     }
 }

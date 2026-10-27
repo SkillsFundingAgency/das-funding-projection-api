@@ -20,7 +20,7 @@ public static class ApprenticeshipPaymentSummaryEntityExtensions
                 EndDate = now.AddMonths(TestData.DefaultLength-1), // 8 month length, months are inclusive
                 TotalCost = TestData.DefaultTotalCost,
                 TotalPaid = 0,
-                AgeAtStart = TestData.DefaultAge,
+                Dob = now.AddYears(-TestData.DefaultAge),
                 IsTransfer = false,
                 Status = ApprenticeshipStatus.Live,
                 ProviderOrder = 0,

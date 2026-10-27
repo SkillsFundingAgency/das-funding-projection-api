@@ -29,7 +29,7 @@ public class WhenCalculatingCoinvestment
                 EndDate = now.AddMonths(1),
                 Status = ApprenticeshipStatus.Live,
                 IsTransfer = false,
-                AgeAtStart = ageAtStart
+                Dob = now.AddMonths(-1).AddYears(-ageAtStart),
             }
         ];
 
@@ -73,7 +73,7 @@ public class WhenCalculatingCoinvestment
                 EndDate = now.AddMonths(1),
                 Status = ApprenticeshipStatus.Live,
                 IsTransfer = false,
-                AgeAtStart = ageAtStart
+                Dob = now.AddMonths(-1).AddYears(-ageAtStart),
             }
         ];
 

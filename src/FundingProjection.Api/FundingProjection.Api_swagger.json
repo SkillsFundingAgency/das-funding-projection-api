@@ -317,10 +317,9 @@
             "type": "integer",
             "format": "int64"
           },
-          "ageAtStart": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer",
-            "format": "int32"
+          "dob": {
+            "type": "string",
+            "format": "date"
           },
           "status": {
             "$ref": "#/components/schemas/ApprenticeshipStatus"
@@ -614,10 +613,9 @@
             "type": "integer",
             "format": "int64"
           },
-          "ageAtStart": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer",
-            "format": "int32"
+          "dob": {
+            "type": "string",
+            "format": "date"
           },
           "status": {
             "$ref": "#/components/schemas/ApprenticeshipStatus"

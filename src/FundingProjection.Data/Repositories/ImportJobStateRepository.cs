@@ -42,7 +42,7 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
             AccountId = accountId,
             JobName = jobName,
             JobState = JobState.Pending,
-            LastSuccessfulImportDate = DateTime.UtcNow.AddDays(-30),
+            LastSuccessfulImportDate = DateTime.MinValue, // No successful import yet and incremental imports will be based on this date, so set to the minimum value to ensure all records are imported on the first run
             LastAttemptedDate = DateTime.UtcNow,
             LastAttemptSuccessful = false,
             TotalRecordsLastRun = 0,

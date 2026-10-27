@@ -1,24 +1,19 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Domain.Entities;
-using SFA.DAS.FundingProjection.Domain.Enums;
 
 namespace SFA.DAS.FundingProjection.Api.Projection;
 
 public static class CoInvestmentEstimator
 {
-    public static void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, decimal requestCurrentLevyFunds)
+    public static void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> scheduledPayments, decimal openingLevyBalance)
     {
-        var apprenticeships = apprenticeshipPaymentSummaries.Where(x => x.Status is ApprenticeshipStatus.Live or ApprenticeshipStatus.Completed or ApprenticeshipStatus.WaitingToStart).ToList();
-        
-        // TODO: we can probably pass these in
-        var paymentSchedules = apprenticeships
-            .Select(PaymentScheduleGenerator.CreateFrom)
+        var paymentSchedules = scheduledPayments
             .Select(x => x.ScheduledPayments.Select(p => new KeyValuePair<string, ScheduledPayment>($"{x.ApprenticeshipId}-{p.PaymentPeriod}", p)))
             .SelectMany(x => x)
             .ToDictionary(x => x.Key, x => x.Value);
         
-        var orderedApprenticeships = apprenticeships
+        var orderedApprenticeships = apprenticeshipPaymentSummaries
             .OrderByDescending(x => x.IsTransfer)
             .ThenBy(x => x.StartDate)
             .ThenBy(x => x.Uln)
@@ -28,7 +23,7 @@ public static class CoInvestmentEstimator
         {
             var projectedPeriod = timeline.Projections[index];
             var balance = index == 0 
-                ? requestCurrentLevyFunds
+                ? openingLevyBalance
                 : timeline.Projections[index-1].ClosingBalance;
             var currentPeriod = new DateOnly(projectedPeriod.Year, projectedPeriod.Month, 1);
             var copay = 0m;

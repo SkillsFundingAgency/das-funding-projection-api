@@ -342,6 +342,11 @@
             "type": "string",
             "format": "date"
           },
+          "providerId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
           "providerOrder": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
@@ -349,6 +354,13 @@
               "integer"
             ],
             "format": "int32"
+          },
+          "approvalDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "learningType": {
+            "$ref": "#/components/schemas/LearningType"
           },
           "lastPaymentDate": {
             "type": [
@@ -487,6 +499,14 @@
           "Pending",
           "Completed",
           "Failed"
+        ],
+        "type": "string"
+      },
+      "LearningType": {
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
         ],
         "type": "string"
       },
@@ -638,6 +658,11 @@
             "type": "string",
             "format": "date"
           },
+          "providerId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
           "providerOrder": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
@@ -645,6 +670,13 @@
               "integer"
             ],
             "format": "int32"
+          },
+          "approvalDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "learningType": {
+            "$ref": "#/components/schemas/LearningType"
           },
           "lastPaymentDate": {
             "type": [

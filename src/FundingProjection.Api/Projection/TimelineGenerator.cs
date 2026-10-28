@@ -21,10 +21,14 @@ public class TimelineGenerator(IExpiredFunds expiredFunds)
     public EstimatesTimeline Create(TimelineData data)
     {
         var standardCommitments = data.ApprenticeshipPaymentSummaries.Where(x => !x.IsTransfer).ToList();
-        var standardPaymentSchedules = standardCommitments.Where(ApprenticeshipCanBeProjected).Select(PaymentScheduleGenerator.CreateFrom).ToList();
+        var standardPaymentSchedules = standardCommitments
+            .Where(ApprenticeshipCanBeProjected)
+            .Select(x => PaymentScheduleGenerator.CreateFrom(data.StartingPeriod, x)).ToList();
         
         var transferCommitments = data.ApprenticeshipPaymentSummaries.Where(x => x.IsTransfer).ToList();
-        var transferPaymentSchedules = transferCommitments.Where(ApprenticeshipCanBeProjected).Select(PaymentScheduleGenerator.CreateFrom).ToList();
+        var transferPaymentSchedules = transferCommitments
+            .Where(ApprenticeshipCanBeProjected)
+            .Select(x => PaymentScheduleGenerator.CreateFrom(data.StartingPeriod, x)).ToList();
         
         var commitmentProjections = CommitmentsProjector.CreateProjection(data.StartingPeriod, data.Months, standardPaymentSchedules);
         var transferOutProjections = CommitmentsProjector.CreateProjection(data.StartingPeriod, data.Months, transferPaymentSchedules);

@@ -45,7 +45,7 @@ public class WhenProjectingCommitments
                 Status = ApprenticeshipStatus.Live,
             }
         ];
-        var paymentSchedules = summaries.Select(PaymentScheduleGenerator.CreateFrom).ToList();
+        var paymentSchedules = summaries.Select(x => PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), x)).ToList();
         
         // act
         var results = CommitmentsProjector.CreateProjection(now, 3, paymentSchedules);
@@ -80,7 +80,7 @@ public class WhenProjectingCommitments
                 Status = ApprenticeshipStatus.Live,
             }
         ];
-        var paymentSchedules = summaries.Select(PaymentScheduleGenerator.CreateFrom).ToList();
+        var paymentSchedules = summaries.Select(x => PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), x)).ToList();
         
         // act
         var results = CommitmentsProjector.CreateProjection(now, 3, paymentSchedules);
@@ -123,7 +123,7 @@ public class WhenProjectingCommitments
                 Status = ApprenticeshipStatus.Live,
             }
         ];
-        var paymentSchedules = summaries.Select(PaymentScheduleGenerator.CreateFrom).ToList();
+        var paymentSchedules = summaries.Select(x => PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), x)).ToList();
         
         // act
         var results = CommitmentsProjector.CreateProjection(now, 3, paymentSchedules);

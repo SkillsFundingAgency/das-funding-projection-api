@@ -34,7 +34,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         var timelineData = new TimelineData
         {
             AccountId = accountId,
-            StartingPeriod = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod(),
+            StartingPeriod = (request.StartPeriod ?? DateOnly.FromDateTime(DateTime.UtcNow)).ToPeriod(),
             OpeningBalance = request.CurrentLevyFunds,
             Months = Math.Clamp(request.Months, 1, MaxProjectionMonths),
             HistoricLevyIn = request.HistoricLevyIn,

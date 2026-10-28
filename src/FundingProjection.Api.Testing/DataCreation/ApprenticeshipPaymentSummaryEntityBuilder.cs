@@ -19,6 +19,13 @@ public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSumm
         return this;
     }
 
+    public ApprenticeshipPaymentSummaryEntityBuilder Start(DateOnly date)
+    {
+        entity.StartDate = date;
+        entity.EndDate = entity.StartDate.AddMonths(TestData.DefaultLength-1);
+        return this;
+    }
+
     public ApprenticeshipPaymentSummaryEntityBuilder Length(int months)
     {
         entity.EndDate = entity.StartDate.AddMonths(months-1);

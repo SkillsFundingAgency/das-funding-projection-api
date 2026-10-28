@@ -59,14 +59,14 @@ public static class CoInvestmentEstimator
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class Dates
     {
-        
+        public static readonly DateOnly April1st2019 = new(2019, 4, 1);
         public static readonly DateOnly August1st2026 = new(2026, 8, 1);
-        
     }
     
     private static readonly List<CopaymentRule> Rules =
     [
         CopaymentRule.Create(x => x.StartDate >= Dates.August1st2026 && x.AgeAtStart >= 25, x => x * 0.25m),
+        CopaymentRule.Create(x => x.StartDate >= Dates.April1st2019 && x.StartDate < Dates.August1st2026, x => x * 0.05m),
         
         // default rule - do not modify and should be last
         CopaymentRule.Create(_ => true, _ => 0m)

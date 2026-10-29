@@ -87,4 +87,28 @@ public class WhenCalculatingCopayment: SqlBaseFixture
         timeline.Projections[7].CoInvestmentCosts.Should().Be(43.75m);
         timeline.Projections[8].CoInvestmentCosts.Should().Be(0m);
     }
+    
+    [Test]
+    public async Task Then_Transferred_Apprenticeships_Are_Processed_First()
+    {
+        // arrange
+        var accountId = AccountIdGenerator.Next();
+        await DbData.AddManyAsync([
+            // transferred must have a different rate than the other records 
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Start(new DateOnly(2026, 8, 1)).Age(25)),
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Start(new DateOnly(2026, 7, 1)).Transferred()),
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Start(new DateOnly(2026, 8, 1)).Age(25)),
+        ]);
+        
+        // act
+        var response = await Client.PostAsJsonAsync(ProjectionUrl.Create(accountId), ProjectionRequest.Create(9, 100, 100, new DateOnly(2026, 8, 1)));
+        var timeline = await response.ReadContentAsAsync<EstimatesTimeline>();
+
+        // assert
+        response.Is.Ok();
+        timeline.Should().NotBeNull();
+        timeline.Projections.Should().HaveCount(9);
+        timeline.Projections[0].CoInvestmentCosts.Should().Be(0m);
+        timeline.Projections[1].CoInvestmentCosts.Should().Be(50m);
+    }
 }

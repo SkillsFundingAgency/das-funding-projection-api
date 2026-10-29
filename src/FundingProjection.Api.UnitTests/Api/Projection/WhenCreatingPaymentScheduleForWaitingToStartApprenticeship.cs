@@ -25,7 +25,7 @@ public class WhenCreatingPaymentScheduleForWaitingToStartApprenticeship
         };
 
         // act
-        var result = PaymentScheduleGenerator.CreateFrom(summary);
+        var result = PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), summary);
 
         // assert
         result.ApprenticeshipId.Should().Be(1);

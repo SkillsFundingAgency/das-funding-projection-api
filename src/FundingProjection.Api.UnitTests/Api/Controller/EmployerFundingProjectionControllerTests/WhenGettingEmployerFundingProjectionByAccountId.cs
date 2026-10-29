@@ -3,6 +3,7 @@ using SFA.DAS.EmployerFinance.Types.Models;
 using SFA.DAS.FundingProjection.Api.Controllers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
+using SFA.DAS.FundingProjection.Api.Projection;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Entities;
 using SFA.DAS.FundingProjection.Domain.Enums;
@@ -41,8 +42,14 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object,
-            importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
@@ -113,7 +120,14 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
@@ -203,7 +217,14 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
@@ -265,7 +286,14 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
@@ -310,7 +338,14 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();
@@ -373,7 +408,14 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         };
 
         // act
-        var result = await controller.PostEmployerFundingProjection(apprenticeshipSummariesRepository.Object, importJobStateRepository.Object, eventService.Object, new ExpiredFunds(), accountId, request, token) as Ok<EstimatesTimeline>;
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
 
         // assert
         result.Should().NotBeNull();

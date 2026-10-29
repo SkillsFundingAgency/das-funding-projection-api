@@ -22,7 +22,8 @@ public static class ApprenticeshipPaymentSummaryEntityExtensions
                 TotalPaid = 0,
                 Dob = now.AddYears(-TestData.DefaultAge),
                 IsTransfer = false,
-                Status = ApprenticeshipStatus.Live
+                Status = ApprenticeshipStatus.Live,
+                ProviderOrder = 0,
             };
             var builder = new ApprenticeshipPaymentSummaryEntityBuilder(entity);
             options?.Invoke(builder);

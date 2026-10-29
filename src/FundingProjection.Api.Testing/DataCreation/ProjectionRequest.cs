@@ -5,10 +5,11 @@ namespace FundingProjection.Api.Testing.DataCreation;
 
 public static class ProjectionRequest
 {
-    public static PostEmployerFundingProjectionRequest Create(int months = 6, decimal openingBalance = 1000, decimal? monthlyLevyIn = null)
+    public static PostEmployerFundingProjectionRequest Create(int months = 6, decimal openingBalance = 1000, decimal? monthlyLevyIn = null, DateOnly? startPeriod = null)
     {
         return new PostEmployerFundingProjectionRequest
         {
+            StartPeriod = startPeriod,
             Months = months,
             CurrentLevyFunds = openingBalance,
             HistoricLevyIn = HistoricLevy.Generate(fixedMonthlyAmount: monthlyLevyIn)

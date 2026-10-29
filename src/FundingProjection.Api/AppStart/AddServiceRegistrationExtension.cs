@@ -6,6 +6,7 @@ using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.EmployerFinance.Types.Models;
+using SFA.DAS.FundingProjection.Api.Projection;
 using SFA.DAS.FundingProjection.Domain.Services;
 
 namespace SFA.DAS.FundingProjection.Api.AppStart;
@@ -25,6 +26,9 @@ public static class AddServiceRegistrationExtension
             // domain services
             services.AddSingleton<IEventService, EventService>();
             services.AddScoped<IExpiredFunds, ExpiredFunds>();
+            services.AddScoped<IApprenticeshipOrderingStrategy, ApprenticeshipOrderingStrategy>();
+            services.AddScoped<ICoInvestmentEstimator, CoInvestmentEstimator>();
+            services.AddScoped<ITimelineGenerator, TimelineGenerator>();
         }
 
         public void AddServiceBusRegistration(IConfiguration configuration)

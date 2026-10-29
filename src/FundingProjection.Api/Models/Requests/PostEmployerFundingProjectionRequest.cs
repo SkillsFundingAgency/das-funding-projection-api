@@ -4,10 +4,10 @@ namespace SFA.DAS.FundingProjection.Api.Models.Requests;
 
 public class PostEmployerFundingProjectionRequest
 {
+    public DateOnly? StartPeriod { get; set; }
     public int Months { get; set; } = 6;
     public decimal CurrentLevyFunds { get; set; } = 0m;
     public List<LevyInMonthSummary> HistoricLevyIn { get; set; } = [];
-
     public List<CalendarPeriodAmount> LevyFundsInForExpiry { get; set; } = [];
     public List<CalendarPeriodAmount> PaymentFundsOutForExpiry { get; set; } = [];
     public List<CalendarPeriodAmount> LongTermExpiredFunds { get; set; } = [];

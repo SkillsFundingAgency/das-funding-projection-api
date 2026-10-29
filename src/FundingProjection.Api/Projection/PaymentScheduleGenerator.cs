@@ -1,13 +1,12 @@
 using SFA.DAS.FundingProjection.Domain.Entities;
-using SFA.DAS.FundingProjection.Domain.Enums;
 
 namespace SFA.DAS.FundingProjection.Api.Projection;
 
 public static class PaymentScheduleGenerator
 {
-    public static PaymentSchedule CreateFrom(ApprenticeshipPaymentSummaryEntity summary)
+    public static PaymentSchedule CreateFrom(DateOnly startPeriod, ApprenticeshipPaymentSummaryEntity summary)
     {
-        return CreateForwardPaymentsForApprenticeship(summary, DateTime.UtcNow.ToPeriod());
+        return CreateForwardPaymentsForApprenticeship(summary, startPeriod);
     }
 
     private static PaymentSchedule CreateForwardPaymentsForApprenticeship(ApprenticeshipPaymentSummaryEntity summary, DateOnly now)

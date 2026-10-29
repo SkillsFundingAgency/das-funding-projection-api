@@ -111,4 +111,86 @@ public class WhenCalculatingCopayment: SqlBaseFixture
         timeline.Projections[0].CoInvestmentCosts.Should().Be(0m);
         timeline.Projections[1].CoInvestmentCosts.Should().Be(50m);
     }
+    
+    [Test]
+    public async Task Then_The_5_Percent_Rate_Is_Applied()
+    {
+        // arrange
+        var accountId = AccountIdGenerator.Next();
+        await DbData.AddManyAsync([
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Start(new DateOnly(2019, 4, 1))),
+        ]);
+        
+        // act
+        var response = await Client.PostAsJsonAsync(ProjectionUrl.Create(accountId), ProjectionRequest.Create(1, 0, 0, new DateOnly(2019, 5, 1)));
+        var timeline = await response.ReadContentAsAsync<EstimatesTimeline>();
+
+        // assert
+        response.Is.Ok();
+        timeline.Should().NotBeNull();
+        timeline.Projections.Should().HaveCount(1);
+        timeline.Projections[0].CoInvestmentCosts.Should().Be(5m);
+    }
+    
+    [Test]
+    public async Task Then_The_10_Percent_Rate_Is_Applied()
+    {
+        // arrange
+        var accountId = AccountIdGenerator.Next();
+        await DbData.AddManyAsync([
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Start(new DateOnly(2019, 3, 31))),
+        ]);
+        
+        // act
+        var response = await Client.PostAsJsonAsync(ProjectionUrl.Create(accountId), ProjectionRequest.Create(1, 0, 0, new DateOnly(2019, 4, 1)));
+        var timeline = await response.ReadContentAsAsync<EstimatesTimeline>();
+
+        // assert
+        response.Is.Ok();
+        timeline.Should().NotBeNull();
+        timeline.Projections.Should().HaveCount(1);
+        timeline.Projections[0].CoInvestmentCosts.Should().Be(10m);
+    }
+    
+    [Test]
+    public async Task Then_The_25_Percent_Rate_Is_Applied()
+    {
+        // arrange
+        var accountId = AccountIdGenerator.Next();
+        await DbData.AddManyAsync([
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Start(new DateOnly(2026, 8, 1)).Age(25)),
+        ]);
+        
+        // act
+        var response = await Client.PostAsJsonAsync(ProjectionUrl.Create(accountId), ProjectionRequest.Create(1, 0, 0, new DateOnly(2026, 9, 1)));
+        var timeline = await response.ReadContentAsAsync<EstimatesTimeline>();
+
+        // assert
+        response.Is.Ok();
+        timeline.Should().NotBeNull();
+        timeline.Projections.Should().HaveCount(1);
+        timeline.Projections[0].CoInvestmentCosts.Should().Be(25m);
+    }
+    
+    [Test]
+    public async Task Then_The_0_Percent_Rate_Is_Applied()
+    {
+        // arrange
+        var accountId = AccountIdGenerator.Next();
+        await DbData.AddManyAsync([
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Start(new DateOnly(2026, 8, 1)).Age(24)),
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Start(new DateOnly(2026, 8, 1)).Age(16)),
+            ApprenticeshipPaymentSummaryEntity.Create(accountId, x => x.Start(new DateOnly(2026, 8, 1)).Age(15)),
+        ]);
+        
+        // act
+        var response = await Client.PostAsJsonAsync(ProjectionUrl.Create(accountId), ProjectionRequest.Create(1, 0, 0, new DateOnly(2026, 9, 1)));
+        var timeline = await response.ReadContentAsAsync<EstimatesTimeline>();
+
+        // assert
+        response.Is.Ok();
+        timeline.Should().NotBeNull();
+        timeline.Projections.Should().HaveCount(1);
+        timeline.Projections[0].CoInvestmentCosts.Should().Be(0m);
+    }
 }

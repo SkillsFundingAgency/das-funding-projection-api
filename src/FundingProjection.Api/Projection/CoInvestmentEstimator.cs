@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using SFA.DAS.FundingProjection.Api.Models;
-using SFA.DAS.FundingProjection.Api.Models.Responses;
+﻿using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Domain.Entities;
 
 namespace SFA.DAS.FundingProjection.Api.Projection;
@@ -57,19 +55,11 @@ public class CoInvestmentEstimator(IApprenticeshipOrderingStrategy apprenticeshi
             .CalculateCopayment(value);
     }
 
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    private static class Dates
-    {
-        public static readonly DateOnly April1st2019 = new(2019, 4, 1);
-        public static readonly DateOnly August1st2026 = new(2026, 8, 1);
-    }
-    
     private static readonly List<CopaymentRule> Rules =
     [
-        CopaymentRule.Create(x => x.StartDate >= Dates.August1st2026 && x.AgeAtStart >= 25, x => x * 0.25m),
-        CopaymentRule.Create(x => x.StartDate >= Dates.April1st2019 && x.StartDate < Dates.August1st2026, x => x * 0.05m),
-        
-        // default rule - do not modify and should be last
-        CopaymentRule.Create(_ => true, _ => 0m)
+        CopaymentRules.Percent25,
+        CopaymentRules.Percent10,
+        CopaymentRules.Percent5,
+        CopaymentRules.DefaultPercent0,
     ];
 }

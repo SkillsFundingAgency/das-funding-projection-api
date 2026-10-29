@@ -23,7 +23,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         [FromServices] IApprenticeshipPaymentSummariesRepository apprenticeshipSummariesRepository,
         [FromServices] IImportJobStateRepository importJobStateRepository,
         [FromServices] IEventService eventService,
-        [FromServices] TimelineGenerator timelineGenerator,
+        [FromServices] ITimelineGenerator timelineGenerator,
         [FromRoute] [Required] long accountId,
         [FromBody] [Required] PostEmployerFundingProjectionRequest request,
         CancellationToken token = default)

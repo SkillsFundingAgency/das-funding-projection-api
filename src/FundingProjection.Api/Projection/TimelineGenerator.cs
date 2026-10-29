@@ -6,7 +6,14 @@ using SFA.DAS.FundingProjection.Domain.Enums;
 
 namespace SFA.DAS.FundingProjection.Api.Projection;
 
-public class TimelineGenerator(IExpiredFunds expiredFunds)
+public interface ITimelineGenerator
+{
+    EstimatesTimeline Create(TimelineData data);
+}
+
+public class TimelineGenerator(
+    IExpiredFunds expiredFunds, 
+    ICoInvestmentEstimator coInvestmentEstimator): ITimelineGenerator
 {
     private static bool ApprenticeshipsHaveRemainingCost(ApprenticeshipPaymentSummaryEntity entity) 
         => entity.Status is ApprenticeshipStatus.Live
@@ -51,7 +58,7 @@ public class TimelineGenerator(IExpiredFunds expiredFunds)
             data.LongTermExpiredFunds
         );
 
-        CoInvestmentEstimator.Estimate(
+        coInvestmentEstimator.Estimate(
             timeline,
             [..data.ApprenticeshipPaymentSummaries.Where(ApprenticeshipCanBeProjected)],
             [..standardPaymentSchedules, ..transferPaymentSchedules],

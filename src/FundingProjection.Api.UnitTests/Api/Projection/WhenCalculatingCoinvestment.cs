@@ -1,4 +1,5 @@
-﻿using SFA.DAS.FundingProjection.Api.Projection;
+﻿using SFA.DAS.EmployerFinance.Types.Models;
+using SFA.DAS.FundingProjection.Api.Projection;
 using SFA.DAS.FundingProjection.Domain.Entities;
 using SFA.DAS.FundingProjection.Domain.Enums;
 
@@ -13,7 +14,7 @@ public class WhenCalculatingCoinvestment
     public void Then_If_A_Leaner_Starts_On_August_1st_Or_Later_And_They_Are_25_Or_Older_At_The_Start_Of_The_Apprenticeship_Then_The_Copayment_Amount_Is_25_Percent(
         int ageAtStart,
         long accountId,
-        [Greedy] TimelineGenerator sut)
+        Mock<IExpiredFunds> expiredFunds)
     {
         // arrange
         var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
@@ -41,6 +42,8 @@ public class WhenCalculatingCoinvestment
             StartingPeriod = now,
             ApprenticeshipPaymentSummaries = summaries,
         };
+        
+        var sut = new TimelineGenerator(expiredFunds.Object, new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy()));
 
         // act
         var timeline = sut.Create(data);
@@ -57,7 +60,7 @@ public class WhenCalculatingCoinvestment
     public void Then_If_A_Leaner_Starts_On_August_1st_Or_Later_And_They_Are_Under_25_At_The_Start_Of_The_Apprenticeship_Then_The_Copayment_Amount_Is_0_Percent(
         int ageAtStart,
         long accountId,
-        [Greedy] TimelineGenerator sut)
+        Mock<IExpiredFunds> expiredFunds)
     {
         // arrange
         var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
@@ -86,6 +89,8 @@ public class WhenCalculatingCoinvestment
             ApprenticeshipPaymentSummaries = summaries,
         };
 
+        var sut = new TimelineGenerator(expiredFunds.Object, new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy()));
+        
         // act
         var timeline = sut.Create(data);
 

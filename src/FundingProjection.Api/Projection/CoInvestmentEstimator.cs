@@ -5,20 +5,21 @@ using SFA.DAS.FundingProjection.Domain.Entities;
 
 namespace SFA.DAS.FundingProjection.Api.Projection;
 
-public static class CoInvestmentEstimator
+public interface ICoInvestmentEstimator
 {
-    public static void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> scheduledPayments, decimal openingLevyBalance)
+    void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> scheduledPayments, decimal openingLevyBalance);
+}
+
+public class CoInvestmentEstimator(IApprenticeshipOrderingStrategy apprenticeshipOrderingStrategy): ICoInvestmentEstimator
+{
+    public void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> scheduledPayments, decimal openingLevyBalance)
     {
         var paymentSchedules = scheduledPayments
             .Select(x => x.ScheduledPayments.Select(p => new KeyValuePair<string, ScheduledPayment>($"{x.ApprenticeshipId}-{p.PaymentPeriod}", p)))
             .SelectMany(x => x)
             .ToDictionary(x => x.Key, x => x.Value);
-        
-        var orderedApprenticeships = apprenticeshipPaymentSummaries
-            .OrderByDescending(x => x.IsTransfer)
-            .ThenBy(x => x.StartDate)
-            .ThenBy(x => x.Uln)
-            .ToList();
+
+        var orderedApprenticeships = apprenticeshipOrderingStrategy.Execute(apprenticeshipPaymentSummaries).ToList(); 
 
         for (var index = 0; index < timeline.Projections.Count; index++)
         {

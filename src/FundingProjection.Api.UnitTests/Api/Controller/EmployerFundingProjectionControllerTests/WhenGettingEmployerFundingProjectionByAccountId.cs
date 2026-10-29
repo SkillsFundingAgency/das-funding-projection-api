@@ -46,7 +46,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             apprenticeshipSummariesRepository.Object,
             importJobStateRepository.Object,
             eventService.Object,
-            new TimelineGenerator(new ExpiredFunds()),
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
             accountId,
             request,
             token) as Ok<EstimatesTimeline>;
@@ -124,7 +124,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             apprenticeshipSummariesRepository.Object,
             importJobStateRepository.Object,
             eventService.Object,
-            new TimelineGenerator(new ExpiredFunds()),
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
             accountId,
             request,
             token) as Ok<EstimatesTimeline>;
@@ -221,7 +221,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             apprenticeshipSummariesRepository.Object,
             importJobStateRepository.Object,
             eventService.Object,
-            new TimelineGenerator(new ExpiredFunds()),
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
             accountId,
             request,
             token) as Ok<EstimatesTimeline>;
@@ -290,7 +290,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             apprenticeshipSummariesRepository.Object,
             importJobStateRepository.Object,
             eventService.Object,
-            new TimelineGenerator(new ExpiredFunds()),
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
             accountId,
             request,
             token) as Ok<EstimatesTimeline>;
@@ -342,7 +342,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             apprenticeshipSummariesRepository.Object,
             importJobStateRepository.Object,
             eventService.Object,
-            new TimelineGenerator(new ExpiredFunds()),
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
             accountId,
             request,
             token) as Ok<EstimatesTimeline>;
@@ -412,7 +412,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             apprenticeshipSummariesRepository.Object,
             importJobStateRepository.Object,
             eventService.Object,
-            new TimelineGenerator(new ExpiredFunds()),
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
             accountId,
             request,
             token) as Ok<EstimatesTimeline>;

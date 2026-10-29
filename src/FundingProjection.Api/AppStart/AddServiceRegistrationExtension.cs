@@ -26,7 +26,9 @@ public static class AddServiceRegistrationExtension
             // domain services
             services.AddSingleton<IEventService, EventService>();
             services.AddScoped<IExpiredFunds, ExpiredFunds>();
-            services.AddScoped<TimelineGenerator>();
+            services.AddScoped<IApprenticeshipOrderingStrategy, ApprenticeshipOrderingStrategy>();
+            services.AddScoped<ICoInvestmentEstimator, CoInvestmentEstimator>();
+            services.AddScoped<ITimelineGenerator, TimelineGenerator>();
         }
 
         public void AddServiceBusRegistration(IConfiguration configuration)

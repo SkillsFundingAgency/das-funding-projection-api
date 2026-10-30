@@ -7,6 +7,7 @@ namespace FundingProjection.Api.Testing.DataCreation;
 public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSummaryEntity entity)
 {
     private bool _statusSet;
+    private bool _approvalDateSet;
     private int _ageAtStart = TestData.DefaultAge;
     private readonly DateOnly _now = DateTime.UtcNow.ToPeriod();
     
@@ -83,6 +84,31 @@ public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSumm
         _ageAtStart = age;
         return this;
     }
+    
+    public ApprenticeshipPaymentSummaryEntityBuilder Approved(DateTime approvalDate)
+    {
+        _approvalDateSet = true;
+        entity.ApprovalDate = approvalDate;
+        return this;
+    }
+    
+    public ApprenticeshipPaymentSummaryEntityBuilder Provider(long id)
+    {
+        entity.ProviderId = id;
+        return this;
+    }
+    
+    public ApprenticeshipPaymentSummaryEntityBuilder Priority(int value)
+    {
+        entity.ProviderOrder = value;
+        return this;
+    }
+    
+    public ApprenticeshipPaymentSummaryEntityBuilder ApprenticeshipUnit()
+    {
+        entity.LearningType = LearningType.ApprenticeshipUnit;
+        return this;
+    }
 
     public ApprenticeshipPaymentSummaryEntity Build()
     {
@@ -110,8 +136,13 @@ public class ApprenticeshipPaymentSummaryEntityBuilder(ApprenticeshipPaymentSumm
                 entity.Status = ApprenticeshipStatus.WaitingToStart;
             }
         }
-        
+
         entity.Dob = entity.StartDate.AddYears(-_ageAtStart);
+        
+        if (!_approvalDateSet)
+        {
+            entity.ApprovalDate = entity.StartDate.ToDateTime(TimeOnly.MinValue);
+        }
         return entity;
     }
 }

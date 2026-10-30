@@ -17,13 +17,15 @@ public static class ApprenticeshipPaymentSummaryEntityExtensions
                 Uln = UlnGenerator.Next(),
                 ApprenticeshipId = ApprenticeshipIdGenerator.Next(),
                 StartDate = now,
-                EndDate = now.AddMonths(TestData.DefaultLength-1), // 8 month length, months are inclusive
+                EndDate = now.AddMonths(TestData.DefaultLength-1), // -1 because months are inclusive
                 TotalCost = TestData.DefaultTotalCost,
                 TotalPaid = 0,
                 Dob = now.AddYears(-TestData.DefaultAge),
                 IsTransfer = false,
                 Status = ApprenticeshipStatus.Live,
                 ProviderOrder = 0,
+                ApprovalDate = now.ToDateTime(TimeOnly.MinValue),
+                LearningType = TestData.DefaultLearningType,
             };
             var builder = new ApprenticeshipPaymentSummaryEntityBuilder(entity);
             options?.Invoke(builder);

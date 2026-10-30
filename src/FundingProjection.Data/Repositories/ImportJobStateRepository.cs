@@ -16,7 +16,7 @@ public interface IImportJobStateRepository
     /// <summary>
     /// Updates an existing job state
     /// </summary>
-    Task<ImportJobStateEntity> UpdateJobStateAsync(
+    Task<ImportJobStateEntity?> UpdateJobStateAsync(
         ImportJobStateEntity entity,
         CancellationToken cancellationToken);
 }
@@ -57,7 +57,7 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
         return jobState;
     }
 
-    public async Task<ImportJobStateEntity> UpdateJobStateAsync(
+    public async Task<ImportJobStateEntity?> UpdateJobStateAsync(
         ImportJobStateEntity entity,
         CancellationToken cancellationToken)
     {
@@ -67,7 +67,7 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
         var existingJobState = await GetJobStateAsync(entity.AccountId, entity.JobName, cancellationToken);
 
         if (existingJobState == null)
-            throw new InvalidOperationException($"Job state with account ID {entity.AccountId} and job name {entity.JobName} not found");
+            return null;
 
         // Update properties
         existingJobState.JobState = entity.JobState;

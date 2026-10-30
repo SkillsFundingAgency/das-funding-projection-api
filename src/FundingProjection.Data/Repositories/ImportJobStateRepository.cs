@@ -6,8 +6,6 @@ namespace SFA.DAS.FundingProjection.Data.Repositories;
 
 public interface IImportJobStateRepository
 {
-    Task<ImportJobStateEntity?> GetJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken);
-
     /// <summary>
     /// Gets existing job state or creates a new one
     /// </summary>
@@ -16,14 +14,14 @@ public interface IImportJobStateRepository
     /// <summary>
     /// Updates an existing job state
     /// </summary>
-    Task<ImportJobStateEntity> UpdateJobStateAsync(
+    Task<ImportJobStateEntity?> UpdateJobStateAsync(
         ImportJobStateEntity entity,
         CancellationToken cancellationToken);
 }
 
 public class ImportJobStateRepository(IFundingProjectionDataContext dataContext) : IImportJobStateRepository
 {
-    public async Task<ImportJobStateEntity?> GetJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken)
+    private async Task<ImportJobStateEntity?> GetJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken)
     {
         return await dataContext.ImportJobStates.FirstOrDefaultAsync(j => j.AccountId == accountId && j.JobName == jobName, cancellationToken);
     }
@@ -57,7 +55,7 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
         return jobState;
     }
 
-    public async Task<ImportJobStateEntity> UpdateJobStateAsync(
+    public async Task<ImportJobStateEntity?> UpdateJobStateAsync(
         ImportJobStateEntity entity,
         CancellationToken cancellationToken)
     {
@@ -67,7 +65,7 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
         var existingJobState = await GetJobStateAsync(entity.AccountId, entity.JobName, cancellationToken);
 
         if (existingJobState == null)
-            throw new InvalidOperationException($"Job state with account ID {entity.AccountId} and job name {entity.JobName} not found");
+            return null;
 
         // Update properties
         existingJobState.JobState = entity.JobState;

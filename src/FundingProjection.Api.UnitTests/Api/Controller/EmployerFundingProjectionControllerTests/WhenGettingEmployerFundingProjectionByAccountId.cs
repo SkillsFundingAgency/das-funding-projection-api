@@ -3,6 +3,7 @@ using SFA.DAS.EmployerFinance.Types.Models;
 using SFA.DAS.FundingProjection.Api.Controllers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
+using SFA.DAS.FundingProjection.Api.Projection;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using SFA.DAS.FundingProjection.Domain.Entities;
 using SFA.DAS.FundingProjection.Domain.Enums;
@@ -274,7 +275,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
     }
 
     [Test, RecursiveMoqAutoData]
-    public async Task Then_All_Levy_Expires_Over_12_Months_When_There_Is_12_Months_Of_Levy_In_And_No_Estimated_Values(
+    public async Task Then_All_Levy_Expires_After_Its_Expiry_Period_When_There_Are_No_Estimated_Values(
         long accountId,
         ImportJobStateEntity importJobState,
         [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
@@ -295,15 +296,17 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
 
         eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
 
-        var levyFundsIn = Enumerable.Range(-12, 12)
-            .Select(i => now.AddMonths(i))
+        // levy received before August 2026 expires after 24 months, and from then after 12 months
+        var policyChange = new DateOnly(2026, 8, 1);
+        var levyFundsIn = Enumerable.Range(-24, 24)
+            .Select(i => now.ToPeriod().AddMonths(i))
             .Select(p => new CalendarPeriodAmount { Year = p.Year, Month = p.Month, Amount = p.Month * 100m })
             .ToList();
         var totalLevyIn = levyFundsIn.Sum(x => x.Amount);
 
         var request = new PostEmployerFundingProjectionRequest
         {
-            Months = 12,
+            Months = 24,
             CurrentLevyFunds = totalLevyIn,
             HistoricLevyIn = [],
             LevyFundsInForExpiry = levyFundsIn
@@ -315,10 +318,18 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         // assert
         result.Should().NotBeNull();
         var projections = result.Value!.Projections;
-        projections.Should().HaveCount(12);
-        for (var i = 0; i < 12; i++)
+        projections.Should().HaveCount(24);
+        foreach (var projection in projections)
         {
-            projections[i].LevyOutSummary.ExpiredLevy.Should().Be(levyFundsIn[i].Amount);
+            var period = new DateOnly(projection.Year, projection.Month, 1);
+            var expectedExpiry = levyFundsIn
+                .Where(x =>
+                {
+                    var received = new DateOnly(x.Year, x.Month, 1);
+                    return received.AddMonths(received < policyChange ? 24 : 12) == period;
+                })
+                .Sum(x => x.Amount);
+            projection.LevyOutSummary.ExpiredLevy.Should().Be(expectedExpiry);
         }
         projections.Sum(x => x.LevyOutSummary.ExpiredLevy).Should().Be(totalLevyIn);
         projections[^1].ClosingBalance.Should().Be(0m);

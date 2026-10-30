@@ -59,7 +59,8 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             request.LevyFundsInForExpiry,
             request.PaymentFundsOutForExpiry,
             request.ShortTermExpiredFunds,
-            request.LongTermExpiredFunds
+            request.LongTermExpiredFunds,
+            currentMonthLevyInReceived: request.HistoricLevyIn.Any(x => x.Period.ToPeriod() == now)
             );
 
         var job = await importJobStateRepository.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token);

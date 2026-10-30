@@ -6,8 +6,6 @@ namespace SFA.DAS.FundingProjection.Data.Repositories;
 
 public interface IImportJobStateRepository
 {
-    Task<ImportJobStateEntity?> GetJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken);
-
     /// <summary>
     /// Gets existing job state or creates a new one
     /// </summary>
@@ -23,7 +21,7 @@ public interface IImportJobStateRepository
 
 public class ImportJobStateRepository(IFundingProjectionDataContext dataContext) : IImportJobStateRepository
 {
-    public async Task<ImportJobStateEntity?> GetJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken)
+    private async Task<ImportJobStateEntity?> GetJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken)
     {
         return await dataContext.ImportJobStates.FirstOrDefaultAsync(j => j.AccountId == accountId && j.JobName == jobName, cancellationToken);
     }

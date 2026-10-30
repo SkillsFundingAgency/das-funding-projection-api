@@ -9,7 +9,8 @@ namespace SFA.DAS.FundingProjection.Api.UnitTests.Api.Mappers;
 public class WhenBuildingEstimatesTimelineWithExpiry
 {
     private const long AccountId = 12345;
-    private static readonly DateOnly StartPeriod = new(2026, 10, 1);
+    private static readonly DateOnly StartPeriod = new(2028, 8, 1);
+    private static readonly DateOnly BeforePolicyChange = new(2026, 10, 1);
 
     private static List<CalendarPeriodAmount> GetTwelveMonthsOfLevyIn()
     {
@@ -34,14 +35,13 @@ public class WhenBuildingEstimatesTimelineWithExpiry
         Enumerable.Range(0, months).Select(i => new CommittedLevyProjection { Period = StartPeriod.AddMonths(i), TotalMonthlyPayments = amount }).ToList();
 
     // 24 months of history: 1000 levy in and 400 paid out each month. The first 12 months of levy have
-    // already expired at 600 a month (400 short term + 200 long term, to check the two are combined)
+    // already expired at 600 a month
     private static EstimatesTimeline BuildTimelineWithAllData(int months) => BuildTimeline(
         months,
         openingBalance: 24 * 1000m - 24 * 400m - 12 * 600m,
         levyFundsIn: Amounts(-24, 24, 1000m),
         paymentFundsOut: Amounts(-24, 24, 400m),
-        shortTermExpired: Amounts(-12, 12, 400m),
-        longTermExpired: Amounts(-12, 12, 200m),
+        shortTermExpired: Amounts(-12, 12, 600m),
         levyInProjections: LevyInEstimates(months, 500m),
         commitmentProjections: CommitmentEstimates(months, 300m));
 
@@ -58,11 +58,12 @@ public class WhenBuildingEstimatesTimelineWithExpiry
         List<CalendarPeriodAmount>? longTermExpired = null,
         List<LevyInMonthSummary>? levyInProjections = null,
         List<CommittedLevyProjection>? commitmentProjections = null,
-        bool currentMonthLevyInReceived = false)
+        bool currentMonthLevyInReceived = false,
+        DateOnly? startPeriod = null)
     {
         return EstimatesTimeline.From(
             AccountId,
-            StartPeriod,
+            startPeriod ?? StartPeriod,
             months,
             openingBalance,
             0m,
@@ -143,11 +144,10 @@ public class WhenBuildingEstimatesTimelineWithExpiry
     {
         // arrange
         var levyFundsIn = GetTwelveMonthsOfLevyIn();
-        var shortTermExpired = new List<CalendarPeriodAmount> { Amount(StartPeriod, 250m) };
-        var longTermExpired = new List<CalendarPeriodAmount> { Amount(StartPeriod.AddMonths(1), 100m) };
+        var shortTermExpired = new List<CalendarPeriodAmount> { Amount(StartPeriod, 250m), Amount(StartPeriod.AddMonths(1), 100m) };
 
         // act
-        var result = BuildTimeline(12, levyFundsIn.Sum(x => x.Amount), levyFundsIn, shortTermExpired: shortTermExpired, longTermExpired: longTermExpired);
+        var result = BuildTimeline(12, levyFundsIn.Sum(x => x.Amount), levyFundsIn, shortTermExpired: shortTermExpired);
 
         // assert
         result.Projections[0].LevyOutSummary.ExpiredLevy.Should().Be(250m);
@@ -259,5 +259,148 @@ public class WhenBuildingEstimatesTimelineWithExpiry
         // assert
         result.Projections[0].LevyInSummary.LevyIn.Should().Be(500m);
         result.Projections[0].ClosingBalance.Should().Be(5500m);
+    }
+
+    [Test]
+    public void Then_Levy_Received_Before_The_Policy_Change_Expires_After_24_Months()
+    {
+        // arrange
+        var levyFundsIn = new List<CalendarPeriodAmount> { Amount(new DateOnly(2025, 10, 1), 1000m) };
+
+        // act
+        var result = BuildTimeline(13, 1000m, levyFundsIn, startPeriod: BeforePolicyChange);
+
+        // assert
+        result.Projections[0].LevyOutSummary.ExpiredLevy.Should().Be(0m);
+        result.Projections[12].LevyOutSummary.ExpiredLevy.Should().Be(1000m);
+    }
+
+    [Test]
+    public void Then_Levy_Received_From_The_Policy_Change_Expires_After_12_Months()
+    {
+        // arrange
+        var levyFundsIn = new List<CalendarPeriodAmount> { Amount(new DateOnly(2026, 8, 1), 1000m) };
+
+        // act
+        var result = BuildTimeline(12, 1000m, levyFundsIn, startPeriod: BeforePolicyChange);
+
+        // assert - August 2027
+        result.Projections[10].LevyOutSummary.ExpiredLevy.Should().Be(1000m);
+        result.Projections.Sum(x => x.LevyOutSummary.ExpiredLevy).Should().Be(1000m);
+    }
+
+    [Test]
+    public void Then_Payments_Out_Are_Taken_From_Long_Term_Levy_Before_Short_Term_Levy()
+    {
+        // arrange - 1000 of each, and 1000 spent last month
+        var levyFundsIn = new List<CalendarPeriodAmount>
+        {
+            Amount(new DateOnly(2024, 10, 1), 1000m),
+            Amount(new DateOnly(2026, 8, 1), 1000m)
+        };
+        var paymentFundsOut = new List<CalendarPeriodAmount> { Amount(new DateOnly(2026, 9, 1), 1000m) };
+
+        // act
+        var result = BuildTimeline(12, 1000m, levyFundsIn, paymentFundsOut, startPeriod: BeforePolicyChange);
+
+        // assert - the spend uses up the long term levy, so only the short term levy expires
+        result.Projections[0].LevyOutSummary.ExpiredLevy.Should().Be(0m);
+        result.Projections[10].LevyOutSummary.ExpiredLevy.Should().Be(1000m);
+        result.Projections.Sum(x => x.LevyOutSummary.ExpiredLevy).Should().Be(1000m);
+    }
+
+    [Test]
+    public void Then_Long_Term_And_Short_Term_Expiry_For_The_Same_Period_Are_Combined()
+    {
+        // arrange
+        var longTermExpired = new List<CalendarPeriodAmount> { Amount(BeforePolicyChange, 300m) };
+        var shortTermExpired = new List<CalendarPeriodAmount> { Amount(BeforePolicyChange, 200m) };
+
+        // act
+        var result = BuildTimeline(1, 0m, [], shortTermExpired: shortTermExpired, longTermExpired: longTermExpired, startPeriod: BeforePolicyChange);
+
+        // assert
+        result.Projections[0].LevyOutSummary.ExpiredLevy.Should().Be(500m);
+    }
+
+    [Test]
+    public void Then_Long_Term_And_Short_Term_Levy_Expire_Together_Across_The_Policy_Change()
+    {
+        // arrange - 1000 a month received from August 2025 and estimated from October 2026, with nothing spent.
+        // August 2025 to July 2026 is long term and expires August 2027 to July 2028. August and September 2026
+        // are short term and expire August and September 2027, and the estimated levy expires from October 2027
+        var levyFundsIn = Enumerable.Range(0, 14).Select(i => Amount(new DateOnly(2025, 8, 1).AddMonths(i), 1000m)).ToList();
+        var levyInProjections = Enumerable.Range(0, 24)
+            .Select(i => new LevyInMonthSummary(BeforePolicyChange.AddMonths(i), 1000m))
+            .ToList();
+
+        // act
+        var result = BuildTimeline(24, 14000m, levyFundsIn, levyInProjections: levyInProjections, startPeriod: BeforePolicyChange);
+
+        // assert
+        result.Projections.Select(x => x.LevyOutSummary.ExpiredLevy).Should().Equal(
+            0m, 0m, 0m, 0m, 0m, 0m, 0m, 0m, 0m, 0m, 2000m, 2000m,
+            2000m, 2000m, 2000m, 2000m, 2000m, 2000m, 2000m, 2000m, 2000m, 2000m, 1000m, 1000m);
+        // only the estimated levy from October 2027 onwards is left
+        result.Projections[^1].ClosingBalance.Should().Be(12000m);
+    }
+
+    [Test]
+    public void Then_Recorded_Expiry_In_One_Pot_Does_Not_Stop_The_Other_Pot_Being_Calculated()
+    {
+        // arrange - long and short term levy both expire in August 2027, but only the long term has been recorded
+        var august2027 = new DateOnly(2027, 8, 1);
+        var levyFundsIn = new List<CalendarPeriodAmount>
+        {
+            Amount(new DateOnly(2025, 8, 1), 1000m),
+            Amount(new DateOnly(2026, 8, 1), 1000m)
+        };
+        var longTermExpired = new List<CalendarPeriodAmount> { Amount(august2027, 600m) };
+
+        // act
+        var result = BuildTimeline(1, 2000m, levyFundsIn, longTermExpired: longTermExpired, startPeriod: august2027);
+
+        // assert - the recorded 600 plus the calculated 1000
+        result.Projections[0].LevyOutSummary.ExpiredLevy.Should().Be(1600m);
+    }
+
+    [Test]
+    public void Then_Spend_Less_Than_The_Long_Term_Levy_Leaves_The_Short_Term_Levy_To_Expire_In_Full()
+    {
+        // arrange
+        var levyFundsIn = new List<CalendarPeriodAmount>
+        {
+            Amount(new DateOnly(2024, 10, 1), 1000m),
+            Amount(new DateOnly(2026, 8, 1), 1000m)
+        };
+        var paymentFundsOut = new List<CalendarPeriodAmount> { Amount(new DateOnly(2026, 9, 1), 500m) };
+
+        // act
+        var result = BuildTimeline(12, 1500m, levyFundsIn, paymentFundsOut, startPeriod: BeforePolicyChange);
+
+        // assert - October 2026 (24 months) and August 2027 (12 months)
+        result.Projections[0].LevyOutSummary.ExpiredLevy.Should().Be(500m);
+        result.Projections[10].LevyOutSummary.ExpiredLevy.Should().Be(1000m);
+        result.Projections[^1].ClosingBalance.Should().Be(0m);
+    }
+
+    [Test]
+    public void Then_Spend_Beyond_The_Long_Term_Levy_Reduces_The_Short_Term_Levy_That_Expires()
+    {
+        // arrange
+        var levyFundsIn = new List<CalendarPeriodAmount>
+        {
+            Amount(new DateOnly(2024, 10, 1), 1000m),
+            Amount(new DateOnly(2026, 8, 1), 1000m)
+        };
+        var paymentFundsOut = new List<CalendarPeriodAmount> { Amount(new DateOnly(2026, 9, 1), 1500m) };
+
+        // act
+        var result = BuildTimeline(12, 500m, levyFundsIn, paymentFundsOut, startPeriod: BeforePolicyChange);
+
+        // assert - 1000 of the spend uses up the long term levy and the other 500 comes from the short term levy
+        result.Projections[0].LevyOutSummary.ExpiredLevy.Should().Be(0m);
+        result.Projections[10].LevyOutSummary.ExpiredLevy.Should().Be(500m);
+        result.Projections[^1].ClosingBalance.Should().Be(0m);
     }
 }

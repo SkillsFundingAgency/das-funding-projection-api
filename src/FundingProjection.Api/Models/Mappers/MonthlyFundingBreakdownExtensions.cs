@@ -23,7 +23,8 @@ public static class EstimatesTimelineExtensions
             List<CalendarPeriodAmount> levyFundsInForExpiry,
             List<CalendarPeriodAmount> paymentFundsOutForExpiry,
             List<CalendarPeriodAmount> shortTermExpiredFunds,
-            List<CalendarPeriodAmount> longTermExpiredFunds
+            List<CalendarPeriodAmount> longTermExpiredFunds,
+            bool currentMonthLevyInReceived
             )
         {
             var closingBalance = openingBalance;
@@ -74,7 +75,10 @@ public static class EstimatesTimelineExtensions
                     ExpiredLevy = expired[calendarPeriod],
                 };
                 
-                closingBalance = closingBalance + levyInSummary.Total - levyOutSummary.Total;
+                // once this month's levy has come in it is already in the opening balance, so it is shown but not added again
+                var levyInToAdd = i == 0 && currentMonthLevyInReceived ? 0m : levyInSummary.Total;
+                closingBalance = closingBalance + levyInToAdd - levyOutSummary.Total;
+                
                 var estimate = new MonthlyFundingBreakdown
                 {
                     EmployerAccountId = accountId,

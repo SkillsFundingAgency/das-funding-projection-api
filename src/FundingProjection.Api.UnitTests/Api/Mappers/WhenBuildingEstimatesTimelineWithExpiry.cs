@@ -57,7 +57,8 @@ public class WhenBuildingEstimatesTimelineWithExpiry
         List<CalendarPeriodAmount>? shortTermExpired = null,
         List<CalendarPeriodAmount>? longTermExpired = null,
         List<LevyInMonthSummary>? levyInProjections = null,
-        List<CommittedLevyProjection>? commitmentProjections = null)
+        List<CommittedLevyProjection>? commitmentProjections = null,
+        bool currentMonthLevyInReceived = false)
     {
         return EstimatesTimeline.From(
             AccountId,
@@ -73,7 +74,8 @@ public class WhenBuildingEstimatesTimelineWithExpiry
             levyFundsIn,
             paymentFundsOut ?? [],
             shortTermExpired ?? [],
-            longTermExpired ?? []);
+            longTermExpired ?? [],
+            currentMonthLevyInReceived);
     }
 
     [Test]
@@ -233,5 +235,29 @@ public class WhenBuildingEstimatesTimelineWithExpiry
         // without it the expiry is recalculated and 3000 of the spend goes on the last 3 months of the first year
         withoutExistingExpiry.Projections.Select(x => x.LevyOutSummary.ExpiredLevy).Should().Equal(
             0m, 0m, 0m, 1000m, 1000m, 1000m, 1000m, 1000m, 1000m, 1000m, 1000m, 1000m);
+    }
+
+    [Test]
+    public void Then_Levy_Already_Received_This_Month_Is_Shown_But_Not_Added_To_The_Balance()
+    {
+        // act - the opening balance already includes this month's 500 levy
+        var result = BuildTimeline(3, 5000m, [], levyInProjections: LevyInEstimates(3, 500m), currentMonthLevyInReceived: true);
+
+        // assert
+        result.Projections[0].LevyInSummary.LevyIn.Should().Be(500m);
+        result.Projections[0].ClosingBalance.Should().Be(5000m);
+        result.Projections[1].ClosingBalance.Should().Be(5500m);
+        result.Projections[2].ClosingBalance.Should().Be(6000m);
+    }
+
+    [Test]
+    public void Then_Levy_Not_Yet_Received_This_Month_Is_Added_To_The_Balance()
+    {
+        // act
+        var result = BuildTimeline(3, 5000m, [], levyInProjections: LevyInEstimates(3, 500m));
+
+        // assert
+        result.Projections[0].LevyInSummary.LevyIn.Should().Be(500m);
+        result.Projections[0].ClosingBalance.Should().Be(5500m);
     }
 }

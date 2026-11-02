@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.FundingProjection.Domain.Entities;
+using SFA.DAS.FundingProjection.Domain.Enums;
 
 namespace SFA.DAS.FundingProjection.Api.Projection;
 
@@ -21,7 +22,7 @@ public class ApprenticeshipOrderingStrategy: IApprenticeshipOrderingStrategy
 
         return apprenticeships
             .OrderByDescending(x => x.IsTransfer)
-            .ThenBy(x => x.LearningType)
+            .ThenBy(LearningTypePriority)
             .ThenBy(NullLastPriority)
             .ThenBy(x => defaultProviderOrdering.IndexOf(x.ProviderId))
             .ThenBy(x => x.ApprovalDate)
@@ -34,6 +35,15 @@ public class ApprenticeshipOrderingStrategy: IApprenticeshipOrderingStrategy
         {
             null => int.MaxValue,
             _ => entity.ProviderOrder.Value
+        };
+    }
+    
+    private static int LearningTypePriority(ApprenticeshipPaymentSummaryEntity entity)
+    {
+        return entity.LearningType switch
+        {
+            LearningType.ApprenticeshipUnit => 1,
+            _ => 0
         };
     }
 }

@@ -359,6 +359,13 @@
             "type": "string",
             "format": "date-time"
           },
+          "firstApprovalDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
           "learningType": {
             "$ref": "#/components/schemas/LearningType"
           },
@@ -674,6 +681,13 @@
           "approvalDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "firstApprovalDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
           },
           "learningType": {
             "$ref": "#/components/schemas/LearningType"

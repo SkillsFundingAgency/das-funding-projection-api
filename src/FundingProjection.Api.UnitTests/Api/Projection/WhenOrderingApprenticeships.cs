@@ -51,7 +51,7 @@ public class WhenOrderingApprenticeships
         var apprenticeships = new List<ApprenticeshipPaymentSummaryEntity>
         {
             new() { ProviderId = 1, ProviderOrder = 2, },
-            new() { ProviderId = 2, ProviderOrder = null, },
+            new() { ProviderId = 2, ProviderOrder = null, FirstApprovalDate = DateOnly.FromDateTime(DateTime.UtcNow), },
             new() { ProviderId = 3, ProviderOrder = 1, },
         };
 
@@ -65,17 +65,18 @@ public class WhenOrderingApprenticeships
     }
     
     [Test, MoqAutoData]
-    public void Then_Null_ProviderOrder_Orders_Providers_By_Earliest_ApprovalDate(ApprenticeshipOrderingStrategy sut)
+    public void Then_Null_ProviderOrder_Orders_Providers_By_FirstApprovalDate_Ascending(ApprenticeshipOrderingStrategy sut)
     {
         // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
         var apprenticeships = new List<ApprenticeshipPaymentSummaryEntity>
         {
-            new() { ProviderId = 1, ApprovalDate = DateTime.UtcNow.AddDays(-26), },
-            new() { ProviderId = 2, ApprovalDate = DateTime.UtcNow.AddDays(-45), },
-            new() { ProviderId = 3, ApprovalDate = DateTime.UtcNow.AddDays(-100), },
-            new() { ProviderId = 2, ApprovalDate = DateTime.UtcNow.AddDays(-15), },
-            new() { ProviderId = 1, ApprovalDate = DateTime.UtcNow.AddDays(-10), },
-            new() { ProviderId = 3, ApprovalDate = DateTime.UtcNow.AddDays(-76), },
+            new() { ProviderId = 2, FirstApprovalDate = now.AddDays(-26), },
+            new() { ProviderId = 2, FirstApprovalDate = now.AddDays(-45), },
+            new() { ProviderId = 3, FirstApprovalDate = now.AddDays(-99), },
+            new() { ProviderId = 1, FirstApprovalDate = now.AddDays(-15), },
+            new() { ProviderId = 1, FirstApprovalDate = now.AddDays(-10), },
+            new() { ProviderId = 3, FirstApprovalDate = now.AddDays(-76), },
         };
 
         // act
@@ -158,12 +159,13 @@ public class WhenOrderingApprenticeships
     {
         // arrange
         var now = DateTime.UtcNow;
+        var firstApprovalDate = DateOnly.FromDateTime(now.AddDays(-10));
         var apprenticeships = new List<ApprenticeshipPaymentSummaryEntity>
         {
-            new() { ProviderId = 1, IsTransfer = false, LearningType = LearningType.Apprenticeship, ProviderOrder = null, ApprovalDate = now.AddDays(-1), Uln = 1, },
-            new() { ProviderId = 2, IsTransfer = false, LearningType = LearningType.Apprenticeship, ProviderOrder = 3, ApprovalDate = now.AddDays(-1), Uln = 2, },
-            new() { ProviderId = 3, IsTransfer = false, LearningType = LearningType.Apprenticeship, ProviderOrder = 2, ApprovalDate = now.AddDays(-1), Uln = 3, },
-            new() { ProviderId = 4, IsTransfer = false, LearningType = LearningType.Apprenticeship, ProviderOrder = 1, ApprovalDate = now.AddDays(-1), Uln = 4, },
+            new() { ProviderId = 1, IsTransfer = false, LearningType = LearningType.Apprenticeship, FirstApprovalDate = firstApprovalDate, ProviderOrder = null, ApprovalDate = now.AddDays(-1), Uln = 1, },
+            new() { ProviderId = 2, IsTransfer = false, LearningType = LearningType.Apprenticeship, FirstApprovalDate = firstApprovalDate, ProviderOrder = 3, ApprovalDate = now.AddDays(-1), Uln = 2, },
+            new() { ProviderId = 3, IsTransfer = false, LearningType = LearningType.Apprenticeship, FirstApprovalDate = firstApprovalDate, ProviderOrder = 2, ApprovalDate = now.AddDays(-1), Uln = 3, },
+            new() { ProviderId = 4, IsTransfer = false, LearningType = LearningType.Apprenticeship, FirstApprovalDate = firstApprovalDate, ProviderOrder = 1, ApprovalDate = now.AddDays(-1), Uln = 4, },
         };
 
         // act

@@ -23,6 +23,7 @@ public class ApprenticeshipPaymentSummaryEntity
     public long ProviderId { get; set; }
     public int? ProviderOrder { get; set; }
     public DateTime ApprovalDate { get; set; }
+    public DateOnly? FirstApprovalDate { get; set; }
     public LearningType LearningType { get; set; }
     public DateOnly? LastPaymentDate { get; set; }
     [Column(TypeName = "decimal(18,2)")]

@@ -13,6 +13,7 @@
     [ProviderId]            BIGINT         NOT NULL,
     [ProviderOrder]         SMALLINT       NULL,
     [ApprovalDate]          DATETIME       NOT NULL, -- when the provider & employer both approved the apprenticeship
+    [FirstApprovalDate]     DATE           NULL, -- when the provider & employer both approved their first ever apprenticeship together
     [LearningType]          TINYINT        NOT NULL,
     [LastPaymentDate]       DATE           NULL,
     [LastPaymentAmount]     DECIMAL(18,2)  NULL,

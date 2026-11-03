@@ -43,6 +43,22 @@ internal class WhenUpdatingJobStateAsync
         actual.LastSuccessfulImportDate.Should().Be(previousSuccessfulImportDate);
     }
 
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_Null_Returned_When_The_Entity_Not_Exist(
+        ImportJobStateEntity existing,
+        [Frozen] Mock<IFundingProjectionDataContext> context,
+        [Greedy] ImportJobStateRepository repository)
+    {
+        context.Setup(x => x.ImportJobStates).ReturnsDbSet(new List<ImportJobStateEntity>(0));
+
+        var actual = await repository.UpdateJobStateAsync(CreateUpdate(existing, JobState.Failed, false, DateTime.MinValue), CancellationToken.None);
+
+        actual.Should().BeNull();
+    }
+
+
+
     private static ImportJobStateEntity CreateUpdate(ImportJobStateEntity existing, JobState jobState, bool successful, DateTime lastSuccessfulImportDate) =>
         new()
         {

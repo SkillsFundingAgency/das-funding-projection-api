@@ -29,12 +29,13 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         CancellationToken token = default)
     {
         logger.LogInformation("Funding Projection API: Received query to get projection by accountId : {Id}", accountId);
-        
+
+        var startingPeriod = (request.StartPeriod ?? DateOnly.FromDateTime(DateTime.UtcNow)).ToPeriod();
         var apprenticeshipSummaries = await apprenticeshipSummariesRepository.GetApprenticeshipPaymentSummariesAsync(accountId, token);
         var timelineData = new TimelineData
         {
             AccountId = accountId,
-            StartingPeriod = (request.StartPeriod ?? DateOnly.FromDateTime(DateTime.UtcNow)).ToPeriod(),
+            StartingPeriod = startingPeriod,
             OpeningBalance = request.CurrentLevyFunds,
             Months = Math.Clamp(request.Months, 1, MaxProjectionMonths),
             HistoricLevyIn = request.HistoricLevyIn,
@@ -43,6 +44,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             PaymentFundsOutForExpiry = request.PaymentFundsOutForExpiry,
             ShortTermExpiredFunds = request.ShortTermExpiredFunds,
             LongTermExpiredFunds = request.LongTermExpiredFunds,
+            CurrentPeriodLevyInReceived = request.HistoricLevyIn.Any(x => x.Period.ToPeriod() == startingPeriod)
         };
         var timeline = timelineGenerator.Create(timelineData);
         

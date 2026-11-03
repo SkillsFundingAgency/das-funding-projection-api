@@ -9,6 +9,7 @@ public class TimelineData
     public required int Months { get; init; }
     public required DateOnly StartingPeriod { get; init; }
     public required decimal OpeningBalance { get; init; }
+    public bool CurrentPeriodLevyInReceived { get; init; }
 
     public List<ApprenticeshipPaymentSummaryEntity> ApprenticeshipPaymentSummaries { get; init; } = [];
     public List<LevyInMonthSummary> HistoricLevyIn { get; init; } = [];

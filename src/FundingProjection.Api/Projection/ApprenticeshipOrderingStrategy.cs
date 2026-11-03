@@ -19,6 +19,7 @@ public class ApprenticeshipOrderingStrategy: IApprenticeshipOrderingStrategy
             .ThenBy(x => x.ApprovalDate)
             .ThenBy(x => x.Uln);
     }
+    
     private static long ProviderOrderOrFirstApprovalPriority(ApprenticeshipPaymentSummaryEntity entity)
     {
         return entity.ProviderOrder switch
@@ -29,6 +30,7 @@ public class ApprenticeshipOrderingStrategy: IApprenticeshipOrderingStrategy
             _ => entity.ProviderOrder.Value
         };
     }
+    
     private static int LearningTypePriority(ApprenticeshipPaymentSummaryEntity entity)
     {
         return entity.LearningType switch

@@ -12,7 +12,7 @@ public static class ProjectionRequest
             StartPeriod = startPeriod,
             Months = months,
             CurrentLevyFunds = openingBalance,
-            HistoricLevyIn = HistoricLevy.Generate(fixedMonthlyAmount: monthlyLevyIn)
+            HistoricLevyIn = HistoricLevy.Generate(startPeriod, fixedMonthlyAmount: monthlyLevyIn)
         };
     }
     

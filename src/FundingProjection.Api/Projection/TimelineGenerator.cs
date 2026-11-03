@@ -55,7 +55,8 @@ public class TimelineGenerator(
             data.LevyFundsInForExpiry,
             data.PaymentFundsOutForExpiry,
             data.ShortTermExpiredFunds,
-            data.LongTermExpiredFunds
+            data.LongTermExpiredFunds,
+            data.CurrentPeriodLevyInReceived
         );
 
         coInvestmentEstimator.Estimate(

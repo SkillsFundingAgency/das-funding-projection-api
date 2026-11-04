@@ -1,20 +1,9 @@
-﻿using SFA.DAS.FundingProjection.Domain.Entities;
-using SFA.DAS.FundingProjection.Domain.Enums;
-
-namespace SFA.DAS.FundingProjection.Api.Projection;
+﻿namespace SFA.DAS.FundingProjection.Api.Projection;
 
 public static class CommitmentsProjector
 {
-    public static List<CommittedLevyProjection> CreateProjection(DateOnly now, int months, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipSummaries)
-    {
-        var startPeriod = now.ToPeriod();
-        var scheduledPayments = apprenticeshipSummaries
-            .Where(c => c.Status is ApprenticeshipStatus.Live or ApprenticeshipStatus.WaitingToStart or ApprenticeshipStatus.Completed)
-            .Select(PaymentScheduleGenerator.CreateFrom)
-            .SelectMany(x => x.ScheduledPayments);
-
-        return Project(scheduledPayments, startPeriod, months);
-    }
+    public static List<CommittedLevyProjection> CreateProjection(DateOnly now, int months, List<PaymentSchedule> scheduledPayments)
+        => Project(scheduledPayments.SelectMany(x => x.ScheduledPayments), now.ToPeriod(), months);
 
     private static List<CommittedLevyProjection> Project(
         IEnumerable<ScheduledPayment> scheduledPayments, DateOnly startPeriod, int months)

@@ -1,4 +1,6 @@
-﻿namespace FundingProjection.Api.Testing.DataCreation;
+﻿using SFA.DAS.FundingProjection.Domain.Enums;
+
+namespace FundingProjection.Api.Testing.DataCreation;
 
 public static class TestData
 {
@@ -7,4 +9,5 @@ public static class TestData
     public const decimal DefaultFinalPayment = 200;
     public const int DefaultLength = 8;
     public const int DefaultAge = 18;
+    public const LearningType DefaultLearningType = LearningType.Apprenticeship;
 }

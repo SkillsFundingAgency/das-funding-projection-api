@@ -50,8 +50,8 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             now,
             cappedMonths,
             openingBalance: request.CurrentLevyFunds,
-            payments.Where(ApprenticeshipsHaveRemainingCost()).Sum(c=>c.TotalCost - c.TotalPaid),
-            transfers.Where(ApprenticeshipsHaveRemainingCost()).Sum(c=>c.TotalCost - c.TotalPaid),
+            payments.Where(ApprenticeshipsHaveRemainingCost()).Sum(c => c.TotalCost - c.TotalPaid),
+            transfers.Where(ApprenticeshipsHaveRemainingCost()).Sum(c => c.TotalCost - c.TotalPaid),
             commitmentProjections,
             transferOutProjections,
             levyInProjections,
@@ -65,14 +65,14 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
 
         var job = await importJobStateRepository.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token);
 
-        await eventService.HandleImportLearnersCost(job.Id, accountId);
+        await eventService.HandleImportLearnersCost(job.Id, accountId, job.LastSuccessfulImportDate);
 
         return TypedResults.Ok(timeline);
     }
 
     private static Func<ApprenticeshipPaymentSummaryEntity, bool> ApprenticeshipsHaveRemainingCost()
     {
-        return c=>c.Status is ApprenticeshipStatus.Live
+        return c => c.Status is ApprenticeshipStatus.Live
             or ApprenticeshipStatus.WaitingToStart or ApprenticeshipStatus.Paused;
     }
 }

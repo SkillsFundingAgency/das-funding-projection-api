@@ -41,6 +41,27 @@ internal class WhenUpdatingJobState
     }
 
     [Test, RecursiveMoqAutoData]
+    public async Task GetOrCrUpdateJobState_ReturnsNotFound_WhenEntityNotExist(
+        Guid id,
+        PutImportJobStateRequest request,
+        [Frozen] Mock<IImportJobStateRepository> repository,
+        [Greedy] JobsController endpoint,
+        CancellationToken cancellationToken)
+    {
+        // Arrange
+        repository.Setup(r => r.UpdateJobStateAsync(It.IsAny<ImportJobStateEntity>(), cancellationToken))
+            .ReturnsAsync((ImportJobStateEntity?)null);
+
+        // Act
+        var result = await endpoint.UpdateJobState(id, request, repository.Object, cancellationToken);
+
+        // Assert
+        result.Should().BeOfType<NotFound>();
+        var problemResult = result as NotFound;
+        problemResult!.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+    }
+
+    [Test, RecursiveMoqAutoData]
     public async Task GetOrCrUpdateJobState_ReturnsInternalServerError_WhenExceptionThrown(
         Guid id,
         PutImportJobStateRequest request,

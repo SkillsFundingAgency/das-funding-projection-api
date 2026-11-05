@@ -4,7 +4,7 @@ namespace SFA.DAS.FundingProjection.Api.Models.Requests;
 
 public sealed record PutImportJobStateRequest
 {
-    public long AccountId { get; set; }
+    public required long AccountId { get; set; }
     public JobName JobName { get; set; }
     public JobState JobState { get; set; } = JobState.Pending;
     public DateTime LastSuccessfulImportDate { get; set; }

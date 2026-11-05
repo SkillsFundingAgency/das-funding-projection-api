@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.FundingProjection.Api.Core;
 using SFA.DAS.FundingProjection.Api.Models.Mappers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
@@ -16,11 +17,11 @@ public class JobsController(ILogger<JobsController> logger) : ControllerBase
     /// </summary>
     [HttpPut]
     [Route($"{RouteNames.Jobs}/{{id:guid}}")]
-
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ImportJobStateResponse), StatusCodes.Status200OK)]
-    public async Task<IResult> UpdateJobState([FromRoute] Guid id,
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IResult> UpdateJobState([FromRoute, Required] Guid id,
         [FromBody] PutImportJobStateRequest request,
         [FromServices] IImportJobStateRepository repository,
         CancellationToken cancellationToken)
@@ -42,7 +43,10 @@ public class JobsController(ILogger<JobsController> logger) : ControllerBase
             };
 
             var updatedJobState = await repository.UpdateJobStateAsync(entity, cancellationToken);
-            return Results.Ok(updatedJobState.MapToResponse());
+
+            return updatedJobState is null 
+                ? Results.NotFound() 
+                : Results.Ok(updatedJobState.MapToResponse());
         }
         catch (Exception ex)
         {

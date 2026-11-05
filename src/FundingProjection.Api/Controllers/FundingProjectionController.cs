@@ -49,7 +49,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         var timeline = timelineGenerator.Create(timelineData);
         
         var job = await importJobStateRepository.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token);
-        await eventService.HandleImportLearnersCost(job.Id, accountId);
+        await eventService.HandleImportLearnersCost(job.Id, accountId, job.LastSuccessfulImportDate);
 
         return TypedResults.Ok(timeline);
     }

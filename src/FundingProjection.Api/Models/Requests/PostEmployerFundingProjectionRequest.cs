@@ -1,4 +1,4 @@
-﻿using SFA.DAS.FundingProjection.Api.Projection;
+using SFA.DAS.FundingProjection.Api.Projection;
 
 namespace SFA.DAS.FundingProjection.Api.Models.Requests;
 

@@ -7,15 +7,17 @@ namespace SFA.DAS.FundingProjection.Domain.Services;
 
 public interface IEventService
 {
-    Task HandleImportLearnersCost(Guid jobId, long accountId);
+    Task HandleImportLearnersCost(Guid jobId,
+        long accountId,
+        DateTime lastSuccessfulImportDate);
 }
 public class EventService(ILogger<EventService> logger, ServiceBusClient serviceBusClient) : IEventService
 {
-    public async Task HandleImportLearnersCost(Guid jobId, long accountId)
+    public async Task HandleImportLearnersCost(Guid jobId, long accountId, DateTime lastSuccessfulImportDate)
     {
         logger.LogInformation("Sending ImportLearnerCost message for account {AccountId}.", accountId);
         await using var sender = serviceBusClient.CreateSender(QueueConstants.FundingProjectionQueue);
-        var body = JsonSerializer.Serialize(new ImportLearnersCostEvent(jobId, accountId));
+        var body = JsonSerializer.Serialize(new ImportLearnersCostEvent(jobId, accountId, lastSuccessfulImportDate));
         await sender.SendMessageAsync(new ServiceBusMessage(body) { ContentType = "application/json" });
     }
 }

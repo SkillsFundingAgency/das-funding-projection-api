@@ -1,16 +1,17 @@
-using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Logging;
-using NUnit.Framework;
 using SFA.DAS.FundingProjection.Domain.Events;
 using SFA.DAS.FundingProjection.Domain.Services;
+using System.Text.Json;
 
 namespace SFA.DAS.FundingProjection.Api.UnitTests.Domain.Services;
 
 public class WhenSendingImportLearnersCostMessage
 {
     [Test, MoqAutoData]
-    public async Task Then_The_Message_Is_Sent_To_The_Funding_Projection_Queue(Guid jobId, long accountId)
+    public async Task Then_The_Message_Is_Sent_To_The_Funding_Projection_Queue(Guid jobId,
+        long accountId,
+        DateTime lastSuccessfulImportDate)
     {
         ServiceBusMessage? sentMessage = null;
         var sender = new Mock<ServiceBusSender>();
@@ -23,10 +24,10 @@ public class WhenSendingImportLearnersCostMessage
 
         var sut = new EventService(Mock.Of<ILogger<EventService>>(), client.Object);
 
-        await sut.HandleImportLearnersCost(jobId, accountId);
+        await sut.HandleImportLearnersCost(jobId, accountId, lastSuccessfulImportDate);
 
         sentMessage.Should().NotBeNull();
         JsonSerializer.Deserialize<ImportLearnersCostEvent>(sentMessage!.Body.ToString())
-            .Should().Be(new ImportLearnersCostEvent(jobId, accountId));
+            .Should().Be(new ImportLearnersCostEvent(jobId, accountId, lastSuccessfulImportDate));
     }
 }

@@ -439,4 +439,52 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         projections.TrueForAll(x => x.LevyOutSummary.ExpiredLevy == 0).Should().BeTrue();
         projections[^1].ClosingBalance.Should().Be(0m);
     }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_This_Months_Payments_Are_Used_When_The_Projection_Starts_From_This_Month(
+        long accountId,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
+        [Greedy] FundingProjectionController controller,
+        CancellationToken token)
+    {
+        //Arrange
+        apprenticeshipSummariesRepository
+            .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
+            .ReturnsAsync([]);
+        importJobStateRepository
+            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .ReturnsAsync(importJobState);
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
+
+        var request = new PostEmployerFundingProjectionRequest
+        {
+            StartPeriod = null,
+            Months = 2,
+            CurrentLevyFunds = 5000m,
+            CurrentPayments = new CollectionPeriodPayments
+            {
+                PeriodEndCompleted = true,
+                Payments = [new CollectionPeriodPaymentTotal { FundingSource = FundingSource.Levy, TransactionType = TransactionType.Learning, Amount = 999m }]
+            }
+        };
+
+        // act
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
+
+        // assert
+        result.Should().NotBeNull();
+        var timeLine = result.Value;
+        timeLine!.Projections[0].LevyOutSummary.CommittedLearnerCost.Should().Be(999m);
+        timeLine.Projections[0].ClosingBalance.Should().Be(5000m);
+    }
 }

@@ -29,7 +29,8 @@ public static class EstimatesTimelineExtensions
             List<CalendarPeriodAmount> paymentFundsOutForExpiry,
             List<CalendarPeriodAmount> shortTermExpiredFunds,
             List<CalendarPeriodAmount> longTermExpiredFunds,
-            bool currentMonthLevyInReceived
+            bool currentMonthLevyInReceived,
+            CurrentPeriodPayments? currentPeriodPayments = null
             )
         {
             var closingBalance = openingBalance;
@@ -77,18 +78,23 @@ public static class EstimatesTimelineExtensions
                 longTermExpired.TryAdd(calendarPeriod, ExpiredAmountFor(longTermExpiry, calendarPeriod));
                 shortTermExpired.TryAdd(calendarPeriod, ExpiredAmountFor(shortTermExpiry, calendarPeriod));
 
+                // once this month's payments have been made the actual amounts are shown in place of the estimates
+                var actualPayments = i == 0 ? currentPeriodPayments : null;
+
                 var levyOutSummary = new LevyOutSummary
                 {
-                    CommittedLearnerCost = commitment?.TotalMonthlyPayments ?? 0m,
-                    CommittedLearnerFinalPaymentCost = commitment?.TotalFinalPayments ?? 0m,
-                    CommittedTransferOut = transferOut?.TotalMonthlyPayments ?? 0m,
-                    CommittedTransferOutFinalPaymentCost = transferOut?.TotalFinalPayments ?? 0m,
+                    CommittedLearnerCost = actualPayments?.LearnerCost ?? commitment?.TotalMonthlyPayments ?? 0m,
+                    CommittedLearnerFinalPaymentCost = actualPayments?.LearnerFinalPaymentCost ?? commitment?.TotalFinalPayments ?? 0m,
+                    CommittedTransferOut = actualPayments?.TransferOut ?? transferOut?.TotalMonthlyPayments ?? 0m,
+                    CommittedTransferOutFinalPaymentCost = actualPayments?.TransferOutFinalPaymentCost ?? transferOut?.TotalFinalPayments ?? 0m,
                     ExpiredLevy = longTermExpired[calendarPeriod] + shortTermExpired[calendarPeriod],
                 };
                 
                 // once this month's levy has come in it is already in the opening balance, so it is shown but not added again
                 var levyInToAdd = i == 0 && currentMonthLevyInReceived ? 0m : levyInSummary.Total;
-                closingBalance = closingBalance + levyInToAdd - levyOutSummary.Total;
+                // the same applies to this month's payments, so only the expired levy is taken off
+                var levyOutToSubtract = actualPayments != null ? levyOutSummary.ExpiredLevy : levyOutSummary.Total;
+                closingBalance = closingBalance + levyInToAdd - levyOutToSubtract;
                 
                 var estimate = new MonthlyFundingBreakdown
                 {
@@ -98,6 +104,7 @@ public static class EstimatesTimelineExtensions
                     LevyInSummary = levyInSummary,
                     LevyOutSummary = levyOutSummary,
                     ClosingBalance = closingBalance,
+                    CoInvestmentCosts = actualPayments?.CoInvestment ?? 0m,
                 };
                 
                 currentPeriod = currentPeriod.AddMonths(1);

@@ -463,6 +463,38 @@
         },
         "additionalProperties": false
       },
+      "CollectionPeriodPayments": {
+        "type": "object",
+        "properties": {
+          "periodEndCompleted": {
+            "type": "boolean"
+          },
+          "payments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollectionPeriodPaymentTotal"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "CollectionPeriodPaymentTotal": {
+        "type": "object",
+        "properties": {
+          "fundingSource": {
+            "$ref": "#/components/schemas/FundingSource"
+          },
+          "transactionType": {
+            "$ref": "#/components/schemas/TransactionType"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "EstimatesTimeline": {
         "type": "object",
         "properties": {
@@ -489,6 +521,16 @@
           }
         },
         "additionalProperties": false
+      },
+      "FundingSource": {
+        "enum": [
+          "Levy",
+          "CoInvestedSfa",
+          "CoInvestedEmployer",
+          "FullyFundedSfa",
+          "LevyTransfer"
+        ],
+        "type": "string"
       },
       "ImportJobStateResponse": {
         "type": "object",
@@ -803,6 +845,16 @@
             "items": {
               "$ref": "#/components/schemas/CalendarPeriodAmount"
             }
+          },
+          "currentPayments": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CollectionPeriodPayments"
+              }
+            ]
           }
         },
         "additionalProperties": false
@@ -885,6 +937,15 @@
           }
         },
         "additionalProperties": false
+      },
+      "TransactionType": {
+        "enum": [
+          "Learning",
+          "Completion",
+          "Balancing",
+          "Milestone1"
+        ],
+        "type": "string"
       },
       "ValidationProblemDetails": {
         "type": "object",

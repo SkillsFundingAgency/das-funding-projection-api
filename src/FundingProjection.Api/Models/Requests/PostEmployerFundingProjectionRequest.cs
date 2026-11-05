@@ -1,4 +1,5 @@
 using SFA.DAS.FundingProjection.Api.Projection;
+using SFA.DAS.FundingProjection.Domain.Enums;
 
 namespace SFA.DAS.FundingProjection.Api.Models.Requests;
 
@@ -12,6 +13,20 @@ public class PostEmployerFundingProjectionRequest
     public List<CalendarPeriodAmount> PaymentFundsOutForExpiry { get; set; } = [];
     public List<CalendarPeriodAmount> LongTermExpiredFunds { get; set; } = [];
     public List<CalendarPeriodAmount> ShortTermExpiredFunds { get; set; } = [];
+    public CollectionPeriodPayments? CurrentPayments { get; set; }
+}
+
+public sealed record CollectionPeriodPayments
+{
+    public bool PeriodEndCompleted { get; init; }
+    public List<CollectionPeriodPaymentTotal> Payments { get; init; } = [];
+}
+
+public sealed record CollectionPeriodPaymentTotal
+{
+    public FundingSource FundingSource { get; init; }
+    public TransactionType TransactionType { get; init; }
+    public decimal Amount { get; init; }
 }
 
 public sealed record CalendarPeriodAmount

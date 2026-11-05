@@ -56,14 +56,16 @@ public class TimelineGenerator(
             data.PaymentFundsOutForExpiry,
             data.ShortTermExpiredFunds,
             data.LongTermExpiredFunds,
-            data.CurrentPeriodLevyInReceived
+            data.CurrentPeriodLevyInReceived,
+            data.CurrentPeriodPayments
         );
 
         coInvestmentEstimator.Estimate(
             timeline,
             [..data.ApprenticeshipPaymentSummaries.Where(ApprenticeshipCanBeProjected)],
             [..standardPaymentSchedules, ..transferPaymentSchedules],
-            data.OpeningBalance);
+            data.OpeningBalance,
+            currentPeriodPaymentsReceived: data.CurrentPeriodPayments != null);
 
         return timeline;
     }

@@ -44,7 +44,10 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             PaymentFundsOutForExpiry = request.PaymentFundsOutForExpiry,
             ShortTermExpiredFunds = request.ShortTermExpiredFunds,
             LongTermExpiredFunds = request.LongTermExpiredFunds,
-            CurrentPeriodLevyInReceived = request.HistoricLevyIn.Any(x => x.Period.ToPeriod() == startingPeriod)
+            CurrentPeriodLevyInReceived = request.HistoricLevyIn.Any(x => x.Period.ToPeriod() == startingPeriod),
+            CurrentPeriodPayments = startingPeriod == DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod()
+                ? CurrentPeriodPayments.From(request.CurrentPayments)
+                : null
         };
         var timeline = timelineGenerator.Create(timelineData);
         

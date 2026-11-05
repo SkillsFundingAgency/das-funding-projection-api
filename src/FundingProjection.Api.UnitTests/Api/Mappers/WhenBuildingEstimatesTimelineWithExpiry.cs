@@ -59,7 +59,9 @@ public class WhenBuildingEstimatesTimelineWithExpiry
         List<LevyInMonthSummary>? levyInProjections = null,
         List<CommittedLevyProjection>? commitmentProjections = null,
         bool currentMonthLevyInReceived = false,
-        DateOnly? startPeriod = null)
+        DateOnly? startPeriod = null,
+        List<CommittedLevyProjection>? transferOutProjections = null,
+        CurrentPeriodPayments? currentPeriodPayments = null)
     {
         return EstimatesTimeline.From(
             AccountId,
@@ -69,14 +71,15 @@ public class WhenBuildingEstimatesTimelineWithExpiry
             0m,
             0m,
             commitmentProjections ?? EmptyProjections(months),
-            EmptyProjections(months),
+            transferOutProjections ?? EmptyProjections(months),
             levyInProjections ?? [],
             new ExpiredFunds(),
             levyFundsIn,
             paymentFundsOut ?? [],
             shortTermExpired ?? [],
             longTermExpired ?? [],
-            currentMonthLevyInReceived);
+            currentMonthLevyInReceived,
+            currentPeriodPayments);
     }
 
     [Test]
@@ -248,6 +251,92 @@ public class WhenBuildingEstimatesTimelineWithExpiry
         result.Projections[0].ClosingBalance.Should().Be(5000m);
         result.Projections[1].ClosingBalance.Should().Be(5500m);
         result.Projections[2].ClosingBalance.Should().Be(6000m);
+    }
+
+    [Test]
+    public void Then_Payments_Made_This_Month_Are_Shown_In_Place_Of_The_Estimates()
+    {
+        // arrange
+        var actualPayments = new CurrentPeriodPayments
+        {
+            LearnerCost = 250m,
+            LearnerFinalPaymentCost = 50m,
+            TransferOut = 120m,
+            TransferOutFinalPaymentCost = 30m
+        };
+        var estimates = Enumerable.Range(0, 3)
+            .Select(i => new CommittedLevyProjection { Period = StartPeriod.AddMonths(i), TotalMonthlyPayments = 300m, TotalFinalPayments = 100m })
+            .ToList();
+
+        // act
+        var result = BuildTimeline(3, 5000m, [], commitmentProjections: estimates, transferOutProjections: estimates, currentPeriodPayments: actualPayments);
+
+        // assert
+        result.Projections[0].LevyOutSummary.Should().BeEquivalentTo(new LevyOutSummary
+        {
+            CommittedLearnerCost = 250m,
+            CommittedLearnerFinalPaymentCost = 50m,
+            CommittedTransferOut = 120m,
+            CommittedTransferOutFinalPaymentCost = 30m
+        });
+        result.Projections.Skip(1).Should().AllSatisfy(x => x.LevyOutSummary.Should().BeEquivalentTo(new LevyOutSummary
+        {
+            CommittedLearnerCost = 300m,
+            CommittedLearnerFinalPaymentCost = 100m,
+            CommittedTransferOut = 300m,
+            CommittedTransferOutFinalPaymentCost = 100m
+        }));
+    }
+
+    [Test]
+    public void Then_The_Actual_CoInvestment_Is_Shown_For_This_Month_Once_The_Payments_Have_Been_Made()
+    {
+        // act
+        var result = BuildTimeline(3, 5000m, [], currentPeriodPayments: new CurrentPeriodPayments { CoInvestment = 12m });
+
+        // assert
+        result.Projections[0].CoInvestmentCosts.Should().Be(12m);
+        result.Projections.Skip(1).Should().AllSatisfy(x => x.CoInvestmentCosts.Should().Be(0m));
+    }
+
+    [Test]
+    public void Then_Payments_Made_This_Month_Are_Not_Taken_Off_The_Balance_Again()
+    {
+        // act - the opening balance already has this month's 300 of payments taken off
+        var result = BuildTimeline(3, 5000m, [],
+            commitmentProjections: CommitmentEstimates(3, 400m),
+            currentPeriodPayments: new CurrentPeriodPayments { LearnerCost = 300m });
+
+        // assert
+        result.Projections[0].LevyOutSummary.Total.Should().Be(300m);
+        result.Projections[0].ClosingBalance.Should().Be(5000m);
+        result.Projections[1].ClosingBalance.Should().Be(4600m);
+        result.Projections[2].ClosingBalance.Should().Be(4200m);
+    }
+
+    [Test]
+    public void Then_Expired_Levy_Is_Still_Taken_Off_The_Balance_When_This_Months_Payments_Have_Been_Made()
+    {
+        // arrange - 1000 of levy came in 12 months ago and nothing has been spent, so it expires this month
+        var levyFundsIn = new List<CalendarPeriodAmount> { Amount(StartPeriod.AddMonths(-12), 1000m) };
+
+        // act
+        var result = BuildTimeline(1, 1000m, levyFundsIn, currentPeriodPayments: new CurrentPeriodPayments());
+
+        // assert
+        result.Projections[0].LevyOutSummary.ExpiredLevy.Should().Be(1000m);
+        result.Projections[0].ClosingBalance.Should().Be(0m);
+    }
+
+    [Test]
+    public void Then_Estimated_Payments_Are_Taken_Off_The_Balance_When_This_Months_Payments_Have_Not_Been_Made()
+    {
+        // act
+        var result = BuildTimeline(2, 5000m, [], commitmentProjections: CommitmentEstimates(2, 400m));
+
+        // assert
+        result.Projections[0].ClosingBalance.Should().Be(4600m);
+        result.Projections[1].ClosingBalance.Should().Be(4200m);
     }
 
     [Test]

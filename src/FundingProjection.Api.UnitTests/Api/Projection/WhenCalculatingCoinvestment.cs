@@ -99,4 +99,48 @@ public class WhenCalculatingCoinvestment
         timeline.Projections[1].CoInvestmentCosts.Should().Be(0m);
         timeline.Projections[2].CoInvestmentCosts.Should().Be(0m);
     }
+
+    [Test, MoqAutoData]
+    public void Then_The_Actual_CoInvestment_Payments_Are_Used_If_They_Have_Been_Made(
+        long accountId,
+        Mock<IExpiredFunds> expiredFunds)
+    {
+        // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
+        List<ApprenticeshipPaymentSummaryEntity> summaries =
+        [
+            new()
+            {
+                ApprenticeshipId = 1,
+                AccountId = accountId,
+                TotalCost = 375m,
+                TotalPaid = 0m,
+                StartDate = now.AddMonths(-1),
+                EndDate = now.AddMonths(1),
+                Status = ApprenticeshipStatus.Live,
+                IsTransfer = false,
+                Dob = now.AddMonths(-1).AddYears(-25),
+            }
+        ];
+
+        var data = new TimelineData
+        {
+            AccountId = accountId,
+            Months = 3,
+            OpeningBalance = 0,
+            StartingPeriod = now,
+            ApprenticeshipPaymentSummaries = summaries,
+            CurrentPeriodPayments = new CurrentPeriodPayments { CoInvestment = 12m },
+        };
+
+        var sut = new TimelineGenerator(expiredFunds.Object, new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy()));
+
+        // act
+        var timeline = sut.Create(data);
+
+        // assert
+        timeline.Projections[0].CoInvestmentCosts.Should().Be(12m);
+        timeline.Projections[1].CoInvestmentCosts.Should().Be(25m);
+        timeline.Projections[2].CoInvestmentCosts.Should().Be(43.75m);
+    }
 }

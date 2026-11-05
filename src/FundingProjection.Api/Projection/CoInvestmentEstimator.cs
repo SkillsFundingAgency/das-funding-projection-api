@@ -5,12 +5,12 @@ namespace SFA.DAS.FundingProjection.Api.Projection;
 
 public interface ICoInvestmentEstimator
 {
-    void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> scheduledPayments, decimal openingLevyBalance);
+    void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> scheduledPayments, decimal openingLevyBalance, bool currentPeriodPaymentsReceived);
 }
 
 public class CoInvestmentEstimator(IApprenticeshipOrderingStrategy apprenticeshipOrderingStrategy): ICoInvestmentEstimator
 {
-    public void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> scheduledPayments, decimal openingLevyBalance)
+    public void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> scheduledPayments, decimal openingLevyBalance, bool currentPeriodPaymentsReceived)
     {
         var paymentSchedules = scheduledPayments
             .Select(x => x.ScheduledPayments.Select(p => new KeyValuePair<string, ScheduledPayment>($"{x.ApprenticeshipId}-{p.PaymentPeriod}", p)))
@@ -19,7 +19,9 @@ public class CoInvestmentEstimator(IApprenticeshipOrderingStrategy apprenticeshi
 
         var orderedApprenticeships = apprenticeshipOrderingStrategy.Execute(apprenticeshipPaymentSummaries).ToList(); 
 
-        for (var index = 0; index < timeline.Projections.Count; index++)
+        // once this month's payments have been made the timeline already holds the actual co-investment, so it is not estimated
+        var firstEstimatedIndex = currentPeriodPaymentsReceived ? 1 : 0;
+        for (var index = firstEstimatedIndex; index < timeline.Projections.Count; index++)
         {
             var projectedPeriod = timeline.Projections[index];
             var balance = index == 0 

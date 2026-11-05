@@ -457,7 +457,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         importJobStateRepository
             .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
-        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId)).Returns(Task.CompletedTask);
+        eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
 
         var request = new PostEmployerFundingProjectionRequest
         {

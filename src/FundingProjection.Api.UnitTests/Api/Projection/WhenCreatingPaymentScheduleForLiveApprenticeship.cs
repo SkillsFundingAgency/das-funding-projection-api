@@ -25,7 +25,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
         };
 
         // act
-        var result = PaymentScheduleGenerator.CreateFrom(summary);
+        var result = PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), summary);
 
         // assert
         result.ApprenticeshipId.Should().Be(1);
@@ -61,7 +61,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
         };
 
         // act
-        var result = PaymentScheduleGenerator.CreateFrom(summary);
+        var result = PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), summary);
 
         // assert
         result.ApprenticeshipId.Should().Be(1);
@@ -97,7 +97,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
         };
 
         // act
-        var result = PaymentScheduleGenerator.CreateFrom(summary);
+        var result = PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), summary);
 
         // assert
         result.ApprenticeshipId.Should().Be(1);
@@ -133,7 +133,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
         };
 
         // act
-        var result = PaymentScheduleGenerator.CreateFrom(summary);
+        var result = PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), summary);
 
         // assert
         result.ScheduledPayments.Should().HaveCount(4);
@@ -163,7 +163,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
         };
 
         // act
-        var result = PaymentScheduleGenerator.CreateFrom(summary);
+        var result = PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), summary);
 
         // assert
         result.ScheduledPayments.Should().HaveCount(3);
@@ -191,7 +191,7 @@ public class WhenCreatingPaymentScheduleForLiveApprenticeship
         };
 
         // act
-        var result = PaymentScheduleGenerator.CreateFrom(summary);
+        var result = PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), summary);
 
         // assert
         result.ScheduledPayments.Should().HaveCount(5);

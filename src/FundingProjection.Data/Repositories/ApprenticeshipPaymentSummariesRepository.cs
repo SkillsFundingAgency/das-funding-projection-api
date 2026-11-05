@@ -43,6 +43,10 @@ public class ApprenticeshipPaymentSummariesRepository(IFundingProjectionDataCont
         existingEntity.TotalPaid = entity.TotalPaid;
         existingEntity.StartDate = entity.StartDate;
         existingEntity.EndDate = entity.EndDate;
+        existingEntity.ProviderId = entity.ProviderId;
+        existingEntity.ProviderOrder = entity.ProviderOrder;
+        existingEntity.ApprovalDate = entity.ApprovalDate;
+        existingEntity.LearningType = entity.LearningType;
 
         await context.SaveChangesAsync(cancellationToken);
         return UpsertResult.Create(existingEntity, false);

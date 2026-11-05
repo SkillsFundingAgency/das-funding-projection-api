@@ -25,7 +25,7 @@ public class WhenCreatingPaymentScheduleForCompletedApprenticeship
         };
 
         // act
-        var result = PaymentScheduleGenerator.CreateFrom(summary);
+        var result = PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), summary);
 
         // assert
         result.ApprenticeshipId.Should().Be(1);
@@ -61,7 +61,7 @@ public class WhenCreatingPaymentScheduleForCompletedApprenticeship
         };
 
         // act
-        var result = PaymentScheduleGenerator.CreateFrom(summary);
+        var result = PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), summary);
 
         // assert
         result.ApprenticeshipId.Should().Be(1);
@@ -92,7 +92,7 @@ public class WhenCreatingPaymentScheduleForCompletedApprenticeship
         };
 
         // act
-        var result = PaymentScheduleGenerator.CreateFrom(summary);
+        var result = PaymentScheduleGenerator.CreateFrom(DateTime.UtcNow.ToPeriod(), summary);
 
         // assert
         result.ApprenticeshipId.Should().Be(1);

@@ -355,10 +355,7 @@
             "format": "int64"
           },
           "dob": {
-            "type": [
-              "null",
-              "string"
-            ],
+            "type": "string",
             "format": "date"
           },
           "status": {
@@ -381,6 +378,33 @@
           "endDate": {
             "type": "string",
             "format": "date"
+          },
+          "providerId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "providerOrder": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "approvalDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "firstApprovalDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "learningType": {
+            "$ref": "#/components/schemas/LearningType"
           },
           "lastPaymentDate": {
             "type": [
@@ -522,6 +546,14 @@
         ],
         "type": "string"
       },
+      "LearningType": {
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ],
+        "type": "string"
+      },
       "LevyInMonthSummary": {
         "required": [
           "period",
@@ -620,6 +652,11 @@
             "type": "number",
             "format": "double"
           },
+          "coInvestmentCosts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
           "levyInSummary": {
             "$ref": "#/components/schemas/LevyInSummary"
           },
@@ -641,10 +678,7 @@
             "format": "int64"
           },
           "dob": {
-            "type": [
-              "null",
-              "string"
-            ],
+            "type": "string",
             "format": "date"
           },
           "status": {
@@ -667,6 +701,33 @@
           "endDate": {
             "type": "string",
             "format": "date"
+          },
+          "providerId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int64"
+          },
+          "providerOrder": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "approvalDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "firstApprovalDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "learningType": {
+            "$ref": "#/components/schemas/LearningType"
           },
           "lastPaymentDate": {
             "type": [
@@ -696,6 +757,13 @@
       "PostEmployerFundingProjectionRequest": {
         "type": "object",
         "properties": {
+          "startPeriod": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
           "months": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": "integer",

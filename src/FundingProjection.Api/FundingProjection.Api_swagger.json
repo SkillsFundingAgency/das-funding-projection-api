@@ -149,6 +149,53 @@
         }
       }
     },
+    "/api/employer/{accountId}/funding-projection/months": {
+      "get": {
+        "tags": [
+          "FundingProjection"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "X-Version",
+            "in": "header",
+            "required": true,
+            "example": "1.0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectionMonthsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectionMonthsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectionMonthsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/jobs/{id}": {
       "put": {
         "tags": [
@@ -699,6 +746,11 @@
             "type": "number",
             "format": "double"
           },
+          "dfeCoInvestmentCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "number",
+            "format": "double"
+          },
           "levyInSummary": {
             "$ref": "#/components/schemas/LevyInSummary"
           },
@@ -893,6 +945,17 @@
               "null",
               "string"
             ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectionMonthsResponse": {
+        "type": "object",
+        "properties": {
+          "months": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

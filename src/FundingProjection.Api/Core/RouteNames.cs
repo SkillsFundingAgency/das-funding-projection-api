@@ -12,6 +12,7 @@ public struct RouteElements
     public const string Api = "api";
     public const string Employer = "employer";
     public const string FundingProjection = "funding-projection";
+    public const string Months = "months";
     public const string ApprenticeshipPaymentSummary = "apprenticeship-payment-summary";
     public const string Jobs = "jobs";
 }

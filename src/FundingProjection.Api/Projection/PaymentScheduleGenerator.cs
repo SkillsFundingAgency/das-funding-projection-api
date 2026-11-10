@@ -1,3 +1,4 @@
+using SFA.DAS.FundingProjection.Api.Models;
 using SFA.DAS.FundingProjection.Domain.Entities;
 
 namespace SFA.DAS.FundingProjection.Api.Projection;
@@ -19,7 +20,7 @@ public static class PaymentScheduleGenerator
         var remainingMonthlyCost = remainingCost - remainingCompletionPayment;
         
         var firstPaymentPeriod = summary.StartDate.AddMonths(1).ToPeriod();
-        var lastPaymentPeriod = summary.EndDate.AddMonths(1).ToPeriod();
+        var lastPaymentPeriod = summary.LastPaymentPeriod;
 
         var currentPaymentPeriod = now;
         

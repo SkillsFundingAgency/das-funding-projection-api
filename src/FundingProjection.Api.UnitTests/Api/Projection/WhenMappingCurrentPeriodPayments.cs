@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
 using SFA.DAS.FundingProjection.Api.Projection;
@@ -50,6 +50,8 @@ public class WhenMappingCurrentPeriodPayments
                 Payment(FundingSource.LevyTransfer, TransactionType.Completion, 400m),
                 Payment(FundingSource.CoInvestedEmployer, TransactionType.Learning, 5m),
                 Payment(FundingSource.CoInvestedEmployer, TransactionType.Completion, 15m),
+                Payment(FundingSource.CoInvestedSfa, TransactionType.Learning, 45m),
+                Payment(FundingSource.CoInvestedSfa, TransactionType.Completion, 135m),
             ]
         };
 
@@ -61,7 +63,8 @@ public class WhenMappingCurrentPeriodPayments
             LearnerFinalPaymentCost = 300m,
             TransferOut = 200m,
             TransferOutFinalPaymentCost = 400m,
-            CoInvestment = 20m
+            CoInvestment = 20m,
+            DfeCoInvestment = 180m
         });
     }
 

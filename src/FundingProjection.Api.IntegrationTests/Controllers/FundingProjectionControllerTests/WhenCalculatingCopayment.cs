@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using FundingProjection.Api.Testing;
 using FundingProjection.Api.Testing.DataCreation;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
@@ -66,7 +66,7 @@ public class WhenCalculatingCopayment: SqlBaseFixture
         ]);
         var historicLevy = new List<LevyInMonthSummary>
         {
-            new(DateTime.UtcNow.ToPeriod().AddMonths(3), 475)
+            new(DateTime.UtcNow.ToPeriod().AddMonths(3), 100)
         };
         
         // act
@@ -86,6 +86,7 @@ public class WhenCalculatingCopayment: SqlBaseFixture
         timeline.Projections[6].CoInvestmentCosts.Should().Be(25m); // back into co-investment
         timeline.Projections[7].CoInvestmentCosts.Should().Be(43.75m);
         timeline.Projections[8].CoInvestmentCosts.Should().Be(0m);
+        timeline.Projections.Should().AllSatisfy(x => x.ClosingBalance.Should().BeGreaterThanOrEqualTo(0m));
     }
     
     [Test]

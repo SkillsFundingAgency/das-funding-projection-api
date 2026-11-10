@@ -30,7 +30,8 @@ public static class EstimatesTimelineExtensions
             List<CalendarPeriodAmount> shortTermExpiredFunds,
             List<CalendarPeriodAmount> longTermExpiredFunds,
             bool currentMonthLevyInReceived,
-            CurrentPeriodPayments? currentPeriodPayments = null
+            CurrentPeriodPayments? currentPeriodPayments = null,
+            Func<DateOnly, decimal, CoInvestmentEstimate>? estimateCoInvestment = null
             )
         {
             var closingBalance = openingBalance;
@@ -54,9 +55,19 @@ public static class EstimatesTimelineExtensions
                 var totalFundsOut = (commitment?.TotalFinalPayments ?? 0m) + (commitment?.TotalMonthlyPayments ?? 0m) +
                                     (transferOut?.TotalFinalPayments ?? 0m) + (transferOut?.TotalMonthlyPayments ?? 0m);
 
+                // once this month's payments have been made the actual amounts are shown in place of the estimates
+                var actualPayments = i == 0 ? currentPeriodPayments : null;
+
+                // payments are taken from the balance carried in before this month's levy arrives, levy only covers
+                // them while there is a balance and the shortfall is co-invested, so the balance never goes below zero
+                var coInvestment = actualPayments != null
+                    ? new CoInvestmentEstimate(totalFundsOut, actualPayments.CoInvestment, actualPayments.DfeCoInvestment)
+                    : estimateCoInvestment?.Invoke(currentPeriod, closingBalance)
+                      ?? FullyDfeFunded(totalFundsOut, closingBalance);
+
                 var calendarPeriod = new CalendarPeriod(currentPeriod.Year, currentPeriod.Month);
                 fundsIn.TryAdd(calendarPeriod, levyInSummary.LevyIn);
-                fundsOut.TryAdd(calendarPeriod, totalFundsOut);
+                fundsOut.TryAdd(calendarPeriod, coInvestment.LevyFunded);
 
                 // GetExpiringFunds mutates the dictionaries it is given, so pass copies to keep the running totals intact.
                 // The funds out copy is shared so the long term run spends first and the short term run gets what is left
@@ -78,9 +89,6 @@ public static class EstimatesTimelineExtensions
                 longTermExpired.TryAdd(calendarPeriod, ExpiredAmountFor(longTermExpiry, calendarPeriod));
                 shortTermExpired.TryAdd(calendarPeriod, ExpiredAmountFor(shortTermExpiry, calendarPeriod));
 
-                // once this month's payments have been made the actual amounts are shown in place of the estimates
-                var actualPayments = i == 0 ? currentPeriodPayments : null;
-
                 var levyOutSummary = new LevyOutSummary
                 {
                     CommittedLearnerCost = actualPayments?.LearnerCost ?? commitment?.TotalMonthlyPayments ?? 0m,
@@ -93,7 +101,9 @@ public static class EstimatesTimelineExtensions
                 // once this month's levy has come in it is already in the opening balance, so it is shown but not added again
                 var levyInToAdd = i == 0 && currentMonthLevyInReceived ? 0m : levyInSummary.Total;
                 // the same applies to this month's payments, so only the expired levy is taken off
-                var levyOutToSubtract = actualPayments != null ? levyOutSummary.ExpiredLevy : levyOutSummary.Total;
+                var levyOutToSubtract = actualPayments != null
+                    ? levyOutSummary.ExpiredLevy
+                    : coInvestment.LevyFunded + levyOutSummary.ExpiredLevy;
                 closingBalance = closingBalance + levyInToAdd - levyOutToSubtract;
                 
                 var estimate = new MonthlyFundingBreakdown
@@ -104,7 +114,8 @@ public static class EstimatesTimelineExtensions
                     LevyInSummary = levyInSummary,
                     LevyOutSummary = levyOutSummary,
                     ClosingBalance = closingBalance,
-                    CoInvestmentCosts = actualPayments?.CoInvestment ?? 0m,
+                    CoInvestmentCosts = coInvestment.EmployerCoInvestment,
+                    DfeCoInvestmentCost = coInvestment.DfeCoInvestment,
                 };
                 
                 currentPeriod = currentPeriod.AddMonths(1);
@@ -119,6 +130,13 @@ public static class EstimatesTimelineExtensions
                 Projections = estimates
             };
         }
+    }
+
+    
+    private static CoInvestmentEstimate FullyDfeFunded(decimal totalFundsOut, decimal availableLevy)
+    {
+        var levyFunded = Math.Min(Math.Max(availableLevy, 0m), totalFundsOut);
+        return new CoInvestmentEstimate(levyFunded, 0m, totalFundsOut - levyFunded);
     }
 
     private static Dictionary<CalendarPeriod, decimal> ToExpiryDictionary(List<CalendarPeriodAmount> expiredFunds) =>

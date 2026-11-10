@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.EmployerFinance.Types.Models;
+using SFA.DAS.FundingProjection.Api.Models;
 using SFA.DAS.FundingProjection.Api.Models.Mappers;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Domain.Entities;
@@ -19,22 +20,17 @@ public class TimelineGenerator(
         => entity.Status is ApprenticeshipStatus.Live
             or ApprenticeshipStatus.WaitingToStart
             or ApprenticeshipStatus.Paused;
-
-    private static bool ApprenticeshipCanBeProjected(ApprenticeshipPaymentSummaryEntity entity) =>
-        entity.Status is ApprenticeshipStatus.Live
-            or ApprenticeshipStatus.WaitingToStart
-            or ApprenticeshipStatus.Completed;
     
     public EstimatesTimeline Create(TimelineData data)
     {
         var standardCommitments = data.ApprenticeshipPaymentSummaries.Where(x => !x.IsTransfer).ToList();
         var standardPaymentSchedules = standardCommitments
-            .Where(ApprenticeshipCanBeProjected)
+            .Where(x => x.CanBeProjected)
             .Select(x => PaymentScheduleGenerator.CreateFrom(data.StartingPeriod, x)).ToList();
         
         var transferCommitments = data.ApprenticeshipPaymentSummaries.Where(x => x.IsTransfer).ToList();
         var transferPaymentSchedules = transferCommitments
-            .Where(ApprenticeshipCanBeProjected)
+            .Where(x => x.CanBeProjected)
             .Select(x => PaymentScheduleGenerator.CreateFrom(data.StartingPeriod, x)).ToList();
         
         var commitmentProjections = CommitmentsProjector.CreateProjection(data.StartingPeriod, data.Months, standardPaymentSchedules);
@@ -57,15 +53,11 @@ public class TimelineGenerator(
             data.ShortTermExpiredFunds,
             data.LongTermExpiredFunds,
             data.CurrentPeriodLevyInReceived,
-            data.CurrentPeriodPayments
+            data.CurrentPeriodPayments,
+            coInvestmentEstimator.Prepare(
+                [..data.ApprenticeshipPaymentSummaries.Where(x => x.CanBeProjected)],
+                [..standardPaymentSchedules, ..transferPaymentSchedules])
         );
-
-        coInvestmentEstimator.Estimate(
-            timeline,
-            [..data.ApprenticeshipPaymentSummaries.Where(ApprenticeshipCanBeProjected)],
-            [..standardPaymentSchedules, ..transferPaymentSchedules],
-            data.OpeningBalance,
-            currentPeriodPaymentsReceived: data.CurrentPeriodPayments != null);
 
         return timeline;
     }

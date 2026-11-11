@@ -807,7 +807,10 @@
           },
           "coInvestmentCosts": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": "number",
+            "type": [
+              "null",
+              "number"
+            ],
             "format": "double"
           },
           "dfeCoInvestmentCost": {

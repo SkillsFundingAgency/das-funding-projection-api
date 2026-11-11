@@ -114,7 +114,9 @@ public static class EstimatesTimelineExtensions
                     LevyInSummary = levyInSummary,
                     LevyOutSummary = levyOutSummary,
                     ClosingBalance = closingBalance,
-                    CoInvestmentCosts = coInvestment.EmployerCoInvestment,
+                    CoInvestmentCosts = coInvestment.EmployerCoInvestment + coInvestment.DfeCoInvestment != 0m
+                        ? coInvestment.EmployerCoInvestment
+                        : null,
                     DfeCoInvestmentCost = coInvestment.DfeCoInvestment,
                 };
                 

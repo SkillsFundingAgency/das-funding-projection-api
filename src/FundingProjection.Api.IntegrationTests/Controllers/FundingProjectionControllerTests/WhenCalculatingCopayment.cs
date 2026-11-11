@@ -26,8 +26,8 @@ public class WhenCalculatingCopayment: SqlBaseFixture
         response.Is.Ok();
         timeline.Should().NotBeNull();
         timeline.Projections.Should().HaveCount(4);
-        timeline.Projections[0].CoInvestmentCosts.Should().Be(0m);
-        timeline.Projections[1].CoInvestmentCosts.Should().Be(0m);
+        timeline.Projections[0].CoInvestmentCosts.Should().BeNull();
+        timeline.Projections[1].CoInvestmentCosts.Should().BeNull();
         timeline.Projections[2].CoInvestmentCosts.Should().Be(25m);
         timeline.Projections[3].CoInvestmentCosts.Should().Be(43.75m);
     }
@@ -49,7 +49,7 @@ public class WhenCalculatingCopayment: SqlBaseFixture
         response.Is.Ok();
         timeline.Should().NotBeNull();
         timeline.Projections.Should().HaveCount(4);
-        timeline.Projections[0].CoInvestmentCosts.Should().Be(0m);
+        timeline.Projections[0].CoInvestmentCosts.Should().BeNull();
         timeline.Projections[1].CoInvestmentCosts.Should().Be(18.75m);
         timeline.Projections[2].CoInvestmentCosts.Should().Be(25m);
         timeline.Projections[3].CoInvestmentCosts.Should().Be(43.75m);
@@ -77,15 +77,15 @@ public class WhenCalculatingCopayment: SqlBaseFixture
         response.Is.Ok();
         timeline.Should().NotBeNull();
         timeline.Projections.Should().HaveCount(9);
-        timeline.Projections[0].CoInvestmentCosts.Should().Be(0m);
+        timeline.Projections[0].CoInvestmentCosts.Should().BeNull();
         timeline.Projections[1].CoInvestmentCosts.Should().Be(25m);
         timeline.Projections[2].CoInvestmentCosts.Should().Be(25m);
         timeline.Projections[3].CoInvestmentCosts.Should().Be(43.75m);
-        timeline.Projections[4].CoInvestmentCosts.Should().Be(0m);
-        timeline.Projections[5].CoInvestmentCosts.Should().Be(0m); // the levy in covers this payment
+        timeline.Projections[4].CoInvestmentCosts.Should().BeNull();
+        timeline.Projections[5].CoInvestmentCosts.Should().BeNull(); // the levy in covers this payment
         timeline.Projections[6].CoInvestmentCosts.Should().Be(25m); // back into co-investment
         timeline.Projections[7].CoInvestmentCosts.Should().Be(43.75m);
-        timeline.Projections[8].CoInvestmentCosts.Should().Be(0m);
+        timeline.Projections[8].CoInvestmentCosts.Should().BeNull();
         timeline.Projections.Should().AllSatisfy(x => x.ClosingBalance.Should().BeGreaterThanOrEqualTo(0m));
     }
     
@@ -109,7 +109,7 @@ public class WhenCalculatingCopayment: SqlBaseFixture
         response.Is.Ok();
         timeline.Should().NotBeNull();
         timeline.Projections.Should().HaveCount(9);
-        timeline.Projections[0].CoInvestmentCosts.Should().Be(0m);
+        timeline.Projections[0].CoInvestmentCosts.Should().BeNull();
         timeline.Projections[1].CoInvestmentCosts.Should().Be(50m);
     }
     

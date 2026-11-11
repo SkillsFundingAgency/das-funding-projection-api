@@ -12,6 +12,21 @@ namespace SFA.DAS.FundingProjection.Api.Controllers;
 [Route($"{RouteNames.ApprenticeshipPaymentSummary}")]
 public class ApprenticeshipPaymentSummaryController(ILogger<ApprenticeshipPaymentSummaryController> logger) : ControllerBase
 {
+    [HttpGet]
+    [Route($"{{accountId:long}}/{RouteElements.ApprenticeshipPaymentSummary}")]
+    [ProducesResponseType(typeof(List<ApprenticeshipPaymentSummaryResponse>), StatusCodes.Status200OK)]
+    public async Task<IResult> GetAll(
+        [FromServices] IApprenticeshipPaymentSummariesRepository apprenticeshipSummariesRepository,
+        [FromRoute, Required] long accountId,
+        CancellationToken token)
+    {
+        logger.LogInformation("Processing GET request for apprenticeship payment summaries for account {accountId}", accountId);
+
+        var summaries = await apprenticeshipSummariesRepository.GetApprenticeshipPaymentSummariesAsync(accountId, token);
+
+        return Results.Ok(summaries.Select(s => s.ToResponse()).ToList());
+    }
+
     [HttpPut]
     [Route($"{{accountId:long}}/{RouteElements.ApprenticeshipPaymentSummary}/{{apprenticeshipId:long}}")]
     [ProducesResponseType(typeof(ApprenticeshipPaymentSummaryResponse), StatusCodes.Status200OK)]

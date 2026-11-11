@@ -46,4 +46,34 @@ public class WhenCreatingPaymentScheduleForWaitingToStartApprenticeship
         result.ScheduledPayments[2].ScheduledAmount.Should().Be(100m);
         result.ScheduledPayments[2].FinalPayment.Should().Be(75m);
     }
+
+    [Test]
+    public void Then_An_Early_Payment_This_Month_Does_Not_Replace_The_First_Scheduled_Payment()
+    {
+        // arrange
+        var now = DateTime.UtcNow.ToPeriod();
+        var summary = new ApprenticeshipPaymentSummaryEntity
+        {
+            ApprenticeshipId = 1,
+            AccountId = 1,
+            TotalCost = 1200m,
+            TotalPaid = 50m,
+            // first payment is due the month after it starts, so the schedule runs from two months' time to five
+            StartDate = now.AddMonths(1),
+            EndDate = now.AddMonths(4),
+            LastPaymentDate = now,
+            LastPaymentAmount = 50m,
+            Status = ApprenticeshipStatus.WaitingToStart,
+        };
+
+        // act
+        var result = PaymentScheduleGenerator.CreateFrom(now, summary);
+
+        // assert
+        result.ScheduledPayments.Should().HaveCount(4);
+        result.ScheduledPayments[0].PaymentPeriod.Should().Be(now.AddMonths(2));
+        // (1200 - 50 - 240 completion) spread over the four months
+        result.ScheduledPayments.Should().AllSatisfy(p => p.ScheduledAmount.Should().Be(227.5m));
+        result.ScheduledPayments[^1].FinalPayment.Should().Be(240m);
+    }
 }

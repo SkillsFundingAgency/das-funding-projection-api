@@ -50,14 +50,16 @@ public static class PaymentScheduleGenerator
         var previousPaymentPeriod = summary.LastPaymentDate?.ToPeriod();
         var remainingPaymentPeriods = paymentSchedule.ScheduledPayments;
         
-        // current month already handled, reduce the number of remaining payments to calc
-        if (now == previousPaymentPeriod)
+        // current month already handled, reduce the number of remaining payments to calc.
+        // nly when the schedule starts this month such as a payment outside the schedule (early, or a late completion) has no month to fill
+        if (now == previousPaymentPeriod && remainingPaymentPeriods is [{ PaymentPeriod: var firstScheduledPeriod }, ..] && firstScheduledPeriod == now)
         {
             if (remainingPaymentPeriods.Count == 1)
             {
-                // the last payment includes the final payment
-                paymentSchedule.ScheduledPayments[0].ScheduledAmount = summary.LastPaymentAmount!.Value - completionPayment;
-                paymentSchedule.ScheduledPayments[0].FinalPayment = completionPayment;
+                // the last payment includes the final payment, unless it fell short of it (e.g. a missed payment recorded as zero)
+                var finalPayment = Math.Min(completionPayment, summary.LastPaymentAmount!.Value);
+                paymentSchedule.ScheduledPayments[0].ScheduledAmount = summary.LastPaymentAmount!.Value - finalPayment;
+                paymentSchedule.ScheduledPayments[0].FinalPayment = finalPayment;
                 return paymentSchedule;
             }
             else

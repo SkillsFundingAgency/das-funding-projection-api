@@ -22,7 +22,7 @@ internal class WhenGettingApprenticeshipPaymentSummaries
             .ReturnsAsync(entities);
 
         // Act
-        var result = await endpoint.GetAll(repository.Object, accountId, CancellationToken.None);
+        var result = await endpoint.GetAll(repository.Object, accountId, null, CancellationToken.None);
 
         // Assert
         var ok = result.Should().BeOfType<Ok<List<ApprenticeshipPaymentSummaryResponse>>>().Subject;
@@ -40,10 +40,31 @@ internal class WhenGettingApprenticeshipPaymentSummaries
             .ReturnsAsync([]);
 
         // Act
-        var result = await endpoint.GetAll(repository.Object, accountId, CancellationToken.None);
+        var result = await endpoint.GetAll(repository.Object, accountId, null, CancellationToken.None);
 
         // Assert
         var ok = result.Should().BeOfType<Ok<List<ApprenticeshipPaymentSummaryResponse>>>().Subject;
         ok.Value.Should().BeEmpty();
+    }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task GetAll_ReturnsTheSummariesAwaitingPayment_WhenAPaymentPeriodIsGiven(long accountId,
+        List<ApprenticeshipPaymentSummaryEntity> entities,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> repository,
+        [Greedy] ApprenticeshipPaymentSummaryController endpoint)
+    {
+        // Arrange
+        repository
+            .Setup(r => r.GetApprenticeshipPaymentSummariesAwaitingPaymentAsync(accountId, new DateOnly(2025, 11, 1), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(entities);
+
+        // Act
+        // Any day in the month is treated as that month's payment period
+        var result = await endpoint.GetAll(repository.Object, accountId, new DateOnly(2025, 11, 15), CancellationToken.None);
+
+        // Assert
+        var ok = result.Should().BeOfType<Ok<List<ApprenticeshipPaymentSummaryResponse>>>().Subject;
+        ok.Value.Should().BeEquivalentTo(entities.Select(e => e.ToResponse()));
+        repository.Verify(r => r.GetApprenticeshipPaymentSummariesAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

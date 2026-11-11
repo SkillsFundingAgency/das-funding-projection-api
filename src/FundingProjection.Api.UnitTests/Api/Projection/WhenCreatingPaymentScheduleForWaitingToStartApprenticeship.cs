@@ -76,4 +76,36 @@ public class WhenCreatingPaymentScheduleForWaitingToStartApprenticeship
         result.ScheduledPayments.Should().AllSatisfy(p => p.ScheduledAmount.Should().Be(227.5m));
         result.ScheduledPayments[^1].FinalPayment.Should().Be(240m);
     }
+
+    [Test]
+    public void Then_A_Missed_First_Payment_Recorded_As_Zero_Next_Month_Increases_The_Remaining_Payments()
+    {
+        // arrange
+        var now = DateTime.UtcNow.ToPeriod();
+        var summary = new ApprenticeshipPaymentSummaryEntity
+        {
+            ApprenticeshipId = 1,
+            AccountId = 1,
+            TotalCost = 1200m,
+            TotalPaid = 0m,
+            // starts this month, so the schedule runs from next month to four months' time
+            StartDate = now,
+            EndDate = now.AddMonths(3),
+            // a period end has paid nothing for next month's payment
+            LastPaymentDate = now.AddMonths(1),
+            LastPaymentAmount = 0m,
+            Status = ApprenticeshipStatus.Live,
+        };
+
+        // act
+        var result = PaymentScheduleGenerator.CreateFrom(now, summary);
+
+        // assert
+        result.ScheduledPayments.Should().HaveCount(4);
+        result.ScheduledPayments[0].PaymentPeriod.Should().Be(now.AddMonths(1));
+        result.ScheduledPayments[0].ScheduledAmount.Should().Be(0m);
+        // (1200 - 240 completion) spread over the three months left, rather than 240 a month over four
+        result.ScheduledPayments[1..].Should().AllSatisfy(p => p.ScheduledAmount.Should().Be(320m));
+        result.ScheduledPayments[^1].FinalPayment.Should().Be(240m);
+    }
 }

@@ -50,23 +50,28 @@ public static class PaymentScheduleGenerator
         var previousPaymentPeriod = summary.LastPaymentDate?.ToPeriod();
         var remainingPaymentPeriods = paymentSchedule.ScheduledPayments;
         
-        // current month already handled, reduce the number of remaining payments to calc.
-        // nly when the schedule starts this month such as a payment outside the schedule (early, or a late completion) has no month to fill
-        if (now == previousPaymentPeriod && remainingPaymentPeriods is [{ PaymentPeriod: var firstScheduledPeriod }, ..] && firstScheduledPeriod == now)
+        // The month the last payment was recorded for is already handled, so only the months after it share what is left.
+        // It can be later than the current month when a period end has run ahead of the calendar, and the months before it
+        // are already in TotalPaid. A payment outside the schedule (early, or a late completion) has no month to fill
+        var handledIndex = previousPaymentPeriod is { } paidPeriod
+            ? remainingPaymentPeriods.FindIndex(p => p.PaymentPeriod == paidPeriod)
+            : -1;
+
+        if (handledIndex >= 0)
         {
-            if (remainingPaymentPeriods.Count == 1)
+            var handledPayment = remainingPaymentPeriods[handledIndex];
+
+            if (handledIndex == remainingPaymentPeriods.Count - 1)
             {
                 // the last payment includes the final payment, unless it fell short of it (e.g. a missed payment recorded as zero)
                 var finalPayment = Math.Min(completionPayment, summary.LastPaymentAmount!.Value);
-                paymentSchedule.ScheduledPayments[0].ScheduledAmount = summary.LastPaymentAmount!.Value - finalPayment;
-                paymentSchedule.ScheduledPayments[0].FinalPayment = finalPayment;
+                handledPayment.ScheduledAmount = summary.LastPaymentAmount!.Value - finalPayment;
+                handledPayment.FinalPayment = finalPayment;
                 return paymentSchedule;
             }
-            else
-            {
-                paymentSchedule.ScheduledPayments[0].ScheduledAmount = summary.LastPaymentAmount!.Value;
-            }
-            remainingPaymentPeriods = [.. remainingPaymentPeriods.Skip(1)];
+
+            handledPayment.ScheduledAmount = summary.LastPaymentAmount!.Value;
+            remainingPaymentPeriods = [.. remainingPaymentPeriods.Skip(handledIndex + 1)];
         }
 
         // avoid dividing by zero

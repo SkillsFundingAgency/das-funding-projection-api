@@ -5,6 +5,7 @@ using SFA.DAS.FundingProjection.Data.Repositories;
 using System.ComponentModel.DataAnnotations;
 using SFA.DAS.FundingProjection.Api.Models.Mappers;
 using SFA.DAS.FundingProjection.Api.Models.Responses;
+using SFA.DAS.FundingProjection.Api.Projection;
 
 namespace SFA.DAS.FundingProjection.Api.Controllers;
 
@@ -18,11 +19,15 @@ public class ApprenticeshipPaymentSummaryController(ILogger<ApprenticeshipPaymen
     public async Task<IResult> GetAll(
         [FromServices] IApprenticeshipPaymentSummariesRepository apprenticeshipSummariesRepository,
         [FromRoute, Required] long accountId,
+        [FromQuery] DateOnly? awaitingPaymentFor,
         CancellationToken token)
     {
         logger.LogInformation("Processing GET request for apprenticeship payment summaries for account {accountId}", accountId);
 
-        var summaries = await apprenticeshipSummariesRepository.GetApprenticeshipPaymentSummariesAsync(accountId, token);
+        // When a payment period is given, only the summaries still waiting on a payment for it are returned
+        var summaries = awaitingPaymentFor is { } paymentPeriod
+            ? await apprenticeshipSummariesRepository.GetApprenticeshipPaymentSummariesAwaitingPaymentAsync(accountId, paymentPeriod.ToPeriod(), token)
+            : await apprenticeshipSummariesRepository.GetApprenticeshipPaymentSummariesAsync(accountId, token);
 
         return Results.Ok(summaries.Select(s => s.ToResponse()).ToList());
     }

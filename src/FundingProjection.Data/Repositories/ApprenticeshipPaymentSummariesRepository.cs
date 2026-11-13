@@ -1,0 +1,85 @@
+﻿using Microsoft.EntityFrameworkCore;
+using SFA.DAS.FundingProjection.Data.Models;
+using SFA.DAS.FundingProjection.Domain.Entities;
+
+namespace SFA.DAS.FundingProjection.Data.Repositories;
+public interface IApprenticeshipPaymentSummariesRepository : IReadRepository<ApprenticeshipPaymentSummaryEntity, long>, IWriteRepository<ApprenticeshipPaymentSummaryEntity, long>
+{
+    Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipPaymentSummariesAsync(long accountId, CancellationToken cancellationToken);
+    Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipPaymentSummariesAwaitingPaymentAsync(long accountId, DateOnly paymentPeriod, CancellationToken cancellationToken);
+}
+public class ApprenticeshipPaymentSummariesRepository(IFundingProjectionDataContext context) : IApprenticeshipPaymentSummariesRepository
+{
+    public async Task<ApprenticeshipPaymentSummaryEntity?> GetOneAsync(long key, CancellationToken cancellationToken)
+    {
+        return await context.ApprenticeshipPaymentSummaries.FindAsync([key], cancellationToken);
+    }
+
+    public async Task<UpsertResult<ApprenticeshipPaymentSummaryEntity>> UpsertOneAsync(ApprenticeshipPaymentSummaryEntity entity, CancellationToken cancellationToken)
+    {
+        var existingEntity = await context.ApprenticeshipPaymentSummaries
+            .SingleOrDefaultAsync(x =>
+                    x.AccountId == entity.AccountId &&
+                    x.ApprenticeshipId == entity.ApprenticeshipId,
+                cancellationToken);
+
+        if (existingEntity is null)
+        {
+            await context.ApprenticeshipPaymentSummaries.AddAsync(
+                entity,
+                cancellationToken);
+
+            await context.SaveChangesAsync(cancellationToken);
+            return UpsertResult.Create(entity, true);
+        }
+
+        existingEntity.IsTransfer = entity.IsTransfer;
+        existingEntity.LastPaymentAmount = entity.LastPaymentAmount;
+        existingEntity.LastPaymentDate = entity.LastPaymentDate;
+        existingEntity.LastUpdatedDate = entity.LastUpdatedDate;
+        existingEntity.Uln = entity.Uln;
+        existingEntity.Dob = entity.Dob;
+        existingEntity.Status = entity.Status;
+        existingEntity.TotalCost = entity.TotalCost;
+        existingEntity.TotalPaid = entity.TotalPaid;
+        existingEntity.StartDate = entity.StartDate;
+        existingEntity.EndDate = entity.EndDate;
+        existingEntity.ProviderId = entity.ProviderId;
+        existingEntity.ProviderOrder = entity.ProviderOrder;
+        existingEntity.ApprovalDate = entity.ApprovalDate;
+        existingEntity.LearningType = entity.LearningType;
+
+        await context.SaveChangesAsync(cancellationToken);
+        return UpsertResult.Create(existingEntity, false);
+    }
+
+    public Task<bool> DeleteOneAsync(long key, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(true);
+    }
+
+    public async Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipPaymentSummariesAsync(long accountId, CancellationToken cancellationToken)
+    {
+        return await context.ApprenticeshipPaymentSummaries
+            .Where(x => x.AccountId == accountId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipPaymentSummariesAwaitingPaymentAsync(long accountId, DateOnly paymentPeriod, CancellationToken cancellationToken)
+    {
+        // The schedule's last payment is the month after the end date, and one more month picks up completion payments that arrive late
+        var earliestEndDate = paymentPeriod.AddMonths(-2);
+
+        return await context.ApprenticeshipPaymentSummaries
+            .Where(x => x.AccountId == accountId
+                        && x.TotalPaid < x.TotalCost
+                        && x.EndDate >= earliestEndDate
+                        // Skip those already holding a payment for the period. Zeros are checked again, as a period end
+                        // can be recorded before its payments are imported
+                        && (x.LastPaymentDate == null
+                            || x.LastPaymentDate < paymentPeriod
+                            || x.LastPaymentAmount == null
+                            || x.LastPaymentAmount == 0))
+            .ToListAsync(cancellationToken);
+    }
+}

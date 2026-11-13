@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using SFA.DAS.EmployerFinance.Types.Models;
 using SFA.DAS.FundingProjection.Api.Controllers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
@@ -70,7 +70,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
     }
 
     [Test, RecursiveMoqAutoData]
-    public async Task Then_Transfer_Costs_Are_Projected_Separately_From_Committed_Learner_Costs(
+    public async Task Then_Transfer_Costs_Are_Projected_Separately_From_Committed_Learner_Costs_And_Balance_Does_Not_Go_Below_Zero(
         long accountId,
         ImportJobStateEntity importJobState,
         [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
@@ -141,7 +141,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         projections[0].LevyOutSummary.CommittedTransferOutFinalPaymentCost.Should().Be(0m);
         projections[^1].LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(75m);
         projections[^1].LevyOutSummary.CommittedTransferOutFinalPaymentCost.Should().Be(150m);
-        projections[^1].ClosingBalance.Should().Be(-1125m);
+        projections[^1].ClosingBalance.Should().Be(0m);
     }
 
     [Test, RecursiveMoqAutoData]

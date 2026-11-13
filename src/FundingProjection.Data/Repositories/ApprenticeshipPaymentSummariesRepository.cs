@@ -6,6 +6,7 @@ namespace SFA.DAS.FundingProjection.Data.Repositories;
 public interface IApprenticeshipPaymentSummariesRepository : IReadRepository<ApprenticeshipPaymentSummaryEntity, long>, IWriteRepository<ApprenticeshipPaymentSummaryEntity, long>
 {
     Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipPaymentSummariesAsync(long accountId, CancellationToken cancellationToken);
+    Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipPaymentSummariesAwaitingPaymentAsync(long accountId, DateOnly paymentPeriod, CancellationToken cancellationToken);
 }
 public class ApprenticeshipPaymentSummariesRepository(IFundingProjectionDataContext context) : IApprenticeshipPaymentSummariesRepository
 {
@@ -61,6 +62,24 @@ public class ApprenticeshipPaymentSummariesRepository(IFundingProjectionDataCont
     {
         return await context.ApprenticeshipPaymentSummaries
             .Where(x => x.AccountId == accountId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<ApprenticeshipPaymentSummaryEntity>> GetApprenticeshipPaymentSummariesAwaitingPaymentAsync(long accountId, DateOnly paymentPeriod, CancellationToken cancellationToken)
+    {
+        // The schedule's last payment is the month after the end date, and one more month picks up completion payments that arrive late
+        var earliestEndDate = paymentPeriod.AddMonths(-2);
+
+        return await context.ApprenticeshipPaymentSummaries
+            .Where(x => x.AccountId == accountId
+                        && x.TotalPaid < x.TotalCost
+                        && x.EndDate >= earliestEndDate
+                        // Skip those already holding a payment for the period. Zeros are checked again, as a period end
+                        // can be recorded before its payments are imported
+                        && (x.LastPaymentDate == null
+                            || x.LastPaymentDate < paymentPeriod
+                            || x.LastPaymentAmount == null
+                            || x.LastPaymentAmount == 0))
             .ToListAsync(cancellationToken);
     }
 }

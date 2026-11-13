@@ -296,7 +296,39 @@ public class WhenBuildingEstimatesTimelineWithExpiry
 
         // assert
         result.Projections[0].CoInvestmentCosts.Should().Be(12m);
-        result.Projections.Skip(1).Should().AllSatisfy(x => x.CoInvestmentCosts.Should().Be(0m));
+        result.Projections.Skip(1).Should().AllSatisfy(x => x.CoInvestmentCosts.Should().BeNull());
+    }
+
+    [Test]
+    public void Then_There_Is_No_CoInvestment_When_The_Levy_Covers_The_Payments()
+    {
+        // arrange
+        var estimates = Enumerable.Range(0, 3)
+            .Select(i => new CommittedLevyProjection { Period = StartPeriod.AddMonths(i), TotalMonthlyPayments = 300m, TotalFinalPayments = 100m })
+            .ToList();
+
+        // act
+        var result = BuildTimeline(3, 5000m, [], commitmentProjections: estimates);
+
+        // assert
+        result.Projections.Should().AllSatisfy(x => x.CoInvestmentCosts.Should().BeNull());
+    }
+
+    [Test]
+    public void Then_The_Employer_CoInvestment_Is_Zero_When_The_Shortfall_Is_Fully_Funded_By_The_Dfe()
+    {
+        // arrange
+        var estimates = new List<CommittedLevyProjection>
+        {
+            new() { Period = StartPeriod, TotalMonthlyPayments = 300m, TotalFinalPayments = 0m }
+        };
+
+        // act
+        var result = BuildTimeline(1, 100m, [], commitmentProjections: estimates);
+
+        // assert
+        result.Projections[0].CoInvestmentCosts.Should().Be(0m);
+        result.Projections[0].DfeCoInvestmentCost.Should().Be(200m);
     }
 
     [Test]

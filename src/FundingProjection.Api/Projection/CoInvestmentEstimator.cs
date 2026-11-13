@@ -1,60 +1,59 @@
-﻿using SFA.DAS.FundingProjection.Api.Models.Responses;
-using SFA.DAS.FundingProjection.Domain.Entities;
+﻿using SFA.DAS.FundingProjection.Domain.Entities;
 
 namespace SFA.DAS.FundingProjection.Api.Projection;
 
+public sealed record CoInvestmentEstimate(decimal LevyFunded, decimal EmployerCoInvestment, decimal DfeCoInvestment);
+
 public interface ICoInvestmentEstimator
 {
-    void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> scheduledPayments, decimal openingLevyBalance, bool currentPeriodPaymentsReceived);
+    Func<DateOnly, decimal, CoInvestmentEstimate> Prepare(List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> paymentSchedules);
 }
 
 public class CoInvestmentEstimator(IApprenticeshipOrderingStrategy apprenticeshipOrderingStrategy): ICoInvestmentEstimator
 {
-    public void Estimate(EstimatesTimeline timeline, List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> scheduledPayments, decimal openingLevyBalance, bool currentPeriodPaymentsReceived)
+    public Func<DateOnly, decimal, CoInvestmentEstimate> Prepare(List<ApprenticeshipPaymentSummaryEntity> apprenticeshipPaymentSummaries, List<PaymentSchedule> paymentSchedules)
     {
-        var paymentSchedules = scheduledPayments
-            .Select(x => x.ScheduledPayments.Select(p => new KeyValuePair<string, ScheduledPayment>($"{x.ApprenticeshipId}-{p.PaymentPeriod}", p)))
-            .SelectMany(x => x)
-            .ToDictionary(x => x.Key, x => x.Value);
+        var payments = paymentSchedules
+            .SelectMany(x => x.ScheduledPayments.Select(p => (Key: (x.ApprenticeshipId, p.PaymentPeriod), Payment: p)))
+            .ToDictionary(x => x.Key, x => x.Payment);
 
-        var orderedApprenticeships = apprenticeshipOrderingStrategy.Execute(apprenticeshipPaymentSummaries).ToList(); 
+        var orderedApprenticeships = apprenticeshipOrderingStrategy.Execute(apprenticeshipPaymentSummaries).ToList();
 
-        // once this month's payments have been made the timeline already holds the actual co-investment, so it is not estimated
-        var firstEstimatedIndex = currentPeriodPaymentsReceived ? 1 : 0;
-        for (var index = firstEstimatedIndex; index < timeline.Projections.Count; index++)
-        {
-            var projectedPeriod = timeline.Projections[index];
-            var balance = index == 0 
-                ? openingLevyBalance
-                : timeline.Projections[index-1].ClosingBalance;
-            var currentPeriod = new DateOnly(projectedPeriod.Year, projectedPeriod.Month, 1);
-            var copay = 0m;
-            foreach (var apprenticeship in orderedApprenticeships)
-            {
-                if (!paymentSchedules.TryGetValue($"{apprenticeship.ApprenticeshipId}-{currentPeriod}", out var payment))
-                {
-                    continue;
-                }
-                
-                balance -= payment.ScheduledAmount + payment.FinalPayment;
-                if (balance >= 0)
-                {
-                    continue;
-                }
-                
-                copay += CalculateCoPayment(apprenticeship, balance, payment);
-            }
-            projectedPeriod.CoInvestmentCosts = copay;
-        }
+        return (period, availableLevy) => Estimate(period, availableLevy, orderedApprenticeships, payments);
     }
 
-    private static decimal CalculateCoPayment(ApprenticeshipPaymentSummaryEntity apprenticeship, decimal balance, ScheduledPayment payment)
+    private static CoInvestmentEstimate Estimate(
+        DateOnly period,
+        decimal availableLevy,
+        List<ApprenticeshipPaymentSummaryEntity> orderedApprenticeships,
+        Dictionary<(long, DateOnly), ScheduledPayment> payments)
     {
-        var amount = payment.ScheduledAmount + payment.FinalPayment;
-        var value = Math.Min(amount + (0 - (balance + amount)), amount);
-        return Rules
-            .First(x => x.CanRun(apprenticeship))
-            .CalculateCopayment(value);
+        var balance = Math.Max(availableLevy, 0m);
+        var levyFunded = 0m;
+        var employerCoInvestment = 0m;
+        var dfeCoInvestment = 0m;
+
+        foreach (var apprenticeship in orderedApprenticeships)
+        {
+            if (!payments.TryGetValue((apprenticeship.ApprenticeshipId, period), out var payment))
+            {
+                continue;
+            }
+
+            var amount = payment.ScheduledAmount + payment.FinalPayment;
+            var fromLevy = Math.Min(balance, amount);
+            balance -= fromLevy;
+            levyFunded += fromLevy;
+
+            var shortfall = amount - fromLevy;
+            var employerShare = Rules
+                .First(x => x.CanRun(apprenticeship))
+                .CalculateCopayment(shortfall);
+            employerCoInvestment += employerShare;
+            dfeCoInvestment += shortfall - employerShare;
+        }
+
+        return new CoInvestmentEstimate(levyFunded, employerCoInvestment, dfeCoInvestment);
     }
 
     private static readonly List<CopaymentRule> Rules =

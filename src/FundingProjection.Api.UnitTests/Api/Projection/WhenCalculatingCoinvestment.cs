@@ -52,6 +52,9 @@ public class WhenCalculatingCoinvestment
         timeline.Projections[0].CoInvestmentCosts.Should().Be(25m);
         timeline.Projections[1].CoInvestmentCosts.Should().Be(25m);
         timeline.Projections[2].CoInvestmentCosts.Should().Be(43.75m);
+        timeline.Projections[0].DfeCoInvestmentCost.Should().Be(75m);
+        timeline.Projections[1].DfeCoInvestmentCost.Should().Be(75m);
+        timeline.Projections[2].DfeCoInvestmentCost.Should().Be(131.25m);
     }
     
     [Test]
@@ -98,6 +101,55 @@ public class WhenCalculatingCoinvestment
         timeline.Projections[0].CoInvestmentCosts.Should().Be(0m);
         timeline.Projections[1].CoInvestmentCosts.Should().Be(0m);
         timeline.Projections[2].CoInvestmentCosts.Should().Be(0m);
+        timeline.Projections[0].DfeCoInvestmentCost.Should().Be(100m);
+        timeline.Projections[1].DfeCoInvestmentCost.Should().Be(100m);
+        timeline.Projections[2].DfeCoInvestmentCost.Should().Be(175m);
+    }
+
+    [Test, MoqAutoData]
+    public void Then_The_Levy_Pays_What_It_Can_And_The_Shortfall_Is_Split_So_The_Month_Reconciles(
+        long accountId,
+        Mock<IExpiredFunds> expiredFunds)
+    {
+        // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
+        List<ApprenticeshipPaymentSummaryEntity> summaries =
+        [
+            new()
+            {
+                ApprenticeshipId = 1,
+                AccountId = accountId,
+                TotalCost = 375m,
+                TotalPaid = 0m,
+                StartDate = now.AddMonths(-1),
+                EndDate = now.AddMonths(1),
+                Status = ApprenticeshipStatus.Live,
+                IsTransfer = false,
+                Dob = now.AddMonths(-1).AddYears(-20),
+            }
+        ];
+
+        var data = new TimelineData
+        {
+            AccountId = accountId,
+            Months = 1,
+            OpeningBalance = 40m,
+            StartingPeriod = now,
+            ApprenticeshipPaymentSummaries = summaries,
+        };
+
+        var sut = new TimelineGenerator(expiredFunds.Object, new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy()));
+
+        // act
+        var timeline = sut.Create(data);
+
+        // assert
+        var month = timeline.Projections[0];
+        month.ClosingBalance.Should().Be(0m);
+        month.CoInvestmentCosts.Should().Be(0m);
+        month.DfeCoInvestmentCost.Should().Be(60m);
+        (40m + month.CoInvestmentCosts + month.DfeCoInvestmentCost)
+            .Should().Be(month.LevyOutSummary.Total - month.LevyOutSummary.ExpiredLevy);
     }
 
     [Test, MoqAutoData]

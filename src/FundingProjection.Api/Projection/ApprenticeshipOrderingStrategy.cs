@@ -24,7 +24,7 @@ public class ApprenticeshipOrderingStrategy: IApprenticeshipOrderingStrategy
     {
         return entity.ProviderOrder switch
         {
-            null => entity.FirstApprovalDate is not null
+            null or 0 => entity.FirstApprovalDate is not null
                 ? entity.FirstApprovalDate.Value.ToDateTime(TimeOnly.MinValue).Ticks
                 : entity.ApprovalDate.Ticks,
             _ => entity.ProviderOrder.Value

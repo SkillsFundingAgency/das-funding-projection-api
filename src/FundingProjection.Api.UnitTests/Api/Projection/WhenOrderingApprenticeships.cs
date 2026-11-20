@@ -63,6 +63,27 @@ public class WhenOrderingApprenticeships
         result[1].ProviderOrder.Should().Be(2);
         result[2].ProviderOrder.Should().Be(null);
     }
+
+    [Test, MoqAutoData]
+    public void Then_Zero_ProviderOrder_Orders_Providers_By_FirstApprovalDate_After_ProviderOrder(ApprenticeshipOrderingStrategy sut)
+    {
+        // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow);
+        var apprenticeships = new List<ApprenticeshipPaymentSummaryEntity>
+        {
+            new() { ProviderId = 1, ProviderOrder = 0, FirstApprovalDate = now.AddDays(-10), },
+            new() { ProviderId = 2, ProviderOrder = 1, },
+            new() { ProviderId = 3, ProviderOrder = 0, FirstApprovalDate = now.AddDays(-50), },
+        };
+
+        // act
+        var result = sut.Execute(apprenticeships).ToList();
+
+        // assert
+        result[0].ProviderId.Should().Be(2);
+        result[1].ProviderId.Should().Be(3);
+        result[2].ProviderId.Should().Be(1);
+    }
     
     [Test, MoqAutoData]
     public void Then_Null_ProviderOrder_Orders_Providers_By_FirstApprovalDate_Ascending(ApprenticeshipOrderingStrategy sut)

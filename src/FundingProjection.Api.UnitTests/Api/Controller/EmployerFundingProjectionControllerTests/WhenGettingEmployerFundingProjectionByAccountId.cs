@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using SFA.DAS.EmployerFinance.Types.Models;
 using SFA.DAS.FundingProjection.Api.Controllers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
@@ -55,6 +55,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         result.Should().NotBeNull();
         result.Value.Should().NotBeNull();
         result.Value.AccountId.Should().Be(accountId);
+        result.Value.LastSuccessfulImportDate.Should().Be(importJobState.LastSuccessfulImportDate);
         result.Value.TotalEstimatedCommitedCost.Should().Be(0);
         result.Value.TotalEstimatedCommitedTransferCost.Should().Be(0);
         result.Value.Projections.Should().HaveCount(request.Months);

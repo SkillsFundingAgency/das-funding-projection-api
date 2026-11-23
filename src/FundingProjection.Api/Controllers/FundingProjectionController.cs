@@ -56,6 +56,8 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         var job = await importJobStateRepository.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token);
         await eventService.HandleImportLearnersCost(job.Id, accountId, job.LastSuccessfulImportDate);
 
+        timeline.LastSuccessfulImportDate = job.LastSuccessfulImportDate;
+
         return TypedResults.Ok(timeline);
     }
 

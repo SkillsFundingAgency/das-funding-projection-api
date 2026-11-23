@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http.HttpResults;
 using SFA.DAS.EmployerFinance.Types.Models;
 using SFA.DAS.FundingProjection.Api.Controllers;
 using SFA.DAS.FundingProjection.Api.Models.Requests;
@@ -30,7 +30,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             .ReturnsAsync([]);
 
         importJobStateRepository
-            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .Setup(x => x.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
         eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
@@ -108,7 +108,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
                 }
             ]);
         importJobStateRepository
-            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .Setup(x => x.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
         eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
@@ -205,7 +205,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
                 }
             ]);
         importJobStateRepository
-            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .Setup(x => x.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
         eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
@@ -263,7 +263,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
                 Summary(11, true, ApprenticeshipStatus.Stopped, 900m, 100m),
             ]);
         importJobStateRepository
-            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .Setup(x => x.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
         eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
@@ -320,7 +320,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             .ReturnsAsync([]);
 
         importJobStateRepository
-            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .Setup(x => x.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
         eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
@@ -409,7 +409,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             ]);
 
         importJobStateRepository
-            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .Setup(x => x.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
 
         eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
@@ -455,7 +455,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
             .ReturnsAsync([]);
         importJobStateRepository
-            .Setup(x => x.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token))
+            .Setup(x => x.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token))
             .ReturnsAsync(importJobState);
         eventService.Setup(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate)).Returns(Task.CompletedTask);
 

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.FundingProjection.Api.Core;
 using SFA.DAS.FundingProjection.Api.Models.Mappers;
@@ -42,7 +42,7 @@ public class JobsController(ILogger<JobsController> logger) : ControllerBase
                 FailedRecordsLastRun = request.FailedRecordsLastRun
             };
 
-            var updatedJobState = await repository.UpdateJobStateAsync(entity, cancellationToken);
+            var updatedJobState = await repository.UpdateJobState(entity, cancellationToken);
 
             return updatedJobState is null 
                 ? Results.NotFound() 

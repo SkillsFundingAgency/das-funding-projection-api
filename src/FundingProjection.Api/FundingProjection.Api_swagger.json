@@ -1073,6 +1073,9 @@
                 "$ref": "#/components/schemas/CollectionPeriodPayments"
               }
             ]
+          },
+          "triggerRefresh": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

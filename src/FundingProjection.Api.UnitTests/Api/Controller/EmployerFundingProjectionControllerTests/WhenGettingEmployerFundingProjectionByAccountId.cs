@@ -68,6 +68,8 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
             x.LevyOutSummary.CommittedTransferOutFinalPaymentCost.Should().Be(0);
             x.LevyInSummary.LevyIn.Should().Be(0);
         });
+        result!.Value!.LastSuccessfulImportDate.Should().Be(importJobState.LastSuccessfulImportDate);
+        eventService.Verify(x => x.HandleImportLearnersCost(importJobState.Id, accountId, importJobState.LastSuccessfulImportDate), Times.Once);
     }
 
     [Test, RecursiveMoqAutoData]
@@ -487,5 +489,74 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         var timeLine = result.Value;
         timeLine!.Projections[0].LevyOutSummary.CommittedLearnerCost.Should().Be(999m);
         timeLine.Projections[0].ClosingBalance.Should().Be(5000m);
+    }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_The_Import_Is_Not_Triggered_And_No_Job_Is_Created_When_A_Refresh_Is_Not_Requested(
+        long accountId,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
+        [Greedy] FundingProjectionController controller,
+        CancellationToken token)
+    {
+        // arrange
+        apprenticeshipSummariesRepository
+            .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
+            .ReturnsAsync([]);
+        importJobStateRepository
+            .Setup(x => x.GetJobState(accountId, JobName.ImportLearnersCost, token))
+            .ReturnsAsync(importJobState);
+
+        var request = new PostEmployerFundingProjectionRequest { HistoricLevyIn = [], TriggerRefresh = false };
+
+        // act
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
+
+        // assert
+        eventService.Verify(x => x.HandleImportLearnersCost(It.IsAny<Guid>(), It.IsAny<long>(), It.IsAny<DateTime>()), Times.Never);
+        importJobStateRepository.Verify(x => x.GetOrCreateJobState(It.IsAny<long>(), It.IsAny<JobName>(), It.IsAny<CancellationToken>()), Times.Never);
+        result!.Value!.LastSuccessfulImportDate.Should().Be(importJobState.LastSuccessfulImportDate);
+    }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_The_Last_Successful_Import_Date_Is_The_Minimum_When_There_Is_No_Job_And_A_Refresh_Is_Not_Requested(
+        long accountId,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
+        [Greedy] FundingProjectionController controller,
+        CancellationToken token)
+    {
+        // arrange
+        apprenticeshipSummariesRepository
+            .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, token))
+            .ReturnsAsync([]);
+        importJobStateRepository
+            .Setup(x => x.GetJobState(accountId, JobName.ImportLearnersCost, token))
+            .ReturnsAsync((ImportJobStateEntity?)null);
+
+        var request = new PostEmployerFundingProjectionRequest { HistoricLevyIn = [], TriggerRefresh = false };
+
+        // act
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
+
+        // assert
+        result!.Value!.LastSuccessfulImportDate.Should().Be(DateTime.MinValue);
     }
 }

@@ -53,10 +53,19 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
         };
         var timeline = timelineGenerator.Create(timelineData);
         
-        var job = await importJobStateRepository.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token);
-        await eventService.HandleImportLearnersCost(job.Id, accountId, job.LastSuccessfulImportDate);
+        if (request.TriggerRefresh)
+        {
+            var job = await importJobStateRepository.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token);
+            await eventService.HandleImportLearnersCost(job.Id, accountId, job.LastSuccessfulImportDate);
 
-        timeline.LastSuccessfulImportDate = job.LastSuccessfulImportDate;
+            timeline.LastSuccessfulImportDate = job.LastSuccessfulImportDate;
+        }
+        else
+        {
+            var job = await importJobStateRepository.GetJobState(accountId, JobName.ImportLearnersCost, token);
+
+            timeline.LastSuccessfulImportDate = job?.LastSuccessfulImportDate ?? DateTime.MinValue;
+        }
 
         return TypedResults.Ok(timeline);
     }

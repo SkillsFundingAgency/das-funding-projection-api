@@ -728,6 +728,13 @@
           "lastSuccessfulImportDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "dateEstimateEntersCoinvestment": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           }
         },
         "additionalProperties": false

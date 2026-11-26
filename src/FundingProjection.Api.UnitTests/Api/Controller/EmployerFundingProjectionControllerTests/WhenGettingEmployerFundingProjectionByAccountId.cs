@@ -59,6 +59,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         result.Value.TotalEstimatedCommitedCost.Should().Be(0);
         result.Value.TotalEstimatedCommitedTransferCost.Should().Be(0);
         result.Value.Projections.Should().HaveCount(request.Months);
+        result.Value.DateEstimateEntersCoinvestment.Should().BeNull();
         result.Value.Projections.Should().AllSatisfy(x => {
             x.EmployerAccountId.Should().Be(accountId);
             x.ClosingBalance.Should().Be(0);
@@ -94,6 +95,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
                     IsTransfer = false,
                     TotalCost = 375m,
                     TotalPaid = 0m,
+                    Dob = now.AddYears(-30),
                     StartDate = now.AddMonths(-1),
                     EndDate = now.AddMonths(1),
                     Status = ApprenticeshipStatus.Live,
@@ -105,6 +107,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
                     IsTransfer = true,
                     TotalCost = 750m,
                     TotalPaid = 0m,
+                    Dob = now.AddYears(-30),
                     StartDate = now.AddMonths(-1),
                     EndDate = now.AddMonths(1),
                     Status = ApprenticeshipStatus.Live,
@@ -145,6 +148,7 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
         projections[^1].LevyOutSummary.CommittedLearnerFinalPaymentCost.Should().Be(75m);
         projections[^1].LevyOutSummary.CommittedTransferOutFinalPaymentCost.Should().Be(150m);
         projections[^1].ClosingBalance.Should().Be(0m);
+        result.Value.DateEstimateEntersCoinvestment.Should().Be(now.ToPeriod().ToDateTime(TimeOnly.MinValue), "The Employer is in coinvestment from the first month");
     }
 
     [Test, RecursiveMoqAutoData]
@@ -558,5 +562,137 @@ internal class WhenGettingEmployerFundingProjectionByAccountId
 
         // assert
         result!.Value!.LastSuccessfulImportDate.Should().Be(DateTime.MinValue);
+    }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_The_Date_The_Estimate_Enters_Coinvestment_Is_Returned_When_It_Is_After_The_Requested_Months(
+        long accountId,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
+        [Greedy] FundingProjectionController controller,
+        CancellationToken token)
+    {
+        // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
+        SetupCoinvestmentFromSixthMonth(accountId, now, now.AddYears(-30), importJobState, apprenticeshipSummariesRepository, importJobStateRepository);
+
+        var request = new PostEmployerFundingProjectionRequest { Months = 3, CurrentLevyFunds = 550m, HistoricLevyIn = [], TriggerRefresh = true };
+
+        // act
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
+
+        // assert
+        var timeline = result!.Value!;
+        timeline.Projections.Should().HaveCount(request.Months);
+        timeline.Projections.Should().AllSatisfy(x => x.CoInvestmentCosts.Should().BeNull());
+        timeline.Projections[^1].ClosingBalance.Should().Be(250m);
+        timeline.DateEstimateEntersCoinvestment.Should().Be(now.AddMonths(5).ToDateTime(TimeOnly.MinValue));
+    }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_The_Date_The_Estimate_Enters_Coinvestment_Is_The_First_Month_With_Coinvestment_When_It_Is_Within_The_Requested_Months(
+        long accountId,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
+        [Greedy] FundingProjectionController controller,
+        CancellationToken token)
+    {
+        // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
+        SetupCoinvestmentFromSixthMonth(accountId, now, now.AddYears(-30), importJobState, apprenticeshipSummariesRepository, importJobStateRepository);
+
+        var request = new PostEmployerFundingProjectionRequest { Months = 8, CurrentLevyFunds = 550m, HistoricLevyIn = [], TriggerRefresh = true };
+
+        // act
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
+
+        // assert
+        var timeline = result!.Value!;
+        timeline.Projections.Should().HaveCount(request.Months);
+        timeline.Projections[..5].Should().AllSatisfy(x => x.CoInvestmentCosts.Should().BeNull());
+        timeline.Projections[5].CoInvestmentCosts.Should().Be(12.5m);
+        timeline.DateEstimateEntersCoinvestment.Should().Be(
+            new DateTime(timeline.Projections[5].Year, timeline.Projections[5].Month, 1));
+    }
+
+    [Test, RecursiveMoqAutoData]
+    public async Task Then_No_Date_Returned_When_Fully_Funded_By_Government(
+        long accountId,
+        ImportJobStateEntity importJobState,
+        [Frozen] Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        [Frozen] Mock<IImportJobStateRepository> importJobStateRepository,
+        [Frozen] Mock<IEventService> eventService,
+        [Greedy] FundingProjectionController controller,
+        CancellationToken token)
+    {
+        // arrange
+        var now = DateOnly.FromDateTime(DateTime.UtcNow).ToPeriod();
+        SetupCoinvestmentFromSixthMonth(accountId, now, now.AddYears(-20), importJobState, apprenticeshipSummariesRepository, importJobStateRepository);
+
+        var request = new PostEmployerFundingProjectionRequest { Months = 8, CurrentLevyFunds = 550m, HistoricLevyIn = [], TriggerRefresh = true };
+
+        // act
+        var result = await controller.PostEmployerFundingProjection(
+            apprenticeshipSummariesRepository.Object,
+            importJobStateRepository.Object,
+            eventService.Object,
+            new TimelineGenerator(new ExpiredFunds(), new CoInvestmentEstimator(new ApprenticeshipOrderingStrategy())),
+            accountId,
+            request,
+            token) as Ok<EstimatesTimeline>;
+
+        // assert
+        var timeline = result!.Value!;
+        timeline.Projections[5].CoInvestmentCosts.Should().Be(0m);
+        timeline.Projections[5].DfeCoInvestmentCost.Should().Be(50m);
+        timeline.DateEstimateEntersCoinvestment.Should().BeNull();
+    }
+
+    private static void SetupCoinvestmentFromSixthMonth(
+        long accountId,
+        DateOnly now,
+        DateOnly dob,
+        ImportJobStateEntity importJobState,
+        Mock<IApprenticeshipPaymentSummariesRepository> apprenticeshipSummariesRepository,
+        Mock<IImportJobStateRepository> importJobStateRepository)
+    {
+        apprenticeshipSummariesRepository
+            .Setup(x => x.GetApprenticeshipPaymentSummariesAsync(accountId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([
+                new ApprenticeshipPaymentSummaryEntity
+                {
+                    ApprenticeshipId = 1,
+                    AccountId = accountId,
+                    IsTransfer = false,
+                    TotalCost = 2000m,
+                    TotalPaid = 0m,
+                    Dob = dob,
+                    StartDate = now.AddMonths(-1),
+                    EndDate = now.AddMonths(14),
+                    Status = ApprenticeshipStatus.Live,
+                }
+            ]);
+
+        importJobStateRepository
+            .Setup(x => x.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(importJobState);
     }
 }

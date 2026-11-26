@@ -14,6 +14,7 @@ public class PostEmployerFundingProjectionRequest
     public List<CalendarPeriodAmount> LongTermExpiredFunds { get; set; } = [];
     public List<CalendarPeriodAmount> ShortTermExpiredFunds { get; set; } = [];
     public CollectionPeriodPayments? CurrentPayments { get; set; }
+    public bool TriggerRefresh { get; set; } = true;
 }
 
 public sealed record CollectionPeriodPayments

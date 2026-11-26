@@ -31,7 +31,7 @@ internal class WhenUpdatingJobState
             FailedRecordsLastRun = request.FailedRecordsLastRun
         };
 
-        repository.Setup(r => r.UpdateJobStateAsync(mockJobState, CancellationToken.None)).ReturnsAsync(mockJobState);
+        repository.Setup(r => r.UpdateJobState(mockJobState, CancellationToken.None)).ReturnsAsync(mockJobState);
 
         // Act
         var result = await endpoint.UpdateJobState(id, request, repository.Object, CancellationToken.None);
@@ -49,7 +49,7 @@ internal class WhenUpdatingJobState
         CancellationToken cancellationToken)
     {
         // Arrange
-        repository.Setup(r => r.UpdateJobStateAsync(It.IsAny<ImportJobStateEntity>(), cancellationToken))
+        repository.Setup(r => r.UpdateJobState(It.IsAny<ImportJobStateEntity>(), cancellationToken))
             .ReturnsAsync((ImportJobStateEntity?)null);
 
         // Act
@@ -70,7 +70,7 @@ internal class WhenUpdatingJobState
         CancellationToken cancellationToken)
     {
         // Arrange
-        repository.Setup(r => r.UpdateJobStateAsync(It.IsAny<ImportJobStateEntity>(), cancellationToken)).ThrowsAsync(new Exception());
+        repository.Setup(r => r.UpdateJobState(It.IsAny<ImportJobStateEntity>(), cancellationToken)).ThrowsAsync(new Exception());
 
         // Act
         var result = await endpoint.UpdateJobState(id, request, repository.Object, cancellationToken);

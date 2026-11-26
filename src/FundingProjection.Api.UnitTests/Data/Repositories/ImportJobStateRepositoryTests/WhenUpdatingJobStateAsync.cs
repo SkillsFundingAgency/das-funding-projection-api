@@ -19,7 +19,7 @@ internal class WhenUpdatingJobStateAsync
         existing.JobState = JobState.Pending;
         context.Setup(x => x.ImportJobStates).ReturnsDbSet(new List<ImportJobStateEntity> { existing });
 
-        var actual = await repository.UpdateJobStateAsync(CreateUpdate(existing, JobState.Completed, true, lastSuccessfulImportDate), CancellationToken.None);
+        var actual = await repository.UpdateJobState(CreateUpdate(existing, JobState.Completed, true, lastSuccessfulImportDate), CancellationToken.None);
 
         actual.JobState.Should().Be(JobState.Completed);
         actual.LastAttemptSuccessful.Should().BeTrue();
@@ -36,7 +36,7 @@ internal class WhenUpdatingJobStateAsync
         existing.JobState = JobState.Pending;
         context.Setup(x => x.ImportJobStates).ReturnsDbSet(new List<ImportJobStateEntity> { existing });
 
-        var actual = await repository.UpdateJobStateAsync(CreateUpdate(existing, JobState.Failed, false, DateTime.MinValue), CancellationToken.None);
+        var actual = await repository.UpdateJobState(CreateUpdate(existing, JobState.Failed, false, DateTime.MinValue), CancellationToken.None);
 
         actual.JobState.Should().Be(JobState.Failed);
         actual.LastAttemptSuccessful.Should().BeFalse();
@@ -52,7 +52,7 @@ internal class WhenUpdatingJobStateAsync
     {
         context.Setup(x => x.ImportJobStates).ReturnsDbSet(new List<ImportJobStateEntity>(0));
 
-        var actual = await repository.UpdateJobStateAsync(CreateUpdate(existing, JobState.Failed, false, DateTime.MinValue), CancellationToken.None);
+        var actual = await repository.UpdateJobState(CreateUpdate(existing, JobState.Failed, false, DateTime.MinValue), CancellationToken.None);
 
         actual.Should().BeNull();
     }

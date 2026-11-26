@@ -7,28 +7,33 @@ namespace SFA.DAS.FundingProjection.Data.Repositories;
 public interface IImportJobStateRepository
 {
     /// <summary>
+    /// Gets existing job state, or null when there is none
+    /// </summary>
+    Task<ImportJobStateEntity?> GetJobState(long accountId, JobName jobName, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Gets existing job state or creates a new one
     /// </summary>
-    Task<ImportJobStateEntity> GetOrCreateJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken);
+    Task<ImportJobStateEntity> GetOrCreateJobState(long accountId, JobName jobName, CancellationToken cancellationToken);
 
     /// <summary>
     /// Updates an existing job state
     /// </summary>
-    Task<ImportJobStateEntity?> UpdateJobStateAsync(
+    Task<ImportJobStateEntity?> UpdateJobState(
         ImportJobStateEntity entity,
         CancellationToken cancellationToken);
 }
 
 public class ImportJobStateRepository(IFundingProjectionDataContext dataContext) : IImportJobStateRepository
 {
-    private async Task<ImportJobStateEntity?> GetJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken)
+    public async Task<ImportJobStateEntity?> GetJobState(long accountId, JobName jobName, CancellationToken cancellationToken)
     {
         return await dataContext.ImportJobStates.FirstOrDefaultAsync(j => j.AccountId == accountId && j.JobName == jobName, cancellationToken);
     }
 
-    public async Task<ImportJobStateEntity> GetOrCreateJobStateAsync(long accountId, JobName jobName, CancellationToken cancellationToken)
+    public async Task<ImportJobStateEntity> GetOrCreateJobState(long accountId, JobName jobName, CancellationToken cancellationToken)
     {
-        var jobState = await GetJobStateAsync(accountId, jobName, cancellationToken);
+        var jobState = await GetJobState(accountId, jobName, cancellationToken);
 
         if (jobState != null)
         {
@@ -55,14 +60,14 @@ public class ImportJobStateRepository(IFundingProjectionDataContext dataContext)
         return jobState;
     }
 
-    public async Task<ImportJobStateEntity?> UpdateJobStateAsync(
+    public async Task<ImportJobStateEntity?> UpdateJobState(
         ImportJobStateEntity entity,
         CancellationToken cancellationToken)
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
 
-        var existingJobState = await GetJobStateAsync(entity.AccountId, entity.JobName, cancellationToken);
+        var existingJobState = await GetJobState(entity.AccountId, entity.JobName, cancellationToken);
 
         if (existingJobState == null)
             return null;

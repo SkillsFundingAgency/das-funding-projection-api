@@ -6,6 +6,7 @@ using SFA.DAS.FundingProjection.Api.Models.Responses;
 using SFA.DAS.FundingProjection.Api.Projection;
 using SFA.DAS.FundingProjection.Data.Repositories;
 using System.ComponentModel.DataAnnotations;
+using SFA.DAS.FundingProjection.Domain.Entities;
 using SFA.DAS.FundingProjection.Domain.Enums;
 using SFA.DAS.FundingProjection.Domain.Services;
 
@@ -34,12 +35,15 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
 
         var startingPeriod = (request.StartPeriod ?? DateOnly.FromDateTime(DateTime.UtcNow)).ToPeriod();
         var apprenticeshipSummaries = await apprenticeshipSummariesRepository.GetApprenticeshipPaymentSummariesAsync(accountId, token);
+        var requestedMonths = Math.Clamp(request.Months, 1, MaxProjectionMonths);
+        var totalNumberOfMonths = Math.Max(requestedMonths, GetTotalNumberOfMonthsInProjection(apprenticeshipSummaries));
+
         var timelineData = new TimelineData
         {
             AccountId = accountId,
             StartingPeriod = startingPeriod,
             OpeningBalance = request.CurrentLevyFunds,
-            Months = Math.Clamp(request.Months, 1, MaxProjectionMonths),
+            Months = totalNumberOfMonths,
             HistoricLevyIn = request.HistoricLevyIn,
             ApprenticeshipPaymentSummaries = apprenticeshipSummaries,
             LevyFundsInForExpiry = request.LevyFundsInForExpiry,
@@ -52,9 +56,27 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
                 : null
         };
         var timeline = timelineGenerator.Create(timelineData);
+
+        var firstCoinvestment = timeline.Projections.FirstOrDefault(c => c.CoInvestmentCosts is > 0);
+
+        timeline.DateEstimateEntersCoinvestment = firstCoinvestment != null
+            ? new DateTime(firstCoinvestment.Year, firstCoinvestment.Month, 1)
+            : null;
+        timeline.Projections = [.. timeline.Projections.Take(requestedMonths)];
         
-        var job = await importJobStateRepository.GetOrCreateJobStateAsync(accountId, JobName.ImportLearnersCost, token);
-        await eventService.HandleImportLearnersCost(job.Id, accountId, job.LastSuccessfulImportDate);
+        if (request.TriggerRefresh)
+        {
+            var job = await importJobStateRepository.GetOrCreateJobState(accountId, JobName.ImportLearnersCost, token);
+            await eventService.HandleImportLearnersCost(job.Id, accountId, job.LastSuccessfulImportDate);
+
+            timeline.LastSuccessfulImportDate = job.LastSuccessfulImportDate;
+        }
+        else
+        {
+            var job = await importJobStateRepository.GetJobState(accountId, JobName.ImportLearnersCost, token);
+
+            timeline.LastSuccessfulImportDate = job?.LastSuccessfulImportDate ?? DateTime.MinValue;
+        }
 
         return TypedResults.Ok(timeline);
     }
@@ -71,6 +93,14 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
 
         var apprenticeshipSummaries = await apprenticeshipSummariesRepository.GetApprenticeshipPaymentSummariesAsync(accountId, token);
 
+        return TypedResults.Ok(new ProjectionMonthsResponse
+        {
+            Months = GetTotalNumberOfMonthsInProjection(apprenticeshipSummaries)
+        });
+    }
+
+    private static int GetTotalNumberOfMonthsInProjection(List<ApprenticeshipPaymentSummaryEntity> apprenticeshipSummaries)
+    {
         var lastPaymentPeriod = apprenticeshipSummaries
             .Where(x => x.CanBeProjected)
             .Max(x => (DateOnly?)x.LastPaymentPeriod);
@@ -80,9 +110,7 @@ public class FundingProjectionController(ILogger<FundingProjectionController> lo
             ? (last.Year - startingPeriod.Year) * 12 + last.Month - startingPeriod.Month + 1
             : 0;
 
-        return TypedResults.Ok(new ProjectionMonthsResponse
-        {
-            Months = Math.Clamp(months, MinRequiredProjectionMonths, MaxProjectionMonths)
-        });
+        var numberOfMonths = Math.Clamp(months, MinRequiredProjectionMonths, MaxProjectionMonths);
+        return numberOfMonths;
     }
 }
